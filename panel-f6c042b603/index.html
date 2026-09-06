@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel — Gonzalo Hal</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Schibsted+Grotesk:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div id="loginView">
+  <div class="login-card">
+    <h1>Panel de administración</h1>
+    <p>Acceso privado. Ingresá la contraseña para editar el sitio.</p>
+    <form id="loginForm">
+      <div class="field">
+        <label class="f-label" for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;" id="loginBtn">Entrar</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </div>
+</div>
+
+<div id="dashView">
+  <aside class="sidebar">
+    <div class="brand">Gonzalo<span>.</span>Hal — Panel</div>
+    <nav id="sideNav"></nav>
+    <div class="logout"><button id="logoutBtn">Cerrar sesión</button></div>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <h2 id="sectionTitle">—</h2>
+      <span class="status" id="statusMsg"></span>
+    </div>
+    <div id="sectionContent"></div>
+  </main>
+</div>
+
+<div class="overlay-loading" id="overlayLoading">Cargando…</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

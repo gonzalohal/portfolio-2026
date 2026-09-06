@@ -1,946 +1,197 @@
-<!DOCTYPE html>
-<html lang="en-US">
+<!doctype html>
+<html lang="es">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title>Portfolio | Gonzalo Hal</title>
-	<meta name="description" content="Bolby - Portfolio/CV/Resume HTML Template">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<link rel="shortcut icon" type="image/x-icon" href="images/ico32x32.png">
-
-	<!-- STYLESHEETS -->
-	<link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" media="all">
-	<link rel="stylesheet" href="css/all.min.css" type="text/css" media="all">
-	<link rel="stylesheet" href="css/simple-line-icons.css" type="text/css" media="all">
-	<link rel="stylesheet" href="css/slick.css" type="text/css" media="all">
-	<link rel="stylesheet" href="css/animate.css" type="text/css" media="all">
-	<link rel="stylesheet" href="css/magnific-popup.css" type="text/css" media="all">
-	<link rel="stylesheet" href="css/style.css" type="text/css" media="all">
-
-	<!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gonzalo Hal — Diseñador Multimedial</title>
+<meta name="description" content="Portfolio de Gonzalo Hal, diseñador multimedial en Mendoza, Argentina. Identidad de marca, diseño gráfico, producción audiovisual, modelado 3D y video con IA.">
+<link rel="icon" href="images/site/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Schibsted+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-<!-- Preloader -->
-<div id="preloader" class="light">
-	<div class="outer">
-		<!-- Google Chrome -->
-		<div class="infinityChrome">
-			<div></div>
-			<div></div>
-			<div></div>
-		</div>
-
-		<!-- Safari and others -->
-		<div class="infinity">
-			<div>
-				<span></span>
-			</div>
-			<div>
-				<span></span>
-			</div>
-			<div>
-				<span></span>
-			</div>
-		</div>
-		<!-- Stuff -->
-		<svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="goo-outer">
-			<defs>
-				<filter id="goo">
-					<feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-					<feColorMatrix in="blur" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-					<feBlend in="SourceGraphic" in2="goo" />
-				</filter>
-			</defs>
-		</svg>
-	</div>
+<!-- ================= NAV ================= -->
+<div class="nav-wrap">
+  <nav class="nav" id="nav">
+    <a href="#top" class="nav-logo" id="navLogo">Gonzalo<span>.</span>Hal</a>
+    <ul class="nav-links">
+      <li><a href="#sobre-mi">Sobre mí</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#trabajos">Trabajos</a></li>
+      <li><a href="#experiencia">Experiencia</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#contacto" class="btn btn-ghost btn-sm" id="navContactLabel">Contacto</a>
+      <a href="assets/CV-Gonzalo-Hal.pdf" class="btn btn-primary btn-sm" id="navCvLink" download>Descargar CV</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </nav>
 </div>
 
-<!-- mobile header -->
-<header class="mobile-header-1 light">
-	<div class="container">
-		<!-- menu icon -->
-		<div class="menu-icon d-inline-flex mr-4">
-			<button>
-				<span></span>
-			</button>
-		</div>
-		<!-- logo image -->
-		<div class="site-logo">
-			<a href="index.html">
-				<img src="images/icoo.png" alt="Bolby" />
-			</a>
-		</div>
-	</div>
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Cerrar menú">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <ul>
+    <li><a href="#sobre-mi">Sobre mí</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#trabajos">Trabajos</a></li>
+    <li><a href="#experiencia">Experiencia</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="assets/CV-Gonzalo-Hal.pdf" class="btn btn-primary" id="mobileCvLink" download>Descargar CV</a>
+</div>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <div class="hero-inner reveal">
+    <span class="eyebrow" id="heroEyebrow"></span>
+    <h1 id="heroHeadline"></h1>
+    <p class="hero-sub" id="heroSub"></p>
+    <div class="hero-cta">
+      <a href="#trabajos" class="btn btn-primary" id="heroCtaPrimary"></a>
+      <a href="#contacto" class="btn btn-ghost" id="heroCtaSecondary"></a>
+    </div>
+    <div class="hero-meta" id="heroStats"></div>
+  </div>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track" id="heroTicker"></div>
+  </div>
 </header>
 
-<!-- desktop header -->
-<header class="desktop-header-1 light d-flex align-items-start flex-column">
-	
-	<!-- logo image -->
-	<div class="site-logo">
-		<a href="index.html">
-			<img src="images/icon.png" alt="Bolby" />
-		</a>
-	</div>
-	
-	<!-- main menu -->
-	<nav>
-		<ul class="vertical-menu scrollspy">
-			<li class="active"><a href="#home"><i class="icon-home"></i>Inicio</a></li>
-			<li><a href="#about"><i class="icon-user-following"></i>Sobre Mi</a></li>
-			<li><a href="#services"><i class="icon-briefcase"></i>Conocimientos</a></li>
-			<li><a href="#experience"><i class="icon-graduation"></i>Experiencia</a></li>
-			<li><a href="#Hobbies"><i class="icon-note"></i>Hobbies</a></li>
-			<li><a href="#works"><i class="icon-layers"></i>Trabajos</a></li>
-			
-			<li><a href="#contact"><i class="icon-bubbles"></i>Contacto</a></li>
-		</ul>
-	</nav>
-	
-	<!-- site footer -->
-	<div class="footer">
-		<!-- copyright text -->
-		<span class="copyright">© 2023</span>
-	</div>
-
-</header>
-
-<!-- main layout -->
-<main class="content">
-	
-	<!-- section home -->
-	<section id="home" class="home d-flex light align-items-center">
-		<div class="container">
-
-			<!-- intro -->
-			<div class="intro">
-				<!-- avatar image -->
-				<img src="images/Clients/Perfil.png" alt="Bolby" class="mb-4" />
-
-				<!-- info -->
-				<h1 class="mb-2 mt-0">Gonzalo Hal</h1>
-				<span> <span class="text-rotating">Diseñador Multimedial, Modelador 3D</span></span>
-
-				<!-- social icons -->
-				<ul class="social-icons light list-inline mb-0 mt-4">
-					<li class="list-inline-item"><a href="https://www.linkedin.com/in/gonzalo-hal/"><i class="fab fa-linkedin"></i></a></li>
-					<li class="list-inline-item"><a href="https://www.facebook.com/gonza.e.hal/"><i class="fab fa-facebook-f"></i></a></li>
-					<li class="list-inline-item"><a href="https://www.instagram.com/gonzahal/"><i class="fab fa-instagram"></i></a></li>
-					<li class="list-inline-item"><a href="https://wa.link/10rk7o"><i class="fab fa-whatsapp"></i></a></li>
-				</ul>
-
-				<!-- buttons -->
-				<div class="mt-4">
-					<a href="#contact" class="btn btn-default">Contáctame</a>
-				</div>
-			</div>
-			
-			<!-- scroll down mouse wheel -->
-			<div class="scroll-down light">
-				<a href="#about" class="mouse-wrapper">
-					<span>Desliza</span>
-					<span class="mouse">
-						<span class="wheel"></span>
-					</span>
-				</a>
-			</div>
-
-			<!-- parallax layers -->
-			<div class="parallax" data-relative-input="true">
-
-				<svg width="27" height="29" data-depth="0.3" class="layer p1" xmlns="http://www.w3.org/2000/svg"><path d="M21.15625.60099c4.37954 3.67487 6.46544 9.40612 5.47254 15.03526-.9929 5.62915-4.91339 10.30141-10.2846 12.25672-5.37122 1.9553-11.3776.89631-15.75715-2.77856l2.05692-2.45134c3.50315 2.93948 8.3087 3.78663 12.60572 2.22284 4.297-1.5638 7.43381-5.30209 8.22768-9.80537.79387-4.50328-.8749-9.08872-4.37803-12.02821L21.15625.60099z" fill="#FFD15C" fill-rule="evenodd"/></svg>
-
-				<svg width="26" height="26" data-depth="0.2" class="layer p2" xmlns="http://www.w3.org/2000/svg"><path d="M13 3.3541L2.42705 24.5h21.1459L13 3.3541z" stroke="#FF4C60" stroke-width="3" fill="none" fill-rule="evenodd"/></svg>
-
-				<svg width="30" height="25" data-depth="0.3" class="layer p3" xmlns="http://www.w3.org/2000/svg"><path d="M.1436 8.9282C3.00213 3.97706 8.2841.92763 14.00013.92796c5.71605.00032 10.9981 3.04992 13.85641 8 2.8583 4.95007 2.8584 11.0491-.00014 16.00024l-2.77128-1.6c2.28651-3.96036 2.28631-8.84002.00011-12.8002-2.2862-3.96017-6.5124-6.40017-11.08513-6.4-4.57271.00018-8.79872 2.43984-11.08524 6.4002l-2.77128-1.6z" fill="#44D7B6" fill-rule="evenodd"/></svg>
-
-				<svg width="15" height="23" data-depth="0.6" class="layer p4" xmlns="http://www.w3.org/2000/svg"><rect transform="rotate(30 9.86603 10.13397)" x="7" width="3" height="25" rx="1.5" fill="#FFD15C" fill-rule="evenodd"/></svg>
-
-				<svg width="15" height="23" data-depth="0.2" class="layer p5" xmlns="http://www.w3.org/2000/svg"><rect transform="rotate(30 9.86603 10.13397)" x="7" width="3" height="25" rx="1.5" fill="#6C6CE5" fill-rule="evenodd"/></svg>
-
-				<svg width="49" height="17" data-depth="0.5" class="layer p6" xmlns="http://www.w3.org/2000/svg"><g fill="#FF4C60" fill-rule="evenodd"><path d="M.5 16.5c0-5.71709 2.3825-10.99895 6.25-13.8567 3.8675-2.85774 8.6325-2.85774 12.5 0C23.1175 5.50106 25.5 10.78292 25.5 16.5H23c0-4.57303-1.90625-8.79884-5-11.08535-3.09375-2.28652-6.90625-2.28652-10 0C4.90625 7.70116 3 11.92697 3 16.5H.5z"/><path d="M23.5 16.5c0-5.71709 2.3825-10.99895 6.25-13.8567 3.8675-2.85774 8.6325-2.85774 12.5 0C46.1175 5.50106 48.5 10.78292 48.5 16.5H46c0-4.57303-1.90625-8.79884-5-11.08535-3.09375-2.28652-6.90625-2.28652-10 0-3.09375 2.28651-5 6.51232-5 11.08535h-2.5z"/></g></svg>
-
-				<svg width="26" height="26" data-depth="0.4" class="layer p7" xmlns="http://www.w3.org/2000/svg"><path d="M13 22.6459L2.42705 1.5h21.1459L13 22.6459z" stroke="#FFD15C" stroke-width="3" fill="none" fill-rule="evenodd"/></svg>
-
-				<svg width="19" height="21" data-depth="0.3" class="layer p8" xmlns="http://www.w3.org/2000/svg"><rect transform="rotate(-40 6.25252 10.12626)" x="7" width="3" height="25" rx="1.5" fill="#6C6CE5" fill-rule="evenodd"/></svg>
-
-				<svg width="30" height="25" data-depth="0.3" data-depth-y="-1.30" class="layer p9" xmlns="http://www.w3.org/2000/svg"><path d="M29.8564 16.0718c-2.85854 4.95114-8.1405 8.00057-13.85654 8.00024-5.71605-.00032-10.9981-3.04992-13.85641-8-2.8583-4.95007-2.8584-11.0491.00014-16.00024l2.77128 1.6c-2.28651 3.96036-2.28631 8.84002-.00011 12.8002 2.2862 3.96017 6.5124 6.40017 11.08513 6.4 4.57271-.00018 8.79872-2.43984 11.08524-6.4002l2.77128 1.6z" fill="#6C6CE5" fill-rule="evenodd"/></svg>
-
-				<svg width="47" height="29" data-depth="0.2" class="layer p10" xmlns="http://www.w3.org/2000/svg"><g fill="#44D7B6" fill-rule="evenodd"><path d="M46.78878 17.19094c-1.95535 5.3723-6.00068 9.52077-10.61234 10.8834-4.61167 1.36265-9.0893-.26708-11.74616-4.27524-2.65686-4.00817-3.08917-9.78636-1.13381-15.15866l2.34923.85505c-1.56407 4.29724-1.2181 8.92018.90705 12.12693 2.12514 3.20674 5.70772 4.5107 9.39692 3.4202 3.68921-1.0905 6.92581-4.40949 8.48988-8.70673l2.34923.85505z"/><path d="M25.17585 9.32448c-1.95535 5.3723-6.00068 9.52077-10.61234 10.8834-4.61167 1.36264-9.0893-.26708-11.74616-4.27525C.16049 11.92447-.27182 6.14628 1.68354.77398l2.34923.85505c-1.56407 4.29724-1.2181 8.92018.90705 12.12692 2.12514 3.20675 5.70772 4.5107 9.39692 3.4202 3.68921-1.0905 6.92581-4.40948 8.48988-8.70672l2.34923.85505z"/></g></svg>
-
-				<svg width="33" height="20" data-depth="0.5" class="layer p11" xmlns="http://www.w3.org/2000/svg"><path d="M32.36774.34317c.99276 5.63023-1.09332 11.3614-5.47227 15.03536-4.37895 3.67396-10.3855 4.73307-15.75693 2.77837C5.76711 16.2022 1.84665 11.53014.8539 5.8999l3.15139-.55567c.7941 4.50356 3.93083 8.24147 8.22772 9.8056 4.29688 1.56413 9.10275.71673 12.60554-2.2227C28.34133 9.98771 30.01045 5.4024 29.21635.89884l3.15139-.55567z" fill="#FFD15C" fill-rule="evenodd"/></svg>
-
-			</div>
-		</div>
-		
-	</section>
-
-	<!-- section about -->
-	<section id="about">
-
-		<div class="container">
-			
-			<!-- section title -->
-			<h2 class="section-title wow fadeInUp">Sobre Mi</h2>
-
-			<div class="spacer" data-height="60"></div>
-			
-			<div class="row">
-				<!--
-				<div class="col-md-3">
-					<div class="text-center text-md-left">-->
-						<!-- avatar image --><!--
-						<img src="https://via.placeholder.com/150x150" alt="Bolby" />
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>-->
-
-				<div class="col-md-12 triangle-left-md triangle-top-sm">
-					<div class="rounded bg-white shadow-dark padding-30">
-						<div class="row">
-							<div class="col-md-6">
-								<!-- about text -->
-								<p>¡Hola! Mi nombre es Gonzalo tengo 25 años, y resido en la provincia de Mendoza, Argentina. Soy un apasionado diseñador multimedia, con una sólida formación en diseño gráfico, animación y desarrollo web. Mi objetivo es combinar creatividad y tecnología para crear experiencias visuales impactantes y efectivas.</p>
-								<div class="mt-3">
-									<a href="images/Doc/Curriculum Vitae - Gonzalo Hal.pdf" class="btn btn-default" target="_blank">Curriculum Vitae</a>
-								</div>
-								<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-							</div>
-							<div class="col-md-6">
-								<!-- skill item -->
-								<div class="skill-item">
-									<div class="skill-info clearfix">
-										<h4 class="float-left mb-3 mt-0">Photoshop</h4>
-										<span class="float-right">95%</span>
-									</div>
-									<div class="progress">
-										<div class="progress-bar data-background" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="95" data-color="rgb(68 185 220)">
-										</div>
-									</div>
-									<div class="spacer" data-height="20"></div>
-								</div>
-
-								<!-- skill item -->
-								<div class="skill-item">
-									<div class="skill-info clearfix">
-										<h4 class="float-left mb-3 mt-0">Illustrator</h4>
-										<span class="float-right">98%</span>
-									</div>
-									<div class="progress">
-										<div class="progress-bar data-background" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="98" data-color="#FFD15C">
-										</div>
-									</div>
-									<div class="spacer" data-height="20"></div>
-								</div>
-
-								<!-- skill item -->
-								<div class="skill-item">
-									<div class="skill-info clearfix">
-										<h4 class="float-left mb-3 mt-0">After Effect</h4>
-										<span class="float-right">90%</span>
-									</div>
-									<div class="progress">
-										<div class="progress-bar data-background" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" data-color="rgb(101 69 216)">
-										</div>
-									</div>
-									<div class="spacer" data-height="20"></div>
-								</div>
-
-								<!-- skill item -->
-								<div class="skill-item">
-									<div class="skill-info clearfix">
-										<h4 class="float-left mb-3 mt-0">Premiere</h4>
-										<span class="float-right">70%</span>
-									</div>
-									<div class="progress">
-										<div class="progress-bar data-background" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70" data-color="rgb(101 69 216)">
-										</div>
-									</div>
-									<div class="spacer" data-height="20"></div>
-								</div>
-
-								<!-- skill item -->
-								<div class="skill-item">
-									<div class="skill-info clearfix">
-										<h4 class="float-left mb-3 mt-0">Blender</h4>
-										<span class="float-right">85%</span>
-									</div>
-									<div class="progress">
-										<div class="progress-bar data-background" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85" data-color="#E87D0D">
-										</div>
-									</div>
-									<div class="spacer" data-height="20"></div>
-								</div>
-
-							</div>
-						</div>
-					</div>
-				</div>
-
-			</div>
-			<!-- row end -->
-
-			<div class="spacer" data-height="70"></div>
-			
-			<div class="row">
-				
-				<div class="col-md-4 col-sm-6">
-					<!-- fact item -->
-					<div class="fact-item">
-						<span class="icon icon-fire"></span>
-						<div class="details">
-							<h3 class="mb-0 mt-0 number"><span>+</span><em class="count">400</em></h3>
-							<p class="mb-0">Trabajos completados</p>
-						</div>
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>
-
-				<div class="col-md-4 col-sm-6">
-					<!-- fact item -->
-					<div class="fact-item">
-						<span class="icon icon-cup"></span>
-						<div class="details">
-							<h3 class="mb-0 mt-0 number"><span>+</span><em class="count">300</em></h3>
-							<p class="mb-0">Tasas de té </p>
-						</div>
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>
-
-				<div class="col-md-4 col-sm-6">
-					<!-- fact item -->
-					<div class="fact-item">
-						<span class="icon icon-people"></span>
-						<div class="details">
-							<h3 class="mb-0 mt-0 number"><span>+</span><em class="count">100</em></h3>
-							<p class="mb-0">Trabajos Freelance </p>
-						</div>
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>
-			</div>
-
-		</div>
-		
-	</section>
-	
-	<!-- section services -->
-	<section id="services">
-
-		<div class="container">
-			
-			<!-- section title -->
-			<h2 class="section-title wow fadeInUp">Conocimientos</h2>
-
-			<div class="spacer" data-height="60"></div>
-			
-			<div class="row">
-
-				<div class="col-md-4">
-					<!-- service box -->
-					<div class="service-box rounded data-background padding-30 text-center text-light shadow-blue" data-color="#6C6CE5">
-						<img src="images/Clients/ICOS1.png" alt="UI/UX design" />
-						<h3 class="mb-3 mt-0">DISEÑO MULTIMEDIA</h3>
-						<p class="mb-0">Mi enfoque abarca una amplia variedad de medios, incluyendo gráficos, animaciones, video y más.</p>
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>
-
-				<div class="col-md-4">
-					<!-- service box -->
-					<div class="service-box rounded data-background padding-30 text-center shadow-yellow" data-color="#F9D74C">
-						<img src="images/Clients/ICOS2.png" alt="UI/UX design" />
-						<h3 class="mb-3 mt-0">BRANDING</h3>
-						<p class="mb-0">Mi objetivo principal es garantizar que la marca transmita confianza, coherencia y autenticidad.</p>
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>
-
-				<div class="col-md-4">
-					<!-- service box -->
-					<div class="service-box rounded data-background padding-30 text-center text-light shadow-pink" data-color="#F97B8B">
-						<img src="images/Clients/ICOS3.png" alt="UI/UX design" />
-						<h3 class="mb-3 mt-0">MODELADO 3D</h3>
-						<p class="mb-0">A través de Blender, transformo mis ideas en modelos 3D con precisión y creatividad.</p>
-					</div>
-				</div>
-
-			</div>
-		</div>
-		
-	</section>
-	
-	<!-- section experience -->
-	<section id="experience">
-
-		<div class="container">
-			
-			<!-- section title -->
-			<h2 class="section-title wow fadeInUp">Experencia Laboral</h2>
-
-			<div class="spacer" data-height="60"></div>
-			
-			<div class="row">
-
-				<div class="col-md-6">
-					
-					<!-- timeline wrapper -->
-					<div class="timeline exp bg-white rounded shadow-dark padding-30 overflow-hidden">
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp">
-							<div class="content">
-								<span class="time">2022 - 2023</span>
-								<h3 class="title">Travel Express</h3>
-								<p>"Diseño de graficas/video para redes sociales, pdf interactivos, presentaciones, merchandising, videos animados y más."</p>
-								<div class="mt-3">
-									<a href="images/Doc/CARTA DE RECOMENDACIÓN GONZALO HAL.pdf" class="btn btn-default" target="_blank">Carta de Recomendación </a>
-								</div>
-							</div>
-						</div>
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp" data-wow-delay="0.2s">
-							<div class="content">
-								<span class="time">2020 - 2021</span>
-								<h3 class="title">ADEN International Business School</h3>
-								<p>"Diseño de piezas gráficas y multimedial."</p>
-							</div>
-						</div>
-						<!-- main line -->
-						<span class="line"></span>
-
-					</div>
-
-				</div>
-
-				<div class="col-md-6">
-					
-					<!-- responsive spacer -->
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-
-					<!-- timeline wrapper -->
-					<div class="timeline exp bg-white rounded shadow-dark padding-30 overflow-hidden">
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp">
-							<div class="content">
-								<span class="time">2020 - 2021</span>
-								<h3 class="title">Agencia Sol</h3>
-								<p>"Diseño de piezas visuales, audiovisuales y manejos de páginas web."</p>
-							</div>
-						</div>
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp" data-wow-delay="0.2s">
-							<div class="content">
-								<span class="time">2019 - Pasantías</span>
-								<h3 class="title">“La Pirámide Cadena de Ópticas”</h3>
-								<p></p>
-							</div>
-						</div>
-
-						<!-- main line -->
-						<span class="line"></span>
-
-					</div>
-
-				</div>
-
-			</div>
-
-		</div>
-		<br>
-
-		<div class="container">
-			
-			<!-- section title -->
-			<h2 class="section-title wow fadeInUp">Formación Académica</h2>
-
-			<div class="spacer" data-height="60"></div>
-			
-			<div class="row">
-
-				<div class="col-md-6">
-					
-					<!-- timeline wrapper -->
-					<div class="timeline edu bg-white rounded shadow-dark padding-30 overflow-hidden">
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp">
-							<div class="content">
-								<span class="time">04/08 - 15/12/2022 Estado: Finalizado</span>
-								<h3 class="title">Intercultural</h3>
-								<p>"Cursado nivel A1"</p>
-							</div>
-						</div>
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp" data-wow-delay="0.2s">
-							<div class="content">
-								<span class="time">02/03 - 15/05/2022 Estado: Finalizado</span>
-								<h3 class="title">Coderhouse</h3>
-								<p>"Diseño 3D (Blender)"</p>
-							</div>
-						</div>
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp" data-wow-delay="0.4s">
-							<div class="content">
-								<span class="time">07/06 - 24/11/2021 - Estado: Finalizado</span>
-								<h3 class="title">Egg + Gobierno Mendoza</h3>
-								<p>"Programación Full Stack"</p>
-							</div>
-						</div>
-
-						<!-- main line -->
-						<span class="line"></span>
-
-					</div>
-
-				</div>
-
-				<div class="col-md-6">
-					
-					<!-- responsive spacer -->
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-
-					<!-- timeline wrapper -->
-					<div class="timeline edu bg-white rounded shadow-dark padding-30 overflow-hidden">
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp">
-							<div class="content">
-								<span class="time">Curso iniciado y finalizado en el 2020</span>
-								<h3 class="title">Universidad Tecnológica Nacional (UTN)</h3>
-								<p>"Programación web con PHP y MySQL "</p>
-							</div>
-						</div>
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp" data-wow-delay="0.2s">
-							<div class="content">
-								<span class="time">2017- Egresado Marzo del 2020 Carrera: “Diseño Multimedial”</span>
-								<h3 class="title">Fundación Universitas</h3>
-								<p>Título de Egreso: “TÉCNICO SUPERIOR DE ARTE Y DISEÑO MULTIMEDIAL”.</p>
-							</div>
-						</div>
-
-						<!-- timeline item -->
-						<div class="timeline-container wow fadeInUp" data-wow-delay="0.4s">
-							<div class="content">
-								<span class="time">2011-2016 Secundario Completo</span>
-								<h3 class="title">Colegio María Auxiliadora</h3>
-								<p>Título de Egreso: “ECONOMÍA Y GESTIÓN DE LAS ORGANIZACIONES,
-									ORIENTACIÓN EN GESTIÓN DE MICROEMPRENDIMIENTOS, PYMES Y
-									COOPERATIVAS”</p>
-							</div>
-						</div>
-
-						<!-- main line -->
-						<span class="line"></span>
-
-					</div>
-
-				</div>
-
-			</div>
-
-		</div>
-		<div class="mt-5 text-center">
-			<p class="mb-0">¿Te gusta mi perfil?<a href="#contact"> Contáctame! </a>👋</p>
-		</div>
-	</section>
-
-	<!-- section Hobbies  -->
-	<section id="Hobbies">
-
-		<div class="container">
-			
-			<!-- section title -->
-			<h2 class="section-title wow fadeInUp">Hobbies</h2>
-
-			<div class="spacer" data-height="60"></div>
-			
-			<div class="row">
-
-				<div class="col-md-4">
-					<!-- service box -->
-					<div class="service-box rounded data-background padding-30 text-center text-light shadow-blue" data-color="#6C6CE5">
-						<img src="images/Clients/ICO1.png" alt="UI/UX design" />
-						<h3 class="mb-3 mt-0">COMPUTACIÓN</h3>
-						<p class="mb-0">Desde chico siempre me llamo la atención el entorno de la computación, lo que me llevo a capacitarme y aprender desde armar una computadora hasta instalar SO, aplicativos y más.</p>
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>
-
-				<div class="col-md-4">
-					<!-- service box -->
-					<div class="service-box rounded data-background padding-30 text-center shadow-yellow" data-color="#F9D74C">
-						<img src="images/Clients/ICO2.png" alt="UI/UX design" />
-						<h3 class="mb-3 mt-0">INVESTIGACIÓN</h3>
-						<p class="mb-0">Me importa estar actualizado y enterado del entorno tecnológico, me gusta testear y adentrarme en lo desconocido como por ejemplo la impresión en 3D.</p>
-						<br>
-					</div>
-					<div class="spacer d-md-none d-lg-none" data-height="30"></div>
-				</div>
-
-				<div class="col-md-4">
-					<!-- service box -->
-					<div class="service-box rounded data-background padding-30 text-center text-light shadow-pink" data-color="#F97B8B">
-						<img src="images/Clients/ICO3.png" alt="UI/UX design" />
-						<h3 class="mb-3 mt-0">TIEMPO LIBRE</h3>
-						<p class="mb-0">Compartir momentos con la familia/amigos, andar en bici, ir al gimnasio, informarme sobre distintas tecnologías y testear con la impresora 3D.</p>
-						<br>
-					</div>
-				</div>
-
-			</div>
-		</div>
-		
-	</section>
-
-	
-	<!-- section works -->
-	<section id="works">
-
-		<div class="container">
-			
-			<!-- section title -->
-			<h2 class="section-title wow fadeInUp">Trabajos Recientes</h2>
-
-		
-			<div class="spacer" data-height="60"></div>
-
-			<!-- portfolio filter (desktop) -->
-			<ul class="portfolio-filter list-inline wow fadeInUp">
-				<li class="current list-inline-item" data-filter="*">Trabajos</li>
-				<li class="list-inline-item" data-filter=".Gráficas">Gráficas</li>
-				<li class="list-inline-item" data-filter=".Videos">Videos/Animaciones</li>
-				<li class="list-inline-item" data-filter=".3D">3D</li>
-				<li class="list-inline-item" data-filter=".merchandising">Merchandising</li>
-			</ul>
-			
-			<!-- portfolio filter (mobile) -->
-			<div class="pf-filter-wrapper">
-				<select class="portfolio-filter-mobile">
-					<option value="*">Trabajos</option>
-					<option value=".Gráficas">Gráficas</option>
-					<option value=".Videos">Videos/Animaciones</option>
-					<option value=".3D">3D</option>
-					<option value=".merchandising">Merchandising</option>
-				</select>
-			</div>
-			
-			<!-- portolio wrapper -->
-			<div class="row portfolio-wrapper">
-				
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item Gráficas">
-					<a href="images/Portfolio/Blade King - Con Casaca.jpg" class="work-image">
-						
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">Gráfica</span>
-								<h4 class="title">Diseño y edición Remera | Blade King - WS</h4>
-								<span class="more-button"><i class="icon-magnifier-add"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/bk.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-				</div>
-
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item 3D merchandising">
-					<a href="#small-dialog" class="work-content">
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">3D / Merchandising</span>
-								<h4 class="title">Toca e interactúa con el modelo 3D</h4>
-								<span class="more-button"><i class="icon-crop"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/BOX3D.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-					<div id="small-dialog" class="white-popup zoom-anim-dialog mfp-hide" >
-						<div class="sketchfab-embed-wrapper"> <iframe title="box" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share width="100%" height="480" src="https://sketchfab.com/models/091a81b4e4a34d1795993b26e247e6ee/embed"> </iframe> </div>
-						<h2>Presentación 3D | Diseño y modelado de Box para seminario de Travel Express</h2>
-						<a href="https://sketchfab.com/3d-models/box-091a81b4e4a34d1795993b26e247e6ee" class="btn btn-default">Ver modelo 3D</a>
-					</div>
-				</div>
-
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item Videos">
-					<a href="images/Portfolio/Videos/LMYUN.mp4" class="work-video">
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">Videos/Animaciones</span>
-								<h4 class="title">Animación, creación y edición del programa “Las Mil y una Noches” | Travel Express</h4>
-								<span class="more-button"><i class="icon-camrecorder"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/LMYUN.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-				</div>
-				
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item Videos">
-					<a href="images/Portfolio/Videos/Las Mil y una Noches.mp4" class="work-video">
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">Videos/Animaciones</span>
-								<h4 class="title">Creación y edición del programa “Las Mil y una Noches” | Travel Express</h4>
-								<span class="more-button"><i class="icon-camrecorder"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/VIDLMYUN.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-				</div>
-
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item 3D merchandising">
-					<a href="#Polera" class="work-content">
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">3D / Merchandising</span>
-								<h4 class="title">Toca e interactúa con el modelo 3D</h4>
-								<span class="more-button"><i class="icon-crop"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/Polera.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-					<div id="Polera" class="white-popup zoom-anim-dialog mfp-hide" >
-						<div class="sketchfab-embed-wrapper"> <iframe title="Polera" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share width="100%" height="480" src="https://sketchfab.com/models/a4c8d7ac62d44b3b87ddc9628d7c21db/embed"> </iframe> </div>
-						<h2>Presentación 3D | Diseño y modelado de Polera Travel Express</h2>
-						<a href="https://sketchfab.com/3d-models/polera-a4c8d7ac62d44b3b87ddc9628d7c21db" class="btn btn-default">Ver modelo 3D</a>
-					</div>
-				</div>
-
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item Videos">
-					<a href="images/Portfolio/Videos/Blade King.mp4" class="work-video">
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">Videos/Animaciones</span>
-								<h4 class="title">Diseño animado en bucle | Twitch – Blade King</h4>
-								<span class="more-button"><i class="icon-camrecorder"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/BKINICIO.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-				</div>
-
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item Gráficas">
-					<a href="images/Portfolio/VG.jpg" class="work-image">
-						
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">Grafica</span>
-								<h4 class="title">Diseño de logo | Twitch – El Viejo Gamer</h4>
-								<span class="more-button"><i class="icon-magnifier-add"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/Logovg.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-				</div>
-
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item Gráficas">
-					<a href="images/Portfolio/Lstore.jpg" class="work-image">
-						
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">Grafica</span>
-								<h4 class="title">Diseño de logo | Laons Store</h4>
-								<span class="more-button"><i class="icon-magnifier-add"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/Laons.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-				</div>
-
-				<!-- portfolio item -->
-				<div class="col-md-4 col-sm-6 grid-item merchandising">
-					<a href="images/Portfolio/stand.jpg" class="work-image">
-						
-						<div class="portfolio-item rounded shadow-dark">
-							<div class="details">
-								<span class="term">Merchandising</span>
-								<h4 class="title">Diseño de Pendones y Stand | Travel Express</h4>
-								<span class="more-button"><i class="icon-magnifier-add"></i></span>
-							</div>
-							<div class="thumb">
-								<img src="images/Portfolio/standd.jpg" style="width: 100%;" alt="Portfolio-title" />
-								<div class="mask"></div>
-							</div>
-						</div>
-					</a>
-				</div>
-			</div>
-			
-			<!-- more button -->
-			<div class="load-more text-center mt-4">
-				<a href="javascript:" class="btn btn-default"><i class="fas fa-spinner"></i> Ver más</a>
-				<!-- numbered pagination (hidden for infinite scroll) -->
-				<ul class="portfolio-pagination list-inline d-none">
-					<li class="list-inline-item">1</li>
-					<li class="list-inline-item"><a href="works-2.html">2</a></li>
-				</ul>
-				
-			</div>
-			<div class="mt-5 text-center">
-				<p class="mb-0">Estos son algunos de mis trabajos realizados ya que cuento con más de 100 Reels/Stories realizadas, más de 200 graficas realizadas y…</p>
-			</div>
-
-		</div>
-		
-	</section>
-	
-
-	
-			<div class="container">
-			<div class="row">
-				<div class="col-md-3 col-6">
-					<!-- client item -->
-					<div class="client-item">
-						<div class="inner">
-							<img class="img-fluid" src="images/Clients/img1.png" style="width: 70%;" alt="client-name" />
-						</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-6">
-					<!-- client item -->
-					<div class="client-item">
-						<div class="inner">
-							<img src="images/Clients/img2.png" style="width: 70%;" alt="client-name" />
-						</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-6">
-					<!-- client item -->
-					<div class="client-item">
-						<div class="inner">
-							<img src="images/Clients/img3.png" style="width: 70%;" alt="client-name" />
-						</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-6">
-					<!-- client item -->
-					<div class="client-item">
-						<div class="inner">
-							<img src="images/Clients/img4.png" style="width: 70%;" alt="client-name" />
-						</div>
-					</div>
-				</div>
-			</div>
-	
-	<!-- section contact -->
-	<section id="contact">
-
-		<div class="container">
-			
-			<!-- section title -->
-			<h2 class="section-title wow fadeInUp">Contacto</h2>
-
-			<div class="spacer" data-height="60"></div>
-			
-			<div class="row">
-				
-				<div class="col-md-4">
-					<!-- contact info -->
-					<div class="contact-info">
-						<h3 class="wow fadeInUp">¡Hablemos de todo!</h3>
-						<p class="wow fadeInUp">¿No te gustan los formularios?<a href="mailto:gonzalohal@gmail.com"> Envíame un email</a>. 👋</p>
-					</div>
-				</div>
-
-				<div class="col-md-8">
-					<!-- Contact Form -->
-
-					<form action="https://formspree.io/f/maygvvea" class="contact-form mt-6" method="POST">
-						<div class="row">
-							<div class="column col-md-12">
-								<div class="form-group">
-									<label> <input type="email" class="form-control" name="email" placeholder="Correo" data-error="El Correo es requerido."></label>
-								</div>
-							</div>
-							  <div class="column col-md-12">
-								<div class="form-group">
-									<label style="width: 100%;"> <textarea class="form-control"  name="message" placeholder="Mensaje" data-error="El Mensaje es requerido."></textarea> </label>
-								</div>
-							</div>
-					  <!-- your other form fields go here -->
-							  
-						</div>
-						<button class="btn btn-default" type="submit">Enviar</button>
-					</form>
-					
-				</div>
-
-				<!-- Contact Form end -->
-
-			</div>
-
-		</div>
-
-	</section>
-
-	<div class="spacer" data-height="96"></div>
-	
-</main>
-
-<!-- Go to top button -->
-<a href="javascript:" id="return-to-top"><i class="fas fa-arrow-up"></i></a>
-
-<!-- SCRIPTS -->
-<script src="js/jquery-1.12.3.min.js"></script>
-<script src="js/jquery.easing.min.js"></script>
-<script src="js/jquery.waypoints.min.js"></script>
-<script src="js/jquery.counterup.min.js"></script>
-<script src="js/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/isotope.pkgd.min.js"></script>
-<script src="js/infinite-scroll.min.js"></script>
-<script src="js/imagesloaded.pkgd.min.js"></script>
-<script src="js/slick.min.js"></script>
-<script src="js/contact.js"></script>
-<script src="js/validator.js"></script>
-<script src="js/wow.min.js"></script>
-<script src="js/morphext.min.js"></script>
-<script src="js/parallax.min.js"></script>
-<script src="js/jquery.magnific-popup.min.js"></script>
-<script src="js/custom.js"></script>
-
+<!-- ================= CLIENTS ================= -->
+<div class="clients reveal">
+  <div class="clients-inner" id="clientsInner"></div>
+</div>
+
+<!-- ================= SOBRE MI ================= -->
+<section id="sobre-mi">
+  <div class="about reveal">
+    <div class="inner about-grid">
+      <div class="about-photo">
+        <img src="images/site/gonzalo.jpg" alt="Gonzalo Hal" id="aboutPhoto">
+      </div>
+      <div class="about-text">
+        <span class="eyebrow">Sobre mí</span>
+        <div id="aboutParagraphs" style="margin-top:18px;"></div>
+        <div class="skill-pills" id="aboutSkills"></div>
+        <dl class="about-facts" id="aboutFacts"></dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SERVICIOS ================= -->
+<section id="servicios">
+  <div class="inner">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow" id="servicesEyebrow"></span>
+        <h2 id="servicesTitle"></h2>
+      </div>
+      <p id="servicesSub"></p>
+    </div>
+
+    <div class="services-grid" id="servicesGrid"></div>
+  </div>
+</section>
+
+<!-- ================= TRABAJOS ================= -->
+<section id="trabajos">
+  <div class="inner">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow" id="workEyebrow"></span>
+        <h2 id="workTitle"></h2>
+      </div>
+      <p id="workSub"></p>
+    </div>
+
+    <div class="work-filters reveal">
+      <button class="filter-btn is-active" data-filter="all">Todos</button>
+      <button class="filter-btn" data-filter="branding">Identidad de Marca</button>
+      <button class="filter-btn" data-filter="grafica">Gráfica &amp; Redes</button>
+      <button class="filter-btn" data-filter="audiovisual">Audiovisual</button>
+      <button class="filter-btn" data-filter="merch">Merchandising &amp; Señalética</button>
+    </div>
+
+    <div class="work-grid" id="workGrid"></div>
+  </div>
+</section>
+
+<!-- ================= EXPERIENCIA ================= -->
+<section id="experiencia">
+  <div class="inner exp-grid">
+    <div>
+      <div class="section-head reveal" style="margin-bottom:36px;">
+        <div>
+          <span class="eyebrow" id="expEyebrow"></span>
+          <h2 id="expTitle"></h2>
+        </div>
+      </div>
+      <div class="timeline reveal" id="timelineList"></div>
+    </div>
+
+    <div>
+      <div class="section-head reveal" style="margin-bottom:36px;">
+        <div>
+          <span class="eyebrow" id="eduEyebrow"></span>
+          <h2 id="eduTitle"></h2>
+        </div>
+      </div>
+      <div class="edu-list reveal" id="eduList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACTO ================= -->
+<section id="contacto">
+  <div class="contact reveal">
+    <span class="eyebrow" style="color:#cfced8;" id="contactEyebrow"></span>
+    <h2 style="margin-top:16px;" id="contactTitle"></h2>
+    <p id="contactSub"></p>
+    <div class="contact-cta">
+      <a href="#" class="btn btn-accent" id="contactEmailBtn">Enviar un email</a>
+      <a href="#" class="btn btn-ghost" id="contactWhatsappBtn" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+    <div class="contact-links">
+      <a href="#" id="contactEmailText"></a>
+      <a href="#" id="contactPhoneText"></a>
+      <a href="#" id="contactLinkedin" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="#" id="contactSketchfab" target="_blank" rel="noopener">Sketchfab</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span id="footerText">© <span id="year"></span></span>
+  <a href="#top" class="to-top" aria-label="Volver arriba">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </a>
+</footer>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose" aria-label="Cerrar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="modal-hero"><img id="modalHeroImg" src="" alt=""></div>
+    <div class="modal-body">
+      <span class="tag" id="modalTag"></span>
+      <h3 id="modalTitle"></h3>
+      <p class="desc" id="modalDesc"></p>
+      <div class="modal-strip" id="modalStrip"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
 </body>
 </html>

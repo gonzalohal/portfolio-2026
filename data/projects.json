@@ -1,0 +1,131 @@
+[
+  {
+    "slug": "auxilio24",
+    "name": "Auxilio 24",
+    "tagline": "Asistencia vial",
+    "categories": ["branding", "grafica", "merch"],
+    "blurb": "Identidad visual y piezas gráficas para redes, prensa y flota de Auxilio 24, servicio de asistencia vial del holding.",
+    "images": ["cover.jpg", "03.jpg", "04.jpg", "05.jpg"]
+  },
+  {
+    "slug": "blackia",
+    "name": "Blackia",
+    "tagline": "Contenido & video con IA",
+    "categories": ["branding", "audiovisual"],
+    "blurb": "Identidad, portadas de podcast y miniaturas de video para Blackia, proyecto de contenido con video generado por inteligencia artificial.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"]
+  },
+  {
+    "slug": "fundacion-maria-guadalupe",
+    "name": "Fundación María de Guadalupe",
+    "tagline": "ONG",
+    "categories": ["branding", "grafica"],
+    "blurb": "Piezas gráficas y avisos de página completa para la Fundación María de Guadalupe.",
+    "images": ["cover.jpg", "02.png", "03.png", "04.jpg"]
+  },
+  {
+    "slug": "gaia",
+    "name": "Gaia",
+    "tagline": "Personaje de marca",
+    "categories": ["branding", "grafica"],
+    "blurb": "Diseño de personaje de marca, avatar e ilustraciones de comunicación para Gaia.",
+    "images": ["cover.png", "02.jpg", "03.jpg", "04.jpg"]
+  },
+  {
+    "slug": "gallion",
+    "name": "Gallion Holding",
+    "tagline": "Holding",
+    "categories": ["branding"],
+    "blurb": "Identidad corporativa y arquitectura de marca del holding y las empresas que lo integran.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg"]
+  },
+  {
+    "slug": "mediline",
+    "name": "MediLine",
+    "tagline": "Telemedicina",
+    "categories": ["branding", "grafica"],
+    "blurb": "Identidad, señalética y piezas comerciales para MediLine, servicio de telemedicina 24/7.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg"]
+  },
+  {
+    "slug": "nsa-seguros",
+    "name": "NSA Seguros",
+    "tagline": "Seguros",
+    "categories": ["branding", "grafica"],
+    "blurb": "Diseño de sitio web y piezas para redes sociales de NSA Seguros Generales.",
+    "images": ["cover.png", "02.png", "03.png", "04.jpg"]
+  },
+  {
+    "slug": "pipay",
+    "name": "Pipay",
+    "tagline": "Mutual",
+    "categories": ["branding"],
+    "blurb": "Identidad de marca y presentación institucional de Pipay.",
+    "images": ["cover.jpg", "02.jpg", "03.png", "04.png"]
+  },
+  {
+    "slug": "redex",
+    "name": "Redex",
+    "tagline": "Identidad & campañas",
+    "categories": ["branding", "grafica"],
+    "blurb": "Manual de identidad corporativa, gráfica de premios y piezas de campaña para Redex.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg", "05.png"]
+  },
+  {
+    "slug": "segu",
+    "name": "Segu",
+    "tagline": "Seguros",
+    "categories": ["branding"],
+    "blurb": "Arquitectura de marca y sub-marcas — Hogar, Auto, Moto y Comercio — para Segu.",
+    "images": ["cover.jpg", "02.jpg", "03.png"]
+  },
+  {
+    "slug": "televet",
+    "name": "TeleVet",
+    "tagline": "Veterinaria online",
+    "categories": ["branding", "grafica"],
+    "blurb": "Identidad, planes y campañas de redes sociales para TeleVet, veterinaria online.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg"]
+  },
+  {
+    "slug": "triunfo",
+    "name": "Triunfo Seguros",
+    "tagline": "Seguros",
+    "categories": ["grafica", "merch"],
+    "blurb": "Piezas gráficas, campañas de producto y merchandising para Triunfo Seguros.",
+    "images": ["cover.jpg", "02.png", "03.jpg", "04.jpg", "05.jpg"]
+  },
+  {
+    "slug": "vedi",
+    "name": "Vedi",
+    "tagline": "Broker digital de seguros",
+    "categories": ["branding"],
+    "blurb": "Identidad visual para Vedi, broker digital de seguros.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg"]
+  },
+  {
+    "slug": "yumak",
+    "name": "Yumak",
+    "tagline": "Taller & servicio técnico",
+    "categories": ["branding", "merch"],
+    "blurb": "Señalética, ploteo de local y render de espacio para Yumak.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg"]
+  },
+  {
+    "slug": "coyote",
+    "name": "Coyote",
+    "tagline": "Presentación de marca",
+    "categories": ["branding"],
+    "blurb": "Presentación de marca para Coyote.",
+    "textOnly": true,
+    "pdf": "images/work/coyote/presentacion-coyote.pdf"
+  },
+  {
+    "slug": "sp-risk",
+    "name": "SP Risk Services",
+    "tagline": "Seguros & riesgo",
+    "categories": ["branding"],
+    "blurb": "Identidad y manual de marca para SP Risk Services.",
+    "textOnly": true
+  }
+]
