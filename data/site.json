@@ -10,27 +10,71 @@
   },
   "hero": {
     "eyebrow": "Diseñador Multimedial — Mendoza, Argentina",
-    "headlineLines": ["Diseño de marca", "que se sostiene", "en el tiempo."],
+    "headlineLines": [
+      "Diseño de marca",
+      "que se sostiene",
+      "en el tiempo."
+    ],
     "headlineEmphasis": "se sostiene",
     "sub": "6 años dando forma visual a marcas, campañas y productos: identidad, diseño gráfico, producción audiovisual, modelado 3D y video generado con IA.",
     "ctaPrimary": "Ver trabajos",
     "ctaSecondary": "Hablemos de tu proyecto",
     "stats": [
-      { "value": "6+", "label": "Años de experiencia" },
-      { "value": "16", "label": "Marcas & proyectos" },
-      { "value": "200+", "label": "Piezas gráficas realizadas" },
-      { "value": "100+", "label": "Reels & stories" }
+      {
+        "value": "6+",
+        "label": "Años de experiencia"
+      },
+      {
+        "value": "16",
+        "label": "Marcas & proyectos"
+      },
+      {
+        "value": "200+",
+        "label": "Piezas gráficas realizadas"
+      },
+      {
+        "value": "100+",
+        "label": "Reels & stories"
+      }
     ],
-    "ticker": ["Identidad de Marca", "Diseño Gráfico", "Producción Audiovisual", "Modelado 3D", "Video con IA", "Branding"]
+    "ticker": [
+      "Identidad de Marca",
+      "Diseño Gráfico",
+      "Producción Audiovisual",
+      "Modelado 3D",
+      "Video con IA",
+      "Branding"
+    ]
   },
   "clientLogos": [
-    { "name": "Gallion Holding", "image": "images/site/clients/gallion.jpg" },
-    { "name": "MediLine", "image": "images/site/clients/mediline.jpg" },
-    { "name": "NSA Seguros", "image": "images/site/clients/nsa.jpg" },
-    { "name": "Pipay", "image": "images/site/clients/pipay.png" },
-    { "name": "Vedi", "image": "images/site/clients/vedi.png" },
-    { "name": "TeleVet", "image": "images/site/clients/televet.png" },
-    { "name": "Segu", "image": "images/site/clients/segu.png" }
+    {
+      "name": "Gallion Holding",
+      "image": "images/site/clients/gallion.jpg"
+    },
+    {
+      "name": "MediLine",
+      "image": "images/site/clients/mediline.jpg"
+    },
+    {
+      "name": "NSA Seguros",
+      "image": "images/site/clients/nsa.jpg"
+    },
+    {
+      "name": "Pipay",
+      "image": "images/site/clients/pipay.png"
+    },
+    {
+      "name": "Vedi",
+      "image": "images/site/clients/vedi.png"
+    },
+    {
+      "name": "TeleVet",
+      "image": "images/site/clients/televet.png"
+    },
+    {
+      "name": "Segu",
+      "image": "images/site/clients/segu.png"
+    }
   ],
   "about": {
     "photo": "images/site/gonzalo.jpg",
@@ -38,12 +82,32 @@
       "Diseñador multimedial con 6 años de trayectoria en diseño gráfico, producción audiovisual y modelado 3D. Actualmente a cargo del contenido visual de varias empresas de Gallion Holding, adaptando identidad de marca y línea gráfica a cada una.",
       "Experiencia en desarrollo de identidad de marca, creación y edición de video, y generación de video realista mediante inteligencia artificial. Sumo formación técnica en programación y sistemas, además de diseño, impresión 3D y desarrollo de producto propio."
     ],
-    "skills": ["Illustrator", "Photoshop", "After Effects", "Premiere", "Blender", "Figma", "Canva"],
+    "skills": [
+      "Illustrator",
+      "Photoshop",
+      "After Effects",
+      "Premiere",
+      "Blender",
+      "Figma",
+      "Canva"
+    ],
     "facts": [
-      { "label": "Ubicación", "value": "Mendoza, Argentina" },
-      { "label": "Rol actual", "value": "Diseñador Multimedial — Gallion Holding" },
-      { "label": "Idiomas", "value": "Español (nativo), Inglés (A1)" },
-      { "label": "Modelos 3D", "value": "sketchfab.com/gonzalohal" }
+      {
+        "label": "Ubicación",
+        "value": "Mendoza, Argentina"
+      },
+      {
+        "label": "Rol actual",
+        "value": "Diseñador Multimedial — Gallion Holding"
+      },
+      {
+        "label": "Idiomas",
+        "value": "Español (nativo), Inglés (A1)"
+      },
+      {
+        "label": "Modelos 3D",
+        "value": "sketchfab.com/gonzalohal"
+      }
     ]
   },
   "services": {
@@ -51,12 +115,30 @@
     "title": "Un mismo criterio de diseño, aplicado a cada formato.",
     "sub": "Del logo al reel, de la señalética al render 3D — cuidando que cada pieza hable el mismo idioma de marca.",
     "items": [
-      { "title": "Identidad de Marca", "desc": "Registro de marca, manual de identidad y diseño de logotipo para empresas en operación." },
-      { "title": "Diseño Gráfico", "desc": "Piezas para redes sociales, merchandising, brochures, señalética y campañas impresas." },
-      { "title": "Producción Audiovisual", "desc": "Creación y edición de video en After Effects y Premiere, de piezas de marca a contenido para streamers." },
-      { "title": "Video con IA", "desc": "Generación de video realista mediante inteligencia artificial para campañas y contenido de marca." },
-      { "title": "Modelado 3D", "desc": "Modelado y renderizado en Blender para producto, ambientación y piezas de comunicación." },
-      { "title": "Producto & Impresión 3D", "desc": "Diseño de producto, impresión 3D y desarrollo de proyectos propios, del concepto a la pieza física." }
+      {
+        "title": "Identidad de Marca",
+        "desc": "Registro de marca, manual de identidad y diseño de logotipo para empresas en operación."
+      },
+      {
+        "title": "Diseño Gráfico",
+        "desc": "Piezas para redes sociales, merchandising, brochures, señalética y campañas impresas."
+      },
+      {
+        "title": "Producción Audiovisual",
+        "desc": "Creación y edición de video en After Effects y Premiere, de piezas de marca a contenido para streamers."
+      },
+      {
+        "title": "Video con IA",
+        "desc": "Generación de video realista mediante inteligencia artificial para campañas y contenido de marca."
+      },
+      {
+        "title": "Modelado 3D",
+        "desc": "Modelado y renderizado en Blender para producto, ambientación y piezas de comunicación."
+      },
+      {
+        "title": "Producto & Impresión 3D",
+        "desc": "Diseño de producto, impresión 3D y desarrollo de proyectos propios, del concepto a la pieza física."
+      }
     ]
   },
   "work": {
@@ -68,23 +150,73 @@
     "eyebrow": "Experiencia",
     "title": "Trayectoria",
     "items": [
-      { "date": "Oct 2025 — Actualidad", "role": "Diseñador Multimedial", "company": "Gallion Holding", "desc": "Piezas gráficas y contenido para redes y merchandising de varias empresas del holding. Modelado y renderizado 3D en Blender. Identidad de marca, registro y manual de marca. Video con IA. Desarrollo de plataforma interna y proyectos propios." },
-      { "date": "Jul 2024 — Oct 2025", "role": "Diseñador", "company": "Triunfo Seguros", "desc": "Piezas gráficas para redes y comunicación interna. Edición de video en After Effects. Diseño en Figma y Canva." },
-      { "date": "Sep 2022 — Oct 2023", "role": "Diseñador Gráfico", "company": "Travel Express", "desc": "Piezas para redes (1x1, full size, stories), reels y animación de video. Brochures, trípticos, pendones, stands y merchandising." },
-      { "date": "Mar 2021 — Actualidad", "role": "Freelance", "company": "Diseño para creadores de contenido", "desc": "Overlays animados, intros, outros, transiciones y animaciones en bucle para streamers de Twitch (España y Argentina). Banners e identidad visual de canal." },
-      { "date": "Oct 2020 — Mar 2021", "role": "Diseñador", "company": "Agencia Sol / ADEN Business School", "desc": "Piezas visuales y audiovisuales; gestión y actualización de sitios web. Piezas gráficas y multimedia institucionales." },
-      { "date": "May 2019 — Nov 2019", "role": "Pasantía", "company": "La Pirámide Cadena de Ópticas", "desc": "" }
+      {
+        "date": "Oct 2025 — Actualidad",
+        "role": "Diseñador Multimedial",
+        "company": "Gallion Holding",
+        "desc": "Piezas gráficas y contenido para redes y merchandising de varias empresas del holding. Modelado y renderizado 3D en Blender. Identidad de marca, registro y manual de marca. Video con IA. Desarrollo de plataforma interna y proyectos propios."
+      },
+      {
+        "date": "Jul 2024 — Oct 2025",
+        "role": "Diseñador",
+        "company": "Triunfo Seguros",
+        "desc": "Piezas gráficas para redes y comunicación interna. Edición de video en After Effects. Diseño en Figma y Canva."
+      },
+      {
+        "date": "Sep 2022 — Oct 2023",
+        "role": "Diseñador Gráfico",
+        "company": "Travel Express",
+        "desc": "Piezas para redes (1x1, full size, stories), reels y animación de video. Brochures, trípticos, pendones, stands y merchandising."
+      },
+      {
+        "date": "Mar 2021 — Actualidad",
+        "role": "Freelance",
+        "company": "Diseño para creadores de contenido",
+        "desc": "Overlays animados, intros, outros, transiciones y animaciones en bucle para streamers de Twitch (España y Argentina). Banners e identidad visual de canal."
+      },
+      {
+        "date": "Oct 2020 — Mar 2021",
+        "role": "Diseñador",
+        "company": "Agencia Sol / ADEN Business School",
+        "desc": "Piezas visuales y audiovisuales; gestión y actualización de sitios web. Piezas gráficas y multimedia institucionales."
+      },
+      {
+        "date": "May 2019 — Nov 2019",
+        "role": "Pasantía",
+        "company": "La Pirámide Cadena de Ópticas",
+        "desc": ""
+      }
     ]
   },
   "education": {
     "eyebrow": "Formación",
     "title": "Estudios",
     "items": [
-      { "year": "2022", "title": "Diseño 3D (Blender)", "place": "Coderhouse" },
-      { "year": "2021", "title": "Programación Full Stack", "place": "Egg + Gobierno de Mendoza" },
-      { "year": "2020", "title": "Programación Web (PHP y MySQL)", "place": "UTN" },
-      { "year": "2017 — 2020", "title": "Técnico Superior en Arte y Diseño Multimedial", "place": "Fundación Universitas" },
-      { "year": "2011 — 2016", "title": "Secundario", "place": "Colegio María Auxiliadora" }
+      {
+        "year": "2022",
+        "title": "Diseño 3D (Blender)",
+        "place": "Coderhouse"
+      },
+      {
+        "year": "2021",
+        "title": "Programación Full Stack",
+        "place": "Egg + Gobierno de Mendoza"
+      },
+      {
+        "year": "2020",
+        "title": "Programación Web (PHP y MySQL)",
+        "place": "UTN"
+      },
+      {
+        "year": "2017 — 2020",
+        "title": "Técnico Superior en Arte y Diseño Multimedial",
+        "place": "Fundación Universitas"
+      },
+      {
+        "year": "2011 — 2016",
+        "title": "Secundario",
+        "place": "Colegio María Auxiliadora"
+      }
     ]
   },
   "contact": {
