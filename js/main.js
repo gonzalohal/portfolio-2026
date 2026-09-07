@@ -20,6 +20,35 @@
   }
 
   let PROJECTS = [];
+  const PREVIEW = { token: null, valid: false };
+
+  function isLocked(p) {
+    return (p.blurredImages || []).length > 0 && !PREVIEW.valid;
+  }
+
+  function imgSrc(p, filename) {
+    const isBlurredFile = (p.blurredImages || []).includes(filename);
+    if (isBlurredFile && PREVIEW.valid) {
+      return `/api/reveal-image?token=${encodeURIComponent(PREVIEW.token)}&path=${encodeURIComponent("images/work/" + p.slug + "/" + filename)}`;
+    }
+    return `images/work/${p.slug}/${filename}`;
+  }
+
+  async function checkPreviewToken() {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("preview");
+    if (!token) return;
+    try {
+      const res = await fetch("/api/verify-preview?token=" + encodeURIComponent(token));
+      const data = await res.json();
+      if (data.valid) {
+        PREVIEW.token = token;
+        PREVIEW.valid = true;
+      }
+    } catch (e) {
+      console.error("No se pudo verificar el link de vista previa:", e);
+    }
+  }
 
   /* ================= THEME ================= */
   function applyTheme(theme) {
@@ -202,10 +231,11 @@
           </div>
         </article>`;
     }
-    const coverBlurred = (p.blurredImages || []).includes(p.images[0]);
+    const locked = isLocked(p);
+    const coverBlurred = (p.blurredImages || []).includes(p.images[0]) && !PREVIEW.valid;
     return `
-      <article class="work-card reveal" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
-        <div class="work-thumb"><img src="images/work/${p.slug}/${p.images[0]}" alt="${esc(p.name)}" loading="lazy">${coverBlurred ? blurBadge() : ""}</div>
+      <article class="work-card reveal${locked ? " is-locked" : ""}" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
+        <div class="work-thumb"><img src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}" loading="lazy">${coverBlurred ? blurBadge() : ""}</div>
         <div class="work-body">
           <span class="tag">${esc(label)}</span>
           <h3>${esc(p.name)}</h3>
@@ -247,7 +277,7 @@
 
     function openModal(slug) {
       const p = PROJECTS.find((x) => x.slug === slug);
-      if (!p) return;
+      if (!p || isLocked(p)) return;
 
       modalTag.textContent = CATEGORY_LABELS[p.categories[0]] || "";
       modalTitle.textContent = p.name;
@@ -264,13 +294,13 @@
           : `<div class="pdf-tile">Material disponible a pedido</div>`;
       } else {
         const blurredSet = p.blurredImages || [];
-        const heroBlurred = blurredSet.includes(p.images[0]);
-        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="images/work/${p.slug}/${p.images[0]}" alt="${esc(p.name)}">${heroBlurred ? blurBadge() : ""}`;
+        const heroBlurred = blurredSet.includes(p.images[0]) && !PREVIEW.valid;
+        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}">${heroBlurred ? blurBadge() : ""}`;
         modalStrip.innerHTML = p.images
           .slice(1)
           .map((img) => {
-            const isBlurred = blurredSet.includes(img);
-            return `<div class="img-wrap"><img src="images/work/${p.slug}/${img}" alt="${esc(p.name)}" loading="lazy">${isBlurred ? blurBadge() : ""}</div>`;
+            const isBlurred = blurredSet.includes(img) && !PREVIEW.valid;
+            return `<div class="img-wrap"><img src="${imgSrc(p, img)}" alt="${esc(p.name)}" loading="lazy">${isBlurred ? blurBadge() : ""}</div>`;
           })
           .join("");
       }
@@ -328,7 +358,7 @@
   /* ================= BOOT ================= */
   async function boot() {
     try {
-      const [siteRes, projectsRes] = await Promise.all([fetch("data/site.json"), fetch("data/projects.json")]);
+      const [siteRes, projectsRes] = await Promise.all([fetch("data/site.json"), fetch("data/projects.json"), checkPreviewToken()]);
       const site = await siteRes.json();
       PROJECTS = await projectsRes.json();
       renderSite(site);

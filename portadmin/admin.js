@@ -29,6 +29,9 @@
     upload: (path, dataUrl, message) => api("/api/upload", { method: "POST", body: { path, dataUrl, message } }),
     deleteAsset: (path, message) => api("/api/delete-asset", { method: "POST", body: { path, message } }),
     blurImage: (path, message) => api("/api/blur-image", { method: "POST", body: { path, message } }),
+    previewStatus: () => api("/api/preview-status"),
+    previewGenerate: (hours) => api("/api/preview-generate", { method: "POST", body: { hours } }),
+    previewRevoke: () => api("/api/preview-revoke", { method: "POST" }),
   };
 
   function assetUrl(path) {
@@ -57,6 +60,7 @@
     { id: "formacion", label: "Formación" },
     { id: "contacto", label: "Contacto" },
     { id: "footer", label: "Footer" },
+    { id: "compartir", label: "Compartir (link de entrevista)" },
   ];
   let activeSection = "general";
 
@@ -735,6 +739,122 @@
     container.appendChild(panel);
   }
 
+  const DURATION_OPTS = [
+    { hours: 1, label: "1 hora" },
+    { hours: 4, label: "4 horas" },
+    { hours: 24, label: "1 día" },
+    { hours: 72, label: "3 días" },
+    { hours: 168, label: "7 días" },
+  ];
+
+  function formatExpiry(ms) {
+    const d = new Date(ms);
+    return d.toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
+  }
+
+  function renderCompartir(container) {
+    container.appendChild(
+      el(
+        "p",
+        "section-desc",
+        "Mientras un trabajo tenga alguna imagen difuminada, su tarjeta queda bloqueada en el sitio público (no se puede abrir). Generá acá un link temporal — al abrirlo, quien lo tenga ve el contenido real de todos los trabajos bloqueados hasta que venza. Usalo para compartir o presentar en una entrevista."
+      )
+    );
+
+    const panel = el("div", "panel");
+    const body = el("div");
+    body.appendChild(el("p", "hint", "Cargando estado…"));
+    panel.appendChild(body);
+    container.appendChild(panel);
+
+    async function draw() {
+      body.innerHTML = "";
+      let status;
+      try {
+        status = await API.previewStatus();
+      } catch (e) {
+        body.appendChild(el("p", "hint", "Error: " + e.message));
+        return;
+      }
+
+      if (status.active) {
+        const url = location.origin + "/?preview=" + status.token;
+        body.appendChild(el("h3", null, "Link activo"));
+        const row = el("div", "field-row cols-2");
+        const urlInput = textInput(url, () => {});
+        urlInput.readOnly = true;
+        row.appendChild(field("URL para compartir", urlInput));
+        body.appendChild(row);
+        body.appendChild(el("p", "hint", "Vence: " + formatExpiry(status.expiresAt)));
+
+        const actions = el("div");
+        actions.style.display = "flex";
+        actions.style.gap = "8px";
+        actions.style.marginTop = "10px";
+        actions.appendChild(
+          btn("Copiar link", "btn-sm", async () => {
+            try {
+              await navigator.clipboard.writeText(url);
+              setStatus("Link copiado ✓", "ok");
+            } catch {
+              urlInput.select();
+              setStatus("Seleccioná y copiá manualmente (Ctrl+C)", "");
+            }
+          })
+        );
+        actions.appendChild(
+          btn("Revocar", "btn-sm btn-danger", async () => {
+            if (!confirm("¿Revocar el link activo? Deja de funcionar de inmediato.")) return;
+            try {
+              showLoading(true);
+              await API.previewRevoke();
+              setStatus("Link revocado ✓", "ok");
+              draw();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+        body.appendChild(actions);
+      } else {
+        body.appendChild(el("p", "hint", "No hay ningún link activo ahora mismo."));
+      }
+
+      const genPanel = el("div");
+      genPanel.style.marginTop = "20px";
+      genPanel.appendChild(el("h3", null, status.active ? "Generar uno nuevo (reemplaza el actual)" : "Generar link"));
+      const durRow = el("div", "field-row cols-2");
+      const select = document.createElement("select");
+      DURATION_OPTS.forEach((opt) => {
+        const o = document.createElement("option");
+        o.value = String(opt.hours);
+        o.textContent = opt.label;
+        if (opt.hours === 24) o.selected = true;
+        select.appendChild(o);
+      });
+      durRow.appendChild(field("Duración de la vista previa", select));
+      genPanel.appendChild(durRow);
+      genPanel.appendChild(
+        btn("Generar nuevo link", "btn-primary btn-sm", async () => {
+          try {
+            showLoading(true);
+            await API.previewGenerate(Number(select.value));
+            setStatus("Link generado ✓", "ok");
+            draw();
+          } catch (e) {
+            setStatus("Error: " + e.message, "err");
+          } finally {
+            showLoading(false);
+          }
+        })
+      );
+      body.appendChild(genPanel);
+    }
+    draw();
+  }
+
   /* ---- Trabajos (projects.json) ---- */
   const CATEGORY_OPTS = [
     { key: "branding", label: "Identidad de Marca" },
@@ -1046,6 +1166,7 @@
     formacion: renderFormacion,
     contacto: renderContacto,
     footer: renderFooter,
+    compartir: renderCompartir,
   };
 
   function currentFileForSection(id) {
@@ -1077,12 +1198,14 @@
     content.innerHTML = "";
     SECTION_RENDERERS[activeSection](content);
 
-    const bar = el("div", "save-bar");
-    const info = el("span", "hint", currentFileForSection(activeSection) === "site" ? "Los cambios de esta sección se guardan en data/site.json" : "Los cambios de esta sección se guardan en data/projects.json");
-    bar.appendChild(info);
-    const saveBtn = btn("Guardar y publicar", "btn-primary", () => saveCurrent());
-    bar.appendChild(saveBtn);
-    content.appendChild(bar);
+    if (activeSection !== "compartir") {
+      const bar = el("div", "save-bar");
+      const info = el("span", "hint", currentFileForSection(activeSection) === "site" ? "Los cambios de esta sección se guardan en data/site.json" : "Los cambios de esta sección se guardan en data/projects.json");
+      bar.appendChild(info);
+      const saveBtn = btn("Guardar y publicar", "btn-primary", () => saveCurrent());
+      bar.appendChild(saveBtn);
+      content.appendChild(bar);
+    }
   }
 
   async function saveCurrent() {

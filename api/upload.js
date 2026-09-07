@@ -1,6 +1,6 @@
 const { getSession } = require("../lib/auth");
 const { getFile, putFile } = require("../lib/github");
-const { redact } = require("../lib/redact");
+const { redact, hiddenOriginalPath } = require("../lib/redact");
 const sharp = require("sharp");
 
 module.exports = async (req, res) => {
@@ -22,7 +22,11 @@ module.exports = async (req, res) => {
     let outputBuffer = raw;
 
     if (blur && mime !== "image/svg+xml" && mime !== "application/pdf") {
-      // Permanently redact before this ever reaches the repo — the sharp version never gets committed.
+      // Keep the sharp original only at a hidden path — never at the public one. It's revealed
+      // later only through /api/reveal-image, gated by a valid, non-expired preview token.
+      const originalPath = hiddenOriginalPath(targetPath);
+      const existingOriginal = await getFile(originalPath);
+      await putFile(originalPath, raw, "Guardar original oculto de " + targetPath, existingOriginal ? existingOriginal.sha : undefined);
       outputBuffer = await redact(raw);
     } else if (!skipResize && mime !== "image/svg+xml" && mime !== "application/pdf") {
       const isPng = /png/i.test(mime) || /\.png$/i.test(targetPath);
