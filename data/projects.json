@@ -133,7 +133,9 @@
       "03.png",
       "04.png"
     ],
-    "blurredImages": []
+    "blurredImages": [
+      "04.png"
+    ]
   },
   {
     "slug": "redex",
