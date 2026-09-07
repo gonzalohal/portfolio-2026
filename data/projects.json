@@ -15,7 +15,9 @@
       "04.jpg",
       "05.jpg"
     ],
-    "blurredImages": []
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "blackia",
