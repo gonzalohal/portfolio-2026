@@ -372,6 +372,11 @@
     return targetPath;
   }
 
+  async function saveProjectsNow(message) {
+    await API.save("data/projects.json", projects, message || "Editar trabajos desde el panel");
+    dirtyProjects = false;
+  }
+
   async function blurAllImagesOfProject(p, onProgress) {
     if (p.textOnly || !p.images || !p.images.length) return { blurred: 0 };
     p.blurredImages = p.blurredImages || [];
@@ -938,7 +943,9 @@
           const { blurred } = await blurAllImagesOfProject(proj, (pr, img) => showLoading(true, "Difuminando " + pr.name + " — " + img + "…"));
           total += blurred;
         }
-        setStatus(total + " imagen(es) difuminadas ✓ — no olvides Guardar y publicar", "ok");
+        showLoading(true, "Publicando…");
+        await saveProjectsNow("Difuminar " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(total + " imagen(es) difuminadas y publicadas ✓ — se actualiza el sitio en ~30-60s", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -963,7 +970,9 @@
           const { restored } = await restoreAllImagesOfProject(proj, (pr, img) => showLoading(true, "Restaurando " + pr.name + " — " + img + "…"));
           total += restored;
         }
-        setStatus(total + " imagen(es) restauradas ✓ — no olvides Guardar y publicar", "ok");
+        showLoading(true, "Publicando…");
+        await saveProjectsNow("Restaurar " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(total + " imagen(es) restauradas y publicadas ✓ — se actualiza el sitio en ~30-60s", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -1075,7 +1084,9 @@
             try {
               showLoading(true);
               const { blurred } = await blurAllImagesOfProject(p, (pr, img) => showLoading(true, "Difuminando " + img + "…"));
-              setStatus(blurred + " imagen(es) difuminada(s) en " + p.name + " ✓ — no olvides Guardar y publicar", "ok");
+              showLoading(true, "Publicando…");
+              await saveProjectsNow("Difuminar " + p.name + " desde el panel");
+              setStatus(blurred + " imagen(es) difuminada(s) y publicadas en " + p.name + " ✓ — se actualiza el sitio en ~30-60s", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1092,7 +1103,9 @@
             try {
               showLoading(true);
               const { restored } = await restoreAllImagesOfProject(p, (pr, img) => showLoading(true, "Restaurando " + img + "…"));
-              setStatus(restored + " imagen(es) restaurada(s) en " + p.name + " ✓ — no olvides Guardar y publicar", "ok");
+              showLoading(true, "Publicando…");
+              await saveProjectsNow("Restaurar " + p.name + " desde el panel");
+              setStatus(restored + " imagen(es) restaurada(s) y publicadas en " + p.name + " ✓ — se actualiza el sitio en ~30-60s", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1211,7 +1224,7 @@
         el(
           "p",
           "hint",
-          "El botón \"Difuminar\" reemplaza la imagen pública por una versión con blur (estilo vidrio esmerilado) — no es un filtro visual: nadie puede recuperar la nítida inspeccionando la página, porque el original queda guardado en una ruta oculta del repositorio en vez de la pública. En el sitio se muestra con un cartel de \"" + UNLOCK_MSG + "\". Podés volver atrás en cualquier momento con \"Restaurar original\". Nota: si el repositorio es público, la versión original puede seguir siendo accesible para alguien que revise el historial de commits de git — para ocultarla también ahí, pasá el repo a privado."
+          "El botón \"Difuminar\" reemplaza la imagen pública por una versión con blur (estilo vidrio esmerilado) — no es un filtro visual: nadie puede recuperar la nítida inspeccionando la página, porque el original queda guardado en una ruta oculta del repositorio en vez de la pública. En el sitio se muestra con un cartel de \"" + UNLOCK_MSG + "\". Se publica solo, sin necesidad de tocar \"Guardar y publicar\". Podés volver atrás en cualquier momento con \"Restaurar original\". Nota: si el repositorio es público, la versión original puede seguir siendo accesible para alguien que revise el historial de commits de git — para ocultarla también ahí, pasá el repo a privado."
         )
       );
       p.images = p.images || [];
@@ -1251,8 +1264,9 @@
                 showLoading(true);
                 await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar imagen desde el panel");
                 p.blurredImages.push(imgName);
-                dirtyProjects = true;
-                setStatus("Imagen difuminada ✓ — no olvides Guardar y publicar para mostrar el cartel de desbloqueo", "ok");
+                showLoading(true, "Publicando…");
+                await saveProjectsNow("Difuminar " + imgName + " (" + p.name + ") desde el panel");
+                setStatus("Imagen difuminada y publicada ✓ — se actualiza el sitio en ~30-60s", "ok");
                 renderActiveSection();
               } catch (e) {
                 setStatus("Error: " + e.message, "err");
@@ -1269,8 +1283,9 @@
                 showLoading(true);
                 await API.restoreImage("images/work/" + p.slug + "/" + imgName, "Restaurar imagen desde el panel");
                 p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
-                dirtyProjects = true;
-                setStatus("Imagen restaurada ✓ — no olvides Guardar y publicar", "ok");
+                showLoading(true, "Publicando…");
+                await saveProjectsNow("Restaurar " + imgName + " (" + p.name + ") desde el panel");
+                setStatus("Imagen restaurada y publicada ✓ — se actualiza el sitio en ~30-60s", "ok");
                 renderActiveSection();
               } catch (e) {
                 setStatus("Error: " + e.message, "err");
