@@ -127,5 +127,155 @@
     "categories": ["branding"],
     "blurb": "Identidad y manual de marca para SP Risk Services.",
     "textOnly": true
+  },
+  {
+    "slug": "blade-king",
+    "name": "Blade King",
+    "tagline": "Identidad para Twitch",
+    "categories": ["branding", "merch"],
+    "blurb": "Identidad visual, key art y diseño de indumentaria (remeras/buzos) para el equipo/streamer Blade King.",
+    "images": ["cover.jpg", "02.jpg"]
+  },
+  {
+    "slug": "travel-express",
+    "name": "Travel Express",
+    "tagline": "Agencia de viajes",
+    "categories": ["grafica", "merch"],
+    "blurb": "Piezas institucionales para Travel Express: pendones, stand, trípticos y material de campaña para peregrinaciones y viajes grupales.",
+    "images": ["cover.jpg", "02.jpg"]
+  },
+  {
+    "slug": "streamers",
+    "name": "Identidad para Streamers",
+    "tagline": "Freelance — Twitch",
+    "categories": ["branding", "merch"],
+    "blurb": "Logos, overlays de stream y merchandising para creadores de contenido en Twitch: El Viejo Gamer, Laons Store, E-Spartans y más.",
+    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"]
+  },
+  {
+    "slug": "modelo-flyer",
+    "name": "Flyer",
+    "tagline": "Modelado 3D",
+    "categories": ["3d"],
+    "blurb": "Modelado y renderizado 3D — Flyer.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/898072c5485147908d1d2cc36d5b06ee/embed"
+  },
+  {
+    "slug": "modelo-ebike-matex",
+    "name": "E-Bike | Mate X",
+    "tagline": "Modelado 3D",
+    "categories": ["3d"],
+    "blurb": "Modelado y renderizado 3D de producto — E-Bike Mate X.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/bb9ecc553d964bd09a63f10304c66f65/embed"
+  },
+  {
+    "slug": "modelo-neceser-mcfit",
+    "name": "Neceser McFIT | SULEMA",
+    "tagline": "Modelado 3D de producto",
+    "categories": ["3d"],
+    "blurb": "Modelado y renderizado 3D de producto — Neceser McFIT para SULEMA.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/a8f97f97a92f486e80e97bdc029eb867/embed"
+  },
+  {
+    "slug": "modelo-oso-bruno",
+    "name": "Oso Bruno",
+    "tagline": "Modelado 3D — personaje",
+    "categories": ["3d"],
+    "blurb": "Modelado 3D de personaje — Oso Bruno.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/156429ad020b45ee89c48ad5fa8525ba/embed"
+  },
+  {
+    "slug": "modelo-fizzy",
+    "name": "Fizzy | Sweets y Geeks",
+    "tagline": "Modelado 3D de producto",
+    "categories": ["3d"],
+    "blurb": "Modelado y renderizado 3D de producto — Fizzy para Sweets y Geeks.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/a1a320eb631a479d9463be15cd106622/embed"
+  },
+  {
+    "slug": "modelo-anya-forger-1",
+    "name": "SPY×FAMILY — Anya Forger",
+    "tagline": "Modelado 3D — fan art",
+    "categories": ["3d"],
+    "blurb": "Modelado 3D de personaje — Anya Forger (SPY×FAMILY), fan art.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/be308b7e378545519d1d6ab5639f6360/embed"
+  },
+  {
+    "slug": "modelo-anya-forger-2",
+    "name": "SPY×FAMILY — Anya Forger (v2)",
+    "tagline": "Modelado 3D — fan art",
+    "categories": ["3d"],
+    "blurb": "Segunda versión del modelado 3D de Anya Forger (SPY×FAMILY), fan art.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/1a62776a4cea40e69276a9bfc23928ce/embed"
+  },
+  {
+    "slug": "modelo-anya",
+    "name": "Anya",
+    "tagline": "Modelado 3D — fan art",
+    "categories": ["3d"],
+    "blurb": "Modelado 3D de personaje — Anya, fan art.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/7b13b0dfd3474fadb168a6a7c355c2a9/embed"
+  },
+  {
+    "slug": "modelo-diorama-1",
+    "name": "Diorama",
+    "tagline": "Modelado 3D — escena",
+    "categories": ["3d"],
+    "blurb": "Diorama modelado y renderizado en 3D.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/4c3fdeb6c5684a9493b0a3216f6126e2/embed"
+  },
+  {
+    "slug": "modelo-diablo-1",
+    "name": "Diablo | How Not to Summon a Demon Lord",
+    "tagline": "Modelado 3D — fan art",
+    "categories": ["3d"],
+    "blurb": "Modelado 3D de personaje — Diablo (How Not to Summon a Demon Lord), fan art.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/d8ba23213d8646bc8f7bdda792f33a5c/embed"
+  },
+  {
+    "slug": "modelo-diorama-2",
+    "name": "Diorama (v2)",
+    "tagline": "Modelado 3D — escena",
+    "categories": ["3d"],
+    "blurb": "Segunda versión de diorama modelado y renderizado en 3D.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/c91ef951be044fb49a85be7633a583ed/embed"
+  },
+  {
+    "slug": "modelo-diablo-2",
+    "name": "Diablo | How Not to Summon a Demon Lord (v2)",
+    "tagline": "Modelado 3D — fan art",
+    "categories": ["3d"],
+    "blurb": "Segunda versión del modelado 3D de Diablo (How Not to Summon a Demon Lord), fan art.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/5e75df1fa2134055a73ba398a0b60ca8/embed"
+  },
+  {
+    "slug": "modelo-box",
+    "name": "Box modeling | high poly",
+    "tagline": "Modelado 3D — high poly",
+    "categories": ["3d"],
+    "blurb": "Ejercicio de modelado 3D high poly — caja.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/570f7fb8e87f49ed917ff81bdce08461/embed"
+  },
+  {
+    "slug": "modelo-varita",
+    "name": "Varita | How Not to Summon a Demon Lord",
+    "tagline": "Modelado 3D — fan art",
+    "categories": ["3d"],
+    "blurb": "Modelado 3D de prop — varita (How Not to Summon a Demon Lord), fan art.",
+    "images": ["cover.jpg"],
+    "sketchfab": "https://sketchfab.com/models/fd5e3ab8fa2a40079ed81868800ca554/embed"
   }
 ]

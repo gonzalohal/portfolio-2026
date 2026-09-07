@@ -28,6 +28,7 @@
     save: (file, data, message) => api("/api/save", { method: "POST", body: { file, data, message } }),
     upload: (path, dataUrl, message) => api("/api/upload", { method: "POST", body: { path, dataUrl, message } }),
     deleteAsset: (path, message) => api("/api/delete-asset", { method: "POST", body: { path, message } }),
+    blurImage: (path, message) => api("/api/blur-image", { method: "POST", body: { path, message } }),
   };
 
   function assetUrl(path) {
@@ -348,6 +349,17 @@
     const dataUrl = await fileToResizedDataUrl(file, maxWidth);
     setStatus("Subiendo imagen…", "");
     await API.upload(targetPath, dataUrl, "Actualizar " + targetPath + " desde el panel");
+    setStatus("Imagen subida ✓", "ok");
+    return targetPath;
+  }
+
+  async function uploadBlurredToPath(file, targetPath, maxWidth) {
+    const dataUrl = await fileToResizedDataUrl(file, maxWidth);
+    setStatus("Subiendo imagen difuminada…", "");
+    await api("/api/upload", {
+      method: "POST",
+      body: { path: targetPath, dataUrl, message: "Subir " + targetPath + " difuminada desde el panel", blur: true },
+    });
     setStatus("Imagen subida ✓", "ok");
     return targetPath;
   }
@@ -727,6 +739,7 @@
     { key: "grafica", label: "Gráfica & Redes" },
     { key: "audiovisual", label: "Audiovisual" },
     { key: "merch", label: "Merchandising & Señalética" },
+    { key: "3d", label: "Modelado 3D" },
   ];
 
   function renderTrabajos(container) {
@@ -860,6 +873,15 @@
     catField.appendChild(catWrap);
     panel.appendChild(catField);
 
+    panel.appendChild(
+      textField(
+        "Embed de Sketchfab (opcional, solo para modelado 3D)",
+        p.sketchfab,
+        (v) => { p.sketchfab = v; dirtyProjects = true; },
+        { placeholder: "https://sketchfab.com/models/<id>/embed" }
+      )
+    );
+
     const textOnlyRow = el("label", "checkbox-row");
     const textOnlyCb = document.createElement("input");
     textOnlyCb.type = "checkbox";
@@ -898,6 +920,13 @@
       panel.appendChild(pdfBtn);
     } else {
       panel.appendChild(el("h3", null, "Imágenes (la primera es la portada)"));
+      panel.appendChild(
+        el(
+          "p",
+          "hint",
+          "\"Difuminar\" reemplaza la imagen en el repositorio por una versión pixelada de forma permanente — no se puede deshacer desde el panel (no es solo un filtro visual, nadie puede recuperar la imagen original inspeccionando la página). Usalo para trabajos que no podés mostrar completos. Nota: si el repositorio es público, la versión original puede seguir existiendo en el historial de git de commits anteriores."
+        )
+      );
       const grid = el("div", "img-thumb-grid");
       p.images = p.images || [];
       p.images.forEach((imgName, idx) => {
@@ -916,6 +945,20 @@
           });
           ctrl.appendChild(makeCover);
         }
+        const blurThumb = btn("Difuminar", "", async () => {
+          if (!confirm('¿Difuminar esta imagen de forma PERMANENTE? Reemplaza el archivo en el repositorio — no se puede deshacer desde el panel.')) return;
+          try {
+            showLoading(true);
+            await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar imagen desde el panel");
+            setStatus("Imagen difuminada ✓", "ok");
+            renderActiveSection();
+          } catch (e) {
+            setStatus("Error: " + e.message, "err");
+          } finally {
+            showLoading(false);
+          }
+        });
+        ctrl.appendChild(blurThumb);
         const delThumb = btn("✕", "", async () => {
           if (!confirm("¿Eliminar esta imagen del repositorio?")) return;
           try {
@@ -939,11 +982,19 @@
       addThumb.addEventListener("click", async () => {
         const file = await pickFile("image/*");
         if (!file) return;
+        const wantsBlur = confirm(
+          "¿Subir esta imagen ya difuminada de forma permanente? (Aceptar = difuminada, Cancelar = normal)"
+        );
         try {
           showLoading(true);
           const ext = extFromFile(file);
           const name = nextImageName(p.images, ext);
-          await uploadToPath(file, "images/work/" + p.slug + "/" + name);
+          const targetPath = "images/work/" + p.slug + "/" + name;
+          if (wantsBlur) {
+            await uploadBlurredToPath(file, targetPath);
+          } else {
+            await uploadToPath(file, targetPath);
+          }
           p.images.push(name);
           dirtyProjects = true;
           renderActiveSection();

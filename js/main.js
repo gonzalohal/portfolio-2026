@@ -6,6 +6,7 @@
     grafica: "Gráfica & Redes",
     audiovisual: "Audiovisual",
     merch: "Merchandising & Señalética",
+    "3d": "Modelado 3D",
   };
 
   const $ = (id) => document.getElementById(id);
@@ -230,7 +231,6 @@
 
     /* modal / lightbox */
     const overlay = $("modalOverlay");
-    const modalHeroImg = $("modalHeroImg");
     const modalTag = $("modalTag");
     const modalTitle = $("modalTitle");
     const modalDesc = $("modalDesc");
@@ -245,15 +245,17 @@
       modalTitle.textContent = p.name;
       modalDesc.textContent = p.blurb;
 
-      if (p.textOnly) {
-        modalHeroImg.style.display = "none";
+      const modalHeroEl = document.querySelector(".modal-hero");
+      if (p.sketchfab) {
+        modalHeroEl.innerHTML = `<iframe title="${esc(p.name)}" src="${esc(p.sketchfab)}" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe>`;
+        modalStrip.innerHTML = "";
+      } else if (p.textOnly) {
+        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="" alt="" style="display:none">`;
         modalStrip.innerHTML = p.pdf
           ? `<a class="pdf-tile" href="${esc(p.pdf)}" target="_blank" rel="noopener">Ver presentación en PDF ↗</a>`
           : `<div class="pdf-tile">Material disponible a pedido</div>`;
       } else {
-        modalHeroImg.style.display = "";
-        modalHeroImg.src = `images/work/${p.slug}/${p.images[0]}`;
-        modalHeroImg.alt = p.name;
+        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="images/work/${p.slug}/${p.images[0]}" alt="${esc(p.name)}">`;
         modalStrip.innerHTML = p.images
           .slice(1)
           .map((img) => `<img src="images/work/${p.slug}/${img}" alt="${esc(p.name)}" loading="lazy">`)

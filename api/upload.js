@@ -1,12 +1,13 @@
 const { getSession } = require("../lib/auth");
 const { getFile, putFile } = require("../lib/github");
+const { redact } = require("../lib/redact");
 const sharp = require("sharp");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   if (!getSession(req)) return res.status(401).json({ error: "No autenticado" });
 
-  const { path: targetPath, dataUrl, message, skipResize } = req.body || {};
+  const { path: targetPath, dataUrl, message, skipResize, blur } = req.body || {};
   if (!targetPath || !dataUrl) return res.status(400).json({ error: "Faltan datos" });
   if (!/^images\//.test(targetPath) || targetPath.includes("..")) {
     return res.status(400).json({ error: "Ruta no permitida" });
@@ -20,7 +21,10 @@ module.exports = async (req, res) => {
 
     let outputBuffer = raw;
 
-    if (!skipResize && mime !== "image/svg+xml" && mime !== "application/pdf") {
+    if (blur && mime !== "image/svg+xml" && mime !== "application/pdf") {
+      // Permanently redact before this ever reaches the repo — the sharp version never gets committed.
+      outputBuffer = await redact(raw);
+    } else if (!skipResize && mime !== "image/svg+xml" && mime !== "application/pdf") {
       const isPng = /png/i.test(mime) || /\.png$/i.test(targetPath);
       let pipeline = sharp(raw, { failOn: "none" })
         .rotate()
