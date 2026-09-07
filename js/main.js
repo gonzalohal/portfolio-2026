@@ -223,11 +223,10 @@
   let visibleCount = PAGE_SIZE;
   let revealObserver = null;
 
-  function cardBody(p, label, blurred) {
+  function cardBody(p, label) {
     return `
-        <div class="work-thumb${blurred ? " work-thumb-blurred" : ""}">
+        <div class="work-thumb">
           <img src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}" loading="lazy">
-          ${blurred ? blurBadge() : ""}
         </div>
         <div class="work-body">
           <span class="tag">${esc(label)}</span>
@@ -251,9 +250,16 @@
         </article>`;
     }
     const locked = isLocked(p);
+    if (locked) {
+      return `
+      <article class="work-card reveal is-locked" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
+        <div class="work-card-inner">${cardBody(p, label)}</div>
+        ${blurBadge()}
+      </article>`;
+    }
     return `
-      <article class="work-card reveal${locked ? " is-locked" : ""}" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
-        ${cardBody(p, label, locked)}
+      <article class="work-card reveal" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
+        ${cardBody(p, label)}
       </article>`;
   }
 
