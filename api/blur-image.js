@@ -6,12 +6,21 @@ module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   if (!getSession(req)) return res.status(401).json({ error: "No autenticado" });
 
-  const { path: targetPath, message } = req.body || {};
+  const { path: targetPath, message, restore } = req.body || {};
   if (!targetPath || !/^images\//.test(targetPath) || targetPath.includes("..")) {
     return res.status(400).json({ error: "Ruta no permitida" });
   }
 
   try {
+    if (restore) {
+      const originalPath = hiddenOriginalPath(targetPath);
+      const original = await getRawFile(originalPath);
+      if (!original) return res.status(404).json({ error: "No hay original guardado para restaurar" });
+      const current = await getFile(targetPath);
+      const result = await putFile(targetPath, original, message || `Restaurar original de ${targetPath} desde el panel`, current ? current.sha : undefined);
+      return res.status(200).json({ ok: true, path: targetPath, restored: true, commit: result.commit && result.commit.sha });
+    }
+
     const current = await getFile(targetPath);
     if (!current) return res.status(404).json({ error: "La imagen no existe en el repositorio" });
 

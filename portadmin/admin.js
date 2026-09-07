@@ -29,6 +29,7 @@
     upload: (path, dataUrl, message) => api("/api/upload", { method: "POST", body: { path, dataUrl, message } }),
     deleteAsset: (path, message) => api("/api/delete-asset", { method: "POST", body: { path, message } }),
     blurImage: (path, message) => api("/api/blur-image", { method: "POST", body: { path, message } }),
+    restoreImage: (path, message) => api("/api/blur-image", { method: "POST", body: { path, message, restore: true } }),
     previewStatus: () => api("/api/preview"),
     previewGenerate: (hours) => api("/api/preview", { method: "POST", body: { hours } }),
     previewRevoke: () => api("/api/preview", { method: "DELETE" }),
@@ -384,6 +385,19 @@
     }
     if (count > 0) dirtyProjects = true;
     return { blurred: count };
+  }
+
+  async function restoreAllImagesOfProject(p, onProgress) {
+    if (!p.blurredImages || !p.blurredImages.length) return { restored: 0 };
+    let count = 0;
+    for (const imgName of [...p.blurredImages]) {
+      if (onProgress) onProgress(p, imgName);
+      await API.restoreImage("images/work/" + p.slug + "/" + imgName, "Restaurar " + imgName + " (" + p.name + ") desde el panel");
+      p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
+      count++;
+    }
+    if (count > 0) dirtyProjects = true;
+    return { restored: count };
   }
 
   function nextImageName(images, ext) {
@@ -912,7 +926,7 @@
         setStatus("No seleccionaste ningún trabajo", "err");
         return;
       }
-      if (!confirm("¿Difuminar TODAS las imágenes de " + selectedSlugs.size + " trabajo(s) seleccionados, de forma permanente? No se puede deshacer desde el panel.")) return;
+      if (!confirm("¿Difuminar TODAS las imágenes de " + selectedSlugs.size + " trabajo(s) seleccionados? (Podés restaurarlas después desde acá si te arrepentís.)")) return;
       try {
         showLoading(true);
         let total = 0;
@@ -932,9 +946,36 @@
     });
     bulkBlurBtn.disabled = true;
 
+    const bulkRestoreBtn = btn("Restaurar seleccionados (0)", "btn-sm", async () => {
+      if (selectedSlugs.size === 0) {
+        setStatus("No seleccionaste ningún trabajo", "err");
+        return;
+      }
+      if (!confirm("¿Restaurar las imágenes originales de " + selectedSlugs.size + " trabajo(s) seleccionados?")) return;
+      try {
+        showLoading(true);
+        let total = 0;
+        for (const slug of selectedSlugs) {
+          const proj = projects.find((x) => x.slug === slug);
+          if (!proj) continue;
+          const { restored } = await restoreAllImagesOfProject(proj, (pr, img) => setStatus("Restaurando " + pr.name + " — " + img + "…", ""));
+          total += restored;
+        }
+        setStatus(total + " imagen(es) restauradas ✓ — no olvides Guardar y publicar", "ok");
+        renderActiveSection();
+      } catch (e) {
+        setStatus("Error: " + e.message, "err");
+      } finally {
+        showLoading(false);
+      }
+    });
+    bulkRestoreBtn.disabled = true;
+
     function refreshBulkBtn() {
       bulkBlurBtn.textContent = "Difuminar seleccionados (" + selectedSlugs.size + ")";
       bulkBlurBtn.disabled = selectedSlugs.size === 0;
+      bulkRestoreBtn.textContent = "Restaurar seleccionados (" + selectedSlugs.size + ")";
+      bulkRestoreBtn.disabled = selectedSlugs.size === 0;
     }
 
     const selectAllBtn = btn("Seleccionar todo", "btn-sm", () => {
@@ -950,6 +991,7 @@
 
     bulkRow.appendChild(selectAllBtn);
     bulkRow.appendChild(bulkBlurBtn);
+    bulkRow.appendChild(bulkRestoreBtn);
     bulkRow.appendChild(
       btn("+ Nuevo trabajo", "btn-primary btn-sm", () => {
         const name = prompt("Nombre de la marca / proyecto:");
@@ -1023,14 +1065,32 @@
       });
       actions.appendChild(up);
       actions.appendChild(down);
+      const hasSomeBlurred = canBlur && (p.blurredImages || []).length > 0;
       if (canBlur && !allBlurred) {
         actions.appendChild(
           btn("Difuminar todo", "btn-sm", async () => {
-            if (!confirm('¿Difuminar TODAS las imágenes de "' + p.name + '" de forma permanente? No se puede deshacer desde el panel.')) return;
+            if (!confirm('¿Difuminar TODAS las imágenes de "' + p.name + '"? (Podés restaurarlas después desde acá si te arrepentís.)')) return;
             try {
               showLoading(true);
               const { blurred } = await blurAllImagesOfProject(p, (pr, img) => setStatus("Difuminando " + img + "…", ""));
               setStatus(blurred + " imagen(es) difuminada(s) en " + p.name + " ✓ — no olvides Guardar y publicar", "ok");
+              renderActiveSection();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+      }
+      if (hasSomeBlurred) {
+        actions.appendChild(
+          btn("Restaurar todo", "btn-sm", async () => {
+            if (!confirm('¿Restaurar las imágenes originales de "' + p.name + '"?')) return;
+            try {
+              showLoading(true);
+              const { restored } = await restoreAllImagesOfProject(p, (pr, img) => setStatus("Restaurando " + img + "…", ""));
+              setStatus(restored + " imagen(es) restaurada(s) en " + p.name + " ✓ — no olvides Guardar y publicar", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1149,7 +1209,7 @@
         el(
           "p",
           "hint",
-          "El botón \"Difuminar\" reemplaza la imagen en el repositorio por una versión con blur permanente (estilo vidrio esmerilado) — no es un filtro visual: la imagen nítida nunca se vuelve a subir, así que nadie puede recuperarla inspeccionando la página. En el sitio público se muestra con un cartel de \"" + UNLOCK_MSG + "\". No se puede deshacer desde el panel — si te equivocás, eliminá la imagen y subí de nuevo el original. Nota: si el repositorio es público, la versión original puede seguir existiendo en commits anteriores de git."
+          "El botón \"Difuminar\" reemplaza la imagen pública por una versión con blur (estilo vidrio esmerilado) — no es un filtro visual: nadie puede recuperar la nítida inspeccionando la página, porque el original queda guardado en una ruta oculta del repositorio en vez de la pública. En el sitio se muestra con un cartel de \"" + UNLOCK_MSG + "\". Podés volver atrás en cualquier momento con \"Restaurar original\". Nota: si el repositorio es público, la versión original puede seguir siendo accesible para alguien que revise el historial de commits de git — para ocultarla también ahí, pasá el repo a privado."
         )
       );
       p.images = p.images || [];
@@ -1184,13 +1244,31 @@
         if (!isBlurred) {
           actions.appendChild(
             btn("Difuminar", "btn-sm", async () => {
-              if (!confirm('¿Difuminar "' + imgName + '" de forma PERMANENTE? Reemplaza el archivo en el repositorio — no se puede deshacer desde el panel.')) return;
+              if (!confirm('¿Difuminar "' + imgName + '" de forma permanente en el sitio público? (Podés restaurarla después desde acá si te arrepentís.)')) return;
               try {
                 showLoading(true);
                 await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar imagen desde el panel");
                 p.blurredImages.push(imgName);
                 dirtyProjects = true;
                 setStatus("Imagen difuminada ✓ — no olvides Guardar y publicar para mostrar el cartel de desbloqueo", "ok");
+                renderActiveSection();
+              } catch (e) {
+                setStatus("Error: " + e.message, "err");
+              } finally {
+                showLoading(false);
+              }
+            })
+          );
+        } else {
+          actions.appendChild(
+            btn("Restaurar original", "btn-sm", async () => {
+              if (!confirm('¿Restaurar la versión original de "' + imgName + '"? Vuelve a mostrarse nítida en el sitio público.')) return;
+              try {
+                showLoading(true);
+                await API.restoreImage("images/work/" + p.slug + "/" + imgName, "Restaurar imagen desde el panel");
+                p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
+                dirtyProjects = true;
+                setStatus("Imagen restaurada ✓ — no olvides Guardar y publicar", "ok");
                 renderActiveSection();
               } catch (e) {
                 setStatus("Error: " + e.message, "err");
