@@ -15,7 +15,12 @@
       "04.jpg",
       "05.jpg"
     ],
-    "blurredImages": []
+    "blurredImages": [
+      "cover.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
+    ]
   },
   {
     "slug": "blackia",
@@ -33,7 +38,13 @@
       "04.jpg",
       "05.jpg"
     ],
-    "blurredImages": []
+    "blurredImages": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
+    ]
   },
   {
     "slug": "fundacion-maria-guadalupe",
@@ -50,7 +61,12 @@
       "03.png",
       "04.jpg"
     ],
-    "blurredImages": []
+    "blurredImages": [
+      "cover.jpg",
+      "02.png",
+      "03.png",
+      "04.jpg"
+    ]
   },
   {
     "slug": "gaia",
@@ -67,7 +83,12 @@
       "03.jpg",
       "04.jpg"
     ],
-    "blurredImages": []
+    "blurredImages": [
+      "cover.png",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
+    ]
   },
   {
     "slug": "gallion",
@@ -83,7 +104,9 @@
       "03.jpg",
       "04.jpg"
     ],
-    "blurredImages": []
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "mediline",
