@@ -29,9 +29,9 @@
     upload: (path, dataUrl, message) => api("/api/upload", { method: "POST", body: { path, dataUrl, message } }),
     deleteAsset: (path, message) => api("/api/delete-asset", { method: "POST", body: { path, message } }),
     blurImage: (path, message) => api("/api/blur-image", { method: "POST", body: { path, message } }),
-    previewStatus: () => api("/api/preview-status"),
-    previewGenerate: (hours) => api("/api/preview-generate", { method: "POST", body: { hours } }),
-    previewRevoke: () => api("/api/preview-revoke", { method: "POST" }),
+    previewStatus: () => api("/api/preview"),
+    previewGenerate: (hours) => api("/api/preview", { method: "POST", body: { hours } }),
+    previewRevoke: () => api("/api/preview", { method: "DELETE" }),
   };
 
   function assetUrl(path) {
