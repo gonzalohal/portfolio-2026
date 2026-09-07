@@ -23,7 +23,8 @@
   const PREVIEW = { token: null, valid: false };
 
   function isLocked(p) {
-    return (p.blurredImages || []).length > 0 && !PREVIEW.valid;
+    const cover = p.images && p.images[0];
+    return !!cover && (p.blurredImages || []).includes(cover) && !PREVIEW.valid;
   }
 
   function imgSrc(p, filename) {
@@ -222,9 +223,12 @@
   let visibleCount = PAGE_SIZE;
   let revealObserver = null;
 
-  function cardBody(p, label) {
+  function cardBody(p, label, blurred) {
     return `
-        <div class="work-thumb"><img src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}" loading="lazy"></div>
+        <div class="work-thumb${blurred ? " work-thumb-blurred" : ""}">
+          <img src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}" loading="lazy">
+          ${blurred ? blurBadge() : ""}
+        </div>
         <div class="work-body">
           <span class="tag">${esc(label)}</span>
           <h3>${esc(p.name)}</h3>
@@ -246,16 +250,10 @@
           </div>
         </article>`;
     }
-    if (isLocked(p)) {
-      return `
-      <article class="work-card reveal is-locked" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
-        <div class="work-card-inner">${cardBody(p, label)}</div>
-        ${blurBadge()}
-      </article>`;
-    }
+    const locked = isLocked(p);
     return `
-      <article class="work-card reveal" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
-        ${cardBody(p, label)}
+      <article class="work-card reveal${locked ? " is-locked" : ""}" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
+        ${cardBody(p, label, locked)}
       </article>`;
   }
 

@@ -415,7 +415,7 @@ section { padding: 100px var(--pad); }
 .work-card.is-hidden { display: none; }
 .work-card.is-locked { cursor: default; }
 .work-card.is-locked:hover { transform: none; box-shadow: none; }
-.work-card-inner { filter: blur(16px) saturate(1.1); pointer-events: none; user-select: none; }
+.work-thumb-blurred img { filter: blur(16px) saturate(1.1); pointer-events: none; user-select: none; }
 .work-thumb {
   position: relative;
   aspect-ratio: 4/3.1;

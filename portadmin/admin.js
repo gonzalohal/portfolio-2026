@@ -377,19 +377,16 @@
     dirtyProjects = false;
   }
 
-  async function blurAllImagesOfProject(p, onProgress) {
+  async function blurCoverImage(p, onProgress) {
     if (p.textOnly || !p.images || !p.images.length) return { blurred: 0 };
     p.blurredImages = p.blurredImages || [];
-    let count = 0;
-    for (const imgName of p.images) {
-      if (p.blurredImages.includes(imgName)) continue;
-      if (onProgress) onProgress(p, imgName);
-      await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar " + imgName + " (" + p.name + ") desde el panel");
-      p.blurredImages.push(imgName);
-      count++;
-    }
-    if (count > 0) dirtyProjects = true;
-    return { blurred: count };
+    const cover = p.images[0];
+    if (p.blurredImages.includes(cover)) return { blurred: 0 };
+    if (onProgress) onProgress(p, cover);
+    await API.blurImage("images/work/" + p.slug + "/" + cover, "Difuminar portada de " + p.name + " desde el panel");
+    p.blurredImages.push(cover);
+    dirtyProjects = true;
+    return { blurred: 1 };
   }
 
   async function restoreAllImagesOfProject(p, onProgress) {
@@ -928,24 +925,24 @@
 
     const blurableSlugs = () => projects.filter((p) => !p.textOnly && p.images && p.images.length).map((p) => p.slug);
 
-    const bulkBlurBtn = btn("Difuminar seleccionados (0)", "btn-sm btn-danger", async () => {
+    const bulkBlurBtn = btn("Bloquear seleccionados (0)", "btn-sm btn-danger", async () => {
       if (selectedSlugs.size === 0) {
         setStatus("No seleccionaste ningún trabajo", "err");
         return;
       }
-      if (!confirm("¿Difuminar TODAS las imágenes de " + selectedSlugs.size + " trabajo(s) seleccionados? (Podés restaurarlas después desde acá si te arrepentís.)")) return;
+      if (!confirm("¿Bloquear " + selectedSlugs.size + " trabajo(s) seleccionados? (Se difumina solo la portada, el resto de la galería queda inaccesible hasta que la desbloquees. Podés restaurarlos después desde acá.)")) return;
       try {
         showLoading(true);
         let total = 0;
         for (const slug of selectedSlugs) {
           const proj = projects.find((x) => x.slug === slug);
           if (!proj) continue;
-          const { blurred } = await blurAllImagesOfProject(proj, (pr, img) => showLoading(true, "Difuminando " + pr.name + " — " + img + "…"));
+          const { blurred } = await blurCoverImage(proj, (pr, img) => showLoading(true, "Difuminando portada de " + pr.name + "…"));
           total += blurred;
         }
         showLoading(true, "Publicando…");
-        await saveProjectsNow("Difuminar " + selectedSlugs.size + " trabajo(s) desde el panel");
-        setStatus(total + " imagen(es) difuminadas y publicadas ✓ — se actualiza el sitio en ~30-60s", "ok");
+        await saveProjectsNow("Bloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(total + " trabajo(s) bloqueados y publicados ✓ — se actualiza el sitio en ~30-60s", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -955,12 +952,12 @@
     });
     bulkBlurBtn.disabled = true;
 
-    const bulkRestoreBtn = btn("Restaurar seleccionados (0)", "btn-sm", async () => {
+    const bulkRestoreBtn = btn("Desbloquear seleccionados (0)", "btn-sm", async () => {
       if (selectedSlugs.size === 0) {
         setStatus("No seleccionaste ningún trabajo", "err");
         return;
       }
-      if (!confirm("¿Restaurar las imágenes originales de " + selectedSlugs.size + " trabajo(s) seleccionados?")) return;
+      if (!confirm("¿Desbloquear " + selectedSlugs.size + " trabajo(s) seleccionados y restaurar su portada original?")) return;
       try {
         showLoading(true);
         let total = 0;
@@ -971,8 +968,8 @@
           total += restored;
         }
         showLoading(true, "Publicando…");
-        await saveProjectsNow("Restaurar " + selectedSlugs.size + " trabajo(s) desde el panel");
-        setStatus(total + " imagen(es) restauradas y publicadas ✓ — se actualiza el sitio en ~30-60s", "ok");
+        await saveProjectsNow("Desbloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(total + " trabajo(s) desbloqueados y publicados ✓ — se actualiza el sitio en ~30-60s", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -983,9 +980,9 @@
     bulkRestoreBtn.disabled = true;
 
     function refreshBulkBtn() {
-      bulkBlurBtn.textContent = "Difuminar seleccionados (" + selectedSlugs.size + ")";
+      bulkBlurBtn.textContent = "Bloquear seleccionados (" + selectedSlugs.size + ")";
       bulkBlurBtn.disabled = selectedSlugs.size === 0;
-      bulkRestoreBtn.textContent = "Restaurar seleccionados (" + selectedSlugs.size + ")";
+      bulkRestoreBtn.textContent = "Desbloquear seleccionados (" + selectedSlugs.size + ")";
       bulkRestoreBtn.disabled = selectedSlugs.size === 0;
     }
 
@@ -1046,8 +1043,8 @@
         item.appendChild(img);
       }
       const info = el("div", "wk-info");
-      const allBlurred = canBlur && p.images.every((f) => (p.blurredImages || []).includes(f));
-      info.appendChild(el("strong", null, p.name + (allBlurred ? " · Difuminado 🔒" : "")));
+      const coverBlurred = canBlur && (p.blurredImages || []).includes(p.images[0]);
+      info.appendChild(el("strong", null, p.name + (coverBlurred ? " · Bloqueado 🔒" : "")));
       info.appendChild(el("span", null, p.tagline || p.slug));
       item.appendChild(info);
 
@@ -1077,16 +1074,16 @@
       actions.appendChild(up);
       actions.appendChild(down);
       const hasSomeBlurred = canBlur && (p.blurredImages || []).length > 0;
-      if (canBlur && !allBlurred) {
+      if (canBlur && !coverBlurred) {
         actions.appendChild(
-          btn("Difuminar todo", "btn-sm", async () => {
-            if (!confirm('¿Difuminar TODAS las imágenes de "' + p.name + '"? (Podés restaurarlas después desde acá si te arrepentís.)')) return;
+          btn("Bloquear (difuminar portada)", "btn-sm", async () => {
+            if (!confirm('¿Bloquear "' + p.name + '"? Se difumina solo la portada y no se va a poder abrir la galería hasta que lo desbloquees. (Podés restaurarlo después desde acá.)')) return;
             try {
               showLoading(true);
-              const { blurred } = await blurAllImagesOfProject(p, (pr, img) => showLoading(true, "Difuminando " + img + "…"));
+              const { blurred } = await blurCoverImage(p, (pr, img) => showLoading(true, "Difuminando portada…"));
               showLoading(true, "Publicando…");
-              await saveProjectsNow("Difuminar " + p.name + " desde el panel");
-              setStatus(blurred + " imagen(es) difuminada(s) y publicadas en " + p.name + " ✓ — se actualiza el sitio en ~30-60s", "ok");
+              await saveProjectsNow("Bloquear " + p.name + " desde el panel");
+              setStatus((blurred ? "Portada difuminada y " : "") + p.name + " bloqueado y publicado ✓ — se actualiza el sitio en ~30-60s", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1098,14 +1095,14 @@
       }
       if (hasSomeBlurred) {
         actions.appendChild(
-          btn("Restaurar todo", "btn-sm", async () => {
-            if (!confirm('¿Restaurar las imágenes originales de "' + p.name + '"?')) return;
+          btn("Desbloquear", "btn-sm", async () => {
+            if (!confirm('¿Desbloquear "' + p.name + '" y restaurar su portada original?')) return;
             try {
               showLoading(true);
               const { restored } = await restoreAllImagesOfProject(p, (pr, img) => showLoading(true, "Restaurando " + img + "…"));
               showLoading(true, "Publicando…");
-              await saveProjectsNow("Restaurar " + p.name + " desde el panel");
-              setStatus(restored + " imagen(es) restaurada(s) y publicadas en " + p.name + " ✓ — se actualiza el sitio en ~30-60s", "ok");
+              await saveProjectsNow("Desbloquear " + p.name + " desde el panel");
+              setStatus(p.name + " desbloqueado y publicado ✓ (" + restored + " imagen(es) restaurada(s)) — se actualiza el sitio en ~30-60s", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1224,7 +1221,7 @@
         el(
           "p",
           "hint",
-          "El botón \"Difuminar\" reemplaza la imagen pública por una versión con blur (estilo vidrio esmerilado) — no es un filtro visual: nadie puede recuperar la nítida inspeccionando la página, porque el original queda guardado en una ruta oculta del repositorio en vez de la pública. En el sitio se muestra con un cartel de \"" + UNLOCK_MSG + "\". Se publica solo, sin necesidad de tocar \"Guardar y publicar\". Podés volver atrás en cualquier momento con \"Restaurar original\". Nota: si el repositorio es público, la versión original puede seguir siendo accesible para alguien que revise el historial de commits de git — para ocultarla también ahí, pasá el repo a privado."
+          "El botón \"Difuminar\" reemplaza la imagen pública por una versión con blur (estilo vidrio esmerilado) — no es un filtro visual: nadie puede recuperar la nítida inspeccionando la página, porque el original queda guardado en una ruta oculta del repositorio en vez de la pública. Si difuminás la PORTADA, la card queda bloqueada en el sitio (no se puede abrir la galería) con un cartel de \"" + UNLOCK_MSG + "\" — esto es lo que hacen \"Bloquear\" / \"Bloquear seleccionados\" en el listado. Difuminar otra imagen que no sea la portada solo la redacta a ella, sin bloquear la card. Se publica solo, sin necesidad de tocar \"Guardar y publicar\". Podés volver atrás en cualquier momento con \"Restaurar original\". Nota: si el repositorio es público, la versión original puede seguir siendo accesible para alguien que revise el historial de commits de git — para ocultarla también ahí, pasá el repo a privado."
         )
       );
       p.images = p.images || [];
