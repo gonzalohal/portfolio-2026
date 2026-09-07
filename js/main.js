@@ -12,6 +12,13 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+  const LOCK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  const UNLOCK_MSG = "Desbloqueá en la entrevista";
+
+  function blurBadge() {
+    return `<div class="blur-badge"><span class="pill">${LOCK_ICON}${esc(UNLOCK_MSG)}</span></div>`;
+  }
+
   let PROJECTS = [];
 
   /* ================= THEME ================= */
@@ -195,9 +202,10 @@
           </div>
         </article>`;
     }
+    const coverBlurred = (p.blurredImages || []).includes(p.images[0]);
     return `
       <article class="work-card reveal" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
-        <div class="work-thumb"><img src="images/work/${p.slug}/${p.images[0]}" alt="${esc(p.name)}" loading="lazy"></div>
+        <div class="work-thumb"><img src="images/work/${p.slug}/${p.images[0]}" alt="${esc(p.name)}" loading="lazy">${coverBlurred ? blurBadge() : ""}</div>
         <div class="work-body">
           <span class="tag">${esc(label)}</span>
           <h3>${esc(p.name)}</h3>
@@ -255,10 +263,15 @@
           ? `<a class="pdf-tile" href="${esc(p.pdf)}" target="_blank" rel="noopener">Ver presentación en PDF ↗</a>`
           : `<div class="pdf-tile">Material disponible a pedido</div>`;
       } else {
-        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="images/work/${p.slug}/${p.images[0]}" alt="${esc(p.name)}">`;
+        const blurredSet = p.blurredImages || [];
+        const heroBlurred = blurredSet.includes(p.images[0]);
+        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="images/work/${p.slug}/${p.images[0]}" alt="${esc(p.name)}">${heroBlurred ? blurBadge() : ""}`;
         modalStrip.innerHTML = p.images
           .slice(1)
-          .map((img) => `<img src="images/work/${p.slug}/${img}" alt="${esc(p.name)}" loading="lazy">`)
+          .map((img) => {
+            const isBlurred = blurredSet.includes(img);
+            return `<div class="img-wrap"><img src="images/work/${p.slug}/${img}" alt="${esc(p.name)}" loading="lazy">${isBlurred ? blurBadge() : ""}</div>`;
+          })
           .join("");
       }
 

@@ -35,6 +35,8 @@
     return "/" + String(path).replace(/^\/+/, "");
   }
 
+  const UNLOCK_MSG = "Desbloqueá en la entrevista";
+
   /* ============================================================
      State
      ============================================================ */
@@ -924,88 +926,107 @@
         el(
           "p",
           "hint",
-          "\"Difuminar\" reemplaza la imagen en el repositorio por una versión pixelada de forma permanente — no se puede deshacer desde el panel (no es solo un filtro visual, nadie puede recuperar la imagen original inspeccionando la página). Usalo para trabajos que no podés mostrar completos. Nota: si el repositorio es público, la versión original puede seguir existiendo en el historial de git de commits anteriores."
+          "El botón \"Difuminar\" reemplaza la imagen en el repositorio por una versión con blur permanente (estilo vidrio esmerilado) — no es un filtro visual: la imagen nítida nunca se vuelve a subir, así que nadie puede recuperarla inspeccionando la página. En el sitio público se muestra con un cartel de \"" + UNLOCK_MSG + "\". No se puede deshacer desde el panel — si te equivocás, eliminá la imagen y subí de nuevo el original. Nota: si el repositorio es público, la versión original puede seguir existiendo en commits anteriores de git."
         )
       );
-      const grid = el("div", "img-thumb-grid");
       p.images = p.images || [];
+      p.blurredImages = p.blurredImages || [];
+      const list = el("div", "wk-list");
       p.images.forEach((imgName, idx) => {
-        const thumb = el("div", "img-thumb");
+        const isBlurred = p.blurredImages.includes(imgName);
+        const row = el("div", "wk-item");
         const img = document.createElement("img");
         img.src = assetUrl("images/work/" + p.slug + "/" + imgName) + "?v=" + Date.now();
-        thumb.appendChild(img);
-        if (idx === 0) thumb.appendChild(el("span", "cover-badge", "Portada"));
-        const ctrl = el("div", "thumb-ctrl");
-        if (idx !== 0) {
-          const makeCover = btn("★", "", () => {
-            p.images.splice(idx, 1);
-            p.images.unshift(imgName);
-            dirtyProjects = true;
-            renderActiveSection();
-          });
-          ctrl.appendChild(makeCover);
-        }
-        const blurThumb = btn("Difuminar", "", async () => {
-          if (!confirm('¿Difuminar esta imagen de forma PERMANENTE? Reemplaza el archivo en el repositorio — no se puede deshacer desde el panel.')) return;
-          try {
-            showLoading(true);
-            await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar imagen desde el panel");
-            setStatus("Imagen difuminada ✓", "ok");
-            renderActiveSection();
-          } catch (e) {
-            setStatus("Error: " + e.message, "err");
-          } finally {
-            showLoading(false);
-          }
-        });
-        ctrl.appendChild(blurThumb);
-        const delThumb = btn("✕", "", async () => {
-          if (!confirm("¿Eliminar esta imagen del repositorio?")) return;
-          try {
-            showLoading(true);
-            await API.deleteAsset("images/work/" + p.slug + "/" + imgName);
-            p.images.splice(idx, 1);
-            dirtyProjects = true;
-            renderActiveSection();
-          } catch (e) {
-            setStatus("Error: " + e.message, "err");
-          } finally {
-            showLoading(false);
-          }
-        });
-        ctrl.appendChild(delThumb);
-        thumb.appendChild(ctrl);
-        grid.appendChild(thumb);
-      });
+        row.appendChild(img);
 
-      const addThumb = el("div", "img-thumb is-add", "+");
-      addThumb.addEventListener("click", async () => {
-        const file = await pickFile("image/*");
-        if (!file) return;
-        const wantsBlur = confirm(
-          "¿Subir esta imagen ya difuminada de forma permanente? (Aceptar = difuminada, Cancelar = normal)"
-        );
-        try {
-          showLoading(true);
-          const ext = extFromFile(file);
-          const name = nextImageName(p.images, ext);
-          const targetPath = "images/work/" + p.slug + "/" + name;
-          if (wantsBlur) {
-            await uploadBlurredToPath(file, targetPath);
-          } else {
-            await uploadToPath(file, targetPath);
-          }
-          p.images.push(name);
-          dirtyProjects = true;
-          renderActiveSection();
-        } catch (e) {
-          setStatus("Error: " + e.message, "err");
-        } finally {
-          showLoading(false);
+        const info = el("div", "wk-info");
+        const badges = [];
+        if (idx === 0) badges.push("Portada");
+        if (isBlurred) badges.push("Difuminada 🔒");
+        info.appendChild(el("strong", null, imgName));
+        info.appendChild(el("span", null, badges.join(" · ") || "—"));
+        row.appendChild(info);
+
+        const actions = el("div", "wk-actions");
+        if (idx !== 0) {
+          actions.appendChild(
+            btn("Hacer portada", "btn-sm", () => {
+              p.images.splice(idx, 1);
+              p.images.unshift(imgName);
+              dirtyProjects = true;
+              renderActiveSection();
+            })
+          );
         }
+        if (!isBlurred) {
+          actions.appendChild(
+            btn("Difuminar", "btn-sm", async () => {
+              if (!confirm('¿Difuminar "' + imgName + '" de forma PERMANENTE? Reemplaza el archivo en el repositorio — no se puede deshacer desde el panel.')) return;
+              try {
+                showLoading(true);
+                await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar imagen desde el panel");
+                p.blurredImages.push(imgName);
+                dirtyProjects = true;
+                setStatus("Imagen difuminada ✓ — no olvides Guardar y publicar para mostrar el cartel de desbloqueo", "ok");
+                renderActiveSection();
+              } catch (e) {
+                setStatus("Error: " + e.message, "err");
+              } finally {
+                showLoading(false);
+              }
+            })
+          );
+        }
+        actions.appendChild(
+          btn("Eliminar", "btn-sm btn-danger", async () => {
+            if (!confirm('¿Eliminar "' + imgName + '" del repositorio?')) return;
+            try {
+              showLoading(true);
+              await API.deleteAsset("images/work/" + p.slug + "/" + imgName);
+              p.images.splice(idx, 1);
+              p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
+              dirtyProjects = true;
+              renderActiveSection();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+        row.appendChild(actions);
+        list.appendChild(row);
       });
-      grid.appendChild(addThumb);
-      panel.appendChild(grid);
+      panel.appendChild(list);
+
+      panel.appendChild(
+        btn("+ Agregar imagen", "btn-primary btn-sm", async () => {
+          const file = await pickFile("image/*");
+          if (!file) return;
+          const wantsBlur = confirm(
+            "¿Subir esta imagen ya difuminada de forma permanente? (Aceptar = difuminada, Cancelar = normal)"
+          );
+          try {
+            showLoading(true);
+            const ext = extFromFile(file);
+            const name = nextImageName(p.images, ext);
+            const targetPath = "images/work/" + p.slug + "/" + name;
+            if (wantsBlur) {
+              await uploadBlurredToPath(file, targetPath);
+              p.blurredImages.push(name);
+            } else {
+              await uploadToPath(file, targetPath);
+            }
+            p.images.push(name);
+            dirtyProjects = true;
+            renderActiveSection();
+          } catch (e) {
+            setStatus("Error: " + e.message, "err");
+          } finally {
+            showLoading(false);
+          }
+        })
+      );
     }
 
     return panel;
