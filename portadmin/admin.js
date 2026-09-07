@@ -440,8 +440,10 @@
     if (kind === "ok") statusTimer = setTimeout(() => (elm.textContent = ""), 4000);
   }
 
-  function showLoading(v) {
-    $("overlayLoading").classList.toggle("is-visible", !!v);
+  function showLoading(v, msg) {
+    const el = $("overlayLoading");
+    el.classList.toggle("is-visible", !!v);
+    el.textContent = v ? msg || "Cargando…" : "Cargando…";
   }
 
   /* ============================================================
@@ -933,7 +935,7 @@
         for (const slug of selectedSlugs) {
           const proj = projects.find((x) => x.slug === slug);
           if (!proj) continue;
-          const { blurred } = await blurAllImagesOfProject(proj, (pr, img) => setStatus("Difuminando " + pr.name + " — " + img + "…", ""));
+          const { blurred } = await blurAllImagesOfProject(proj, (pr, img) => showLoading(true, "Difuminando " + pr.name + " — " + img + "…"));
           total += blurred;
         }
         setStatus(total + " imagen(es) difuminadas ✓ — no olvides Guardar y publicar", "ok");
@@ -958,7 +960,7 @@
         for (const slug of selectedSlugs) {
           const proj = projects.find((x) => x.slug === slug);
           if (!proj) continue;
-          const { restored } = await restoreAllImagesOfProject(proj, (pr, img) => setStatus("Restaurando " + pr.name + " — " + img + "…", ""));
+          const { restored } = await restoreAllImagesOfProject(proj, (pr, img) => showLoading(true, "Restaurando " + pr.name + " — " + img + "…"));
           total += restored;
         }
         setStatus(total + " imagen(es) restauradas ✓ — no olvides Guardar y publicar", "ok");
@@ -1072,7 +1074,7 @@
             if (!confirm('¿Difuminar TODAS las imágenes de "' + p.name + '"? (Podés restaurarlas después desde acá si te arrepentís.)')) return;
             try {
               showLoading(true);
-              const { blurred } = await blurAllImagesOfProject(p, (pr, img) => setStatus("Difuminando " + img + "…", ""));
+              const { blurred } = await blurAllImagesOfProject(p, (pr, img) => showLoading(true, "Difuminando " + img + "…"));
               setStatus(blurred + " imagen(es) difuminada(s) en " + p.name + " ✓ — no olvides Guardar y publicar", "ok");
               renderActiveSection();
             } catch (e) {
@@ -1089,7 +1091,7 @@
             if (!confirm('¿Restaurar las imágenes originales de "' + p.name + '"?')) return;
             try {
               showLoading(true);
-              const { restored } = await restoreAllImagesOfProject(p, (pr, img) => setStatus("Restaurando " + img + "…", ""));
+              const { restored } = await restoreAllImagesOfProject(p, (pr, img) => showLoading(true, "Restaurando " + img + "…"));
               setStatus(restored + " imagen(es) restaurada(s) en " + p.name + " ✓ — no olvides Guardar y publicar", "ok");
               renderActiveSection();
             } catch (e) {
