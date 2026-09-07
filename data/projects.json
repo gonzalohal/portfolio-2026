@@ -14,6 +14,12 @@
       "03.jpg",
       "04.jpg",
       "05.jpg"
+    ],
+    "blurredImages": [
+      "cover.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
     ]
   },
   {
@@ -26,6 +32,13 @@
     ],
     "blurb": "Identidad, portadas de podcast y miniaturas de video para Blackia, proyecto de contenido con video generado por inteligencia artificial.",
     "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg",
       "03.jpg",
@@ -47,6 +60,12 @@
       "02.png",
       "03.png",
       "04.jpg"
+    ],
+    "blurredImages": [
+      "cover.jpg",
+      "02.png",
+      "03.png",
+      "04.jpg"
     ]
   },
   {
@@ -63,6 +82,12 @@
       "02.jpg",
       "03.jpg",
       "04.jpg"
+    ],
+    "blurredImages": [
+      "cover.png",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
     ]
   },
   {
@@ -74,6 +99,12 @@
     ],
     "blurb": "Identidad corporativa y arquitectura de marca del holding y las empresas que lo integran.",
     "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg",
       "03.jpg",
@@ -94,6 +125,12 @@
       "02.jpg",
       "03.jpg",
       "04.jpg"
+    ],
+    "blurredImages": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
     ]
   },
   {
@@ -110,6 +147,12 @@
       "02.png",
       "03.png",
       "04.jpg"
+    ],
+    "blurredImages": [
+      "cover.png",
+      "02.png",
+      "03.png",
+      "04.jpg"
     ]
   },
   {
@@ -121,6 +164,12 @@
     ],
     "blurb": "Identidad de marca y presentación institucional de Pipay.",
     "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.png",
+      "04.png"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg",
       "03.png",
@@ -142,6 +191,13 @@
       "03.jpg",
       "04.jpg",
       "05.png"
+    ],
+    "blurredImages": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.png"
     ]
   },
   {
@@ -153,6 +209,11 @@
     ],
     "blurb": "Arquitectura de marca y sub-marcas — Hogar, Auto, Moto y Comercio — para Segu.",
     "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.png"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg",
       "03.png"
@@ -168,6 +229,12 @@
     ],
     "blurb": "Identidad, planes y campañas de redes sociales para TeleVet, veterinaria online.",
     "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg",
       "03.jpg",
@@ -189,6 +256,13 @@
       "03.jpg",
       "04.jpg",
       "05.jpg"
+    ],
+    "blurredImages": [
+      "cover.jpg",
+      "02.png",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
     ]
   },
   {
@@ -200,6 +274,11 @@
     ],
     "blurb": "Identidad visual para Vedi, broker digital de seguros.",
     "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg",
       "03.jpg"
@@ -215,6 +294,11 @@
     ],
     "blurb": "Señalética, ploteo de local y render de espacio para Yumak.",
     "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg",
       "03.jpg"
@@ -255,7 +339,8 @@
       "02.jpg"
     ],
     "blurredImages": [
-      "cover.jpg"
+      "cover.jpg",
+      "02.jpg"
     ]
   },
   {
@@ -268,6 +353,10 @@
     ],
     "blurb": "Piezas institucionales para Travel Express: pendones, stand, trípticos y material de campaña para peregrinaciones y viajes grupales.",
     "images": [
+      "cover.jpg",
+      "02.jpg"
+    ],
+    "blurredImages": [
       "cover.jpg",
       "02.jpg"
     ]
@@ -287,6 +376,13 @@
       "03.jpg",
       "04.jpg",
       "05.jpg"
+    ],
+    "blurredImages": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
     ]
   },
   {
@@ -300,7 +396,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/898072c5485147908d1d2cc36d5b06ee/embed"
+    "sketchfab": "https://sketchfab.com/models/898072c5485147908d1d2cc36d5b06ee/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-ebike-matex",
@@ -313,7 +412,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/bb9ecc553d964bd09a63f10304c66f65/embed"
+    "sketchfab": "https://sketchfab.com/models/bb9ecc553d964bd09a63f10304c66f65/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-neceser-mcfit",
@@ -326,7 +428,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/a8f97f97a92f486e80e97bdc029eb867/embed"
+    "sketchfab": "https://sketchfab.com/models/a8f97f97a92f486e80e97bdc029eb867/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-oso-bruno",
@@ -339,7 +444,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/156429ad020b45ee89c48ad5fa8525ba/embed"
+    "sketchfab": "https://sketchfab.com/models/156429ad020b45ee89c48ad5fa8525ba/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-fizzy",
@@ -352,7 +460,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/a1a320eb631a479d9463be15cd106622/embed"
+    "sketchfab": "https://sketchfab.com/models/a1a320eb631a479d9463be15cd106622/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-anya-forger-1",
@@ -365,7 +476,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/be308b7e378545519d1d6ab5639f6360/embed"
+    "sketchfab": "https://sketchfab.com/models/be308b7e378545519d1d6ab5639f6360/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-anya-forger-2",
@@ -378,7 +492,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/1a62776a4cea40e69276a9bfc23928ce/embed"
+    "sketchfab": "https://sketchfab.com/models/1a62776a4cea40e69276a9bfc23928ce/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-anya",
@@ -391,7 +508,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/7b13b0dfd3474fadb168a6a7c355c2a9/embed"
+    "sketchfab": "https://sketchfab.com/models/7b13b0dfd3474fadb168a6a7c355c2a9/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-diorama-1",
@@ -404,7 +524,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/4c3fdeb6c5684a9493b0a3216f6126e2/embed"
+    "sketchfab": "https://sketchfab.com/models/4c3fdeb6c5684a9493b0a3216f6126e2/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-diablo-1",
@@ -417,7 +540,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/d8ba23213d8646bc8f7bdda792f33a5c/embed"
+    "sketchfab": "https://sketchfab.com/models/d8ba23213d8646bc8f7bdda792f33a5c/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-diorama-2",
@@ -430,7 +556,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/c91ef951be044fb49a85be7633a583ed/embed"
+    "sketchfab": "https://sketchfab.com/models/c91ef951be044fb49a85be7633a583ed/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-diablo-2",
@@ -443,7 +572,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/5e75df1fa2134055a73ba398a0b60ca8/embed"
+    "sketchfab": "https://sketchfab.com/models/5e75df1fa2134055a73ba398a0b60ca8/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-box",
@@ -456,7 +588,10 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/570f7fb8e87f49ed917ff81bdce08461/embed"
+    "sketchfab": "https://sketchfab.com/models/570f7fb8e87f49ed917ff81bdce08461/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "modelo-varita",
@@ -469,6 +604,9 @@
     "images": [
       "cover.jpg"
     ],
-    "sketchfab": "https://sketchfab.com/models/fd5e3ab8fa2a40079ed81868800ca554/embed"
+    "sketchfab": "https://sketchfab.com/models/fd5e3ab8fa2a40079ed81868800ca554/embed",
+    "blurredImages": [
+      "cover.jpg"
+    ]
   }
 ]
