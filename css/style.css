@@ -414,8 +414,7 @@ section { padding: 100px var(--pad); }
 .work-card.is-hidden { display: none; }
 .work-card.is-locked { cursor: default; }
 .work-card.is-locked:hover { transform: none; box-shadow: none; }
-.work-card.is-locked .work-thumb img { filter: saturate(0.9); }
-.work-card.is-locked:hover .work-thumb img { transform: none; }
+.work-card-inner { filter: blur(16px) saturate(1.1); pointer-events: none; user-select: none; }
 .work-thumb {
   position: relative;
   aspect-ratio: 4/3.1;
@@ -452,9 +451,6 @@ section { padding: 100px var(--pad); }
   white-space: nowrap;
 }
 .blur-badge svg { width: 14px; height: 14px; flex: none; }
-.modal-strip .img-wrap { position: relative; border-radius: var(--radius-sm); overflow: hidden; }
-.modal-strip .img-wrap img { width: 100%; height: 100%; display: block; }
-.modal-strip .img-wrap .blur-badge .pill { padding: 8px 14px; font-size: 12px; }
 .work-card.is-textonly .work-thumb {
   display: flex;
   align-items: center;
@@ -611,14 +607,13 @@ footer {
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
-.modal-strip img, .modal-strip .pdf-tile, .modal-strip .img-wrap {
+.modal-strip img, .modal-strip .pdf-tile {
   border-radius: var(--radius-sm);
   width: 100%;
   aspect-ratio: 1/0.85;
   object-fit: cover;
   background: var(--bg-alt);
 }
-.modal-strip .img-wrap img { aspect-ratio: auto; border-radius: 0; }
 .pdf-tile {
   display: flex;
   align-items: center;
@@ -651,10 +646,24 @@ footer {
   section { padding: 70px var(--pad); }
   .about { padding: 56px 22px; border-radius: 22px; }
   .services-grid { grid-template-columns: 1fr; }
-  .work-grid { grid-template-columns: 1fr; }
   .hero-meta { gap: 26px; }
   .about-facts { grid-template-columns: 1fr; }
   .contact { padding: 64px 22px; }
   .timeline-item { grid-template-columns: 1fr; gap: 6px; }
   .nav { padding: 8px 8px 8px 18px; }
+
+  .work-filters { gap: 8px; }
+  .filter-btn { padding: 8px 14px; font-size: 12px; }
+  .work-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .work-thumb { aspect-ratio: 1/1; }
+  .work-body { padding: 12px 12px 14px; }
+  .work-body .tag { font-size: 10px; }
+  .work-body h3 { font-size: 14px; margin-top: 4px; }
+  .work-body p { font-size: 11px; margin-top: 3px; }
+  .blur-badge .pill { padding: 7px 12px; font-size: 10px; gap: 5px; }
+  .blur-badge svg { width: 11px; height: 11px; }
+}
+
+@media (max-width: 340px) {
+  .work-grid { grid-template-columns: 1fr; }
 }

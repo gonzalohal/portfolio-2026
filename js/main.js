@@ -217,6 +217,21 @@
   }
 
   /* ================= WORK GRID ================= */
+  const PAGE_SIZE = 6;
+  let currentFilter = "all";
+  let visibleCount = PAGE_SIZE;
+  let revealObserver = null;
+
+  function cardBody(p, label) {
+    return `
+        <div class="work-thumb"><img src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}" loading="lazy"></div>
+        <div class="work-body">
+          <span class="tag">${esc(label)}</span>
+          <h3>${esc(p.name)}</h3>
+          <p>${esc(p.tagline)}</p>
+        </div>`;
+  }
+
   function cardMarkup(p) {
     const cat = p.categories[0];
     const label = CATEGORY_LABELS[cat] || "";
@@ -231,23 +246,36 @@
           </div>
         </article>`;
     }
-    const locked = isLocked(p);
-    const coverBlurred = (p.blurredImages || []).includes(p.images[0]) && !PREVIEW.valid;
+    if (isLocked(p)) {
+      return `
+      <article class="work-card reveal is-locked" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
+        <div class="work-card-inner">${cardBody(p, label)}</div>
+        ${blurBadge()}
+      </article>`;
+    }
     return `
-      <article class="work-card reveal${locked ? " is-locked" : ""}" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
-        <div class="work-thumb"><img src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}" loading="lazy">${coverBlurred ? blurBadge() : ""}</div>
-        <div class="work-body">
-          <span class="tag">${esc(label)}</span>
-          <h3>${esc(p.name)}</h3>
-          <p>${esc(p.tagline)}</p>
-        </div>
+      <article class="work-card reveal" data-slug="${p.slug}" data-categories="${p.categories.join(" ")}">
+        ${cardBody(p, label)}
       </article>`;
   }
 
-  function renderWork(projects) {
+  function filteredProjects() {
+    return currentFilter === "all" ? PROJECTS : PROJECTS.filter((p) => p.categories.includes(currentFilter));
+  }
+
+  function renderWork() {
     const grid = $("workGrid");
     if (!grid) return;
-    grid.innerHTML = projects.map(cardMarkup).join("");
+    const all = filteredProjects();
+    const visible = all.slice(0, visibleCount);
+    grid.innerHTML = visible.map(cardMarkup).join("");
+
+    const moreWrap = $("workMore");
+    if (moreWrap) moreWrap.hidden = visibleCount >= all.length;
+
+    if (revealObserver) {
+      grid.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
+    }
   }
 
   /* ================= INTERACTIONS (bound once) ================= */
@@ -258,14 +286,20 @@
       btn.addEventListener("click", () => {
         filterBtns.forEach((b) => b.classList.remove("is-active"));
         btn.classList.add("is-active");
-        const filter = btn.dataset.filter;
-        document.querySelectorAll(".work-card").forEach((card) => {
-          const cats = card.dataset.categories.split(" ");
-          const show = filter === "all" || cats.includes(filter);
-          card.classList.toggle("is-hidden", !show);
-        });
+        currentFilter = btn.dataset.filter;
+        visibleCount = PAGE_SIZE;
+        renderWork();
       });
     });
+
+    /* ver más */
+    const moreBtn = $("workMoreBtn");
+    if (moreBtn) {
+      moreBtn.addEventListener("click", () => {
+        visibleCount += PAGE_SIZE;
+        renderWork();
+      });
+    }
 
     /* modal / lightbox */
     const overlay = $("modalOverlay");
@@ -293,15 +327,12 @@
           ? `<a class="pdf-tile" href="${esc(p.pdf)}" target="_blank" rel="noopener">Ver presentación en PDF ↗</a>`
           : `<div class="pdf-tile">Material disponible a pedido</div>`;
       } else {
-        const blurredSet = p.blurredImages || [];
-        const heroBlurred = blurredSet.includes(p.images[0]) && !PREVIEW.valid;
-        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}">${heroBlurred ? blurBadge() : ""}`;
+        // openModal already returns early when isLocked(p), so any blurred image reachable
+        // here is being shown because a valid preview token unlocked it — never render badges.
+        modalHeroEl.innerHTML = `<img id="modalHeroImg" src="${imgSrc(p, p.images[0])}" alt="${esc(p.name)}">`;
         modalStrip.innerHTML = p.images
           .slice(1)
-          .map((img) => {
-            const isBlurred = blurredSet.includes(img) && !PREVIEW.valid;
-            return `<div class="img-wrap"><img src="${imgSrc(p, img)}" alt="${esc(p.name)}" loading="lazy">${isBlurred ? blurBadge() : ""}</div>`;
-          })
+          .map((img) => `<img src="${imgSrc(p, img)}" alt="${esc(p.name)}" loading="lazy">`)
           .join("");
       }
 
@@ -341,18 +372,18 @@
     window.addEventListener("scroll", () => nav.classList.toggle("is-scrolled", window.scrollY > 20), { passive: true });
 
     /* reveal on scroll */
-    const io = new IntersectionObserver(
+    revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
-            io.unobserve(entry.target);
+            revealObserver.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.12 }
     );
-    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+    document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
   }
 
   /* ================= BOOT ================= */
@@ -362,7 +393,7 @@
       const site = await siteRes.json();
       PROJECTS = await projectsRes.json();
       renderSite(site);
-      renderWork(PROJECTS);
+      renderWork();
     } catch (err) {
       console.error("No se pudo cargar el contenido:", err);
     }
