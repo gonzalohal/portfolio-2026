@@ -3,119 +3,230 @@
     "slug": "auxilio24",
     "name": "Auxilio 24",
     "tagline": "Asistencia vial",
-    "categories": ["branding", "grafica", "merch"],
+    "categories": [
+      "branding",
+      "grafica",
+      "merch"
+    ],
     "blurb": "Identidad visual y piezas gráficas para redes, prensa y flota de Auxilio 24, servicio de asistencia vial del holding.",
-    "images": ["cover.jpg", "03.jpg", "04.jpg", "05.jpg"]
+    "images": [
+      "cover.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
+    ]
   },
   {
     "slug": "blackia",
     "name": "Blackia",
     "tagline": "Contenido & video con IA",
-    "categories": ["branding", "audiovisual"],
+    "categories": [
+      "branding",
+      "audiovisual"
+    ],
     "blurb": "Identidad, portadas de podcast y miniaturas de video para Blackia, proyecto de contenido con video generado por inteligencia artificial.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
+    ]
   },
   {
     "slug": "fundacion-maria-guadalupe",
     "name": "Fundación María de Guadalupe",
     "tagline": "ONG",
-    "categories": ["branding", "grafica"],
+    "categories": [
+      "branding",
+      "grafica"
+    ],
     "blurb": "Piezas gráficas y avisos de página completa para la Fundación María de Guadalupe.",
-    "images": ["cover.jpg", "02.png", "03.png", "04.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.png",
+      "03.png",
+      "04.jpg"
+    ]
   },
   {
     "slug": "gaia",
     "name": "Gaia",
     "tagline": "Personaje de marca",
-    "categories": ["branding", "grafica"],
+    "categories": [
+      "branding",
+      "grafica"
+    ],
     "blurb": "Diseño de personaje de marca, avatar e ilustraciones de comunicación para Gaia.",
-    "images": ["cover.png", "02.jpg", "03.jpg", "04.jpg"]
+    "images": [
+      "cover.png",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
+    ]
   },
   {
     "slug": "gallion",
     "name": "Gallion Holding",
     "tagline": "Holding",
-    "categories": ["branding"],
+    "categories": [
+      "branding"
+    ],
     "blurb": "Identidad corporativa y arquitectura de marca del holding y las empresas que lo integran.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
+    ]
   },
   {
     "slug": "mediline",
     "name": "MediLine",
     "tagline": "Telemedicina",
-    "categories": ["branding", "grafica"],
+    "categories": [
+      "branding",
+      "grafica"
+    ],
     "blurb": "Identidad, señalética y piezas comerciales para MediLine, servicio de telemedicina 24/7.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
+    ]
   },
   {
     "slug": "nsa-seguros",
     "name": "NSA Seguros",
     "tagline": "Seguros",
-    "categories": ["branding", "grafica"],
+    "categories": [
+      "branding",
+      "grafica"
+    ],
     "blurb": "Diseño de sitio web y piezas para redes sociales de NSA Seguros Generales.",
-    "images": ["cover.png", "02.png", "03.png", "04.jpg"]
+    "images": [
+      "cover.png",
+      "02.png",
+      "03.png",
+      "04.jpg"
+    ]
   },
   {
     "slug": "pipay",
     "name": "Pipay",
     "tagline": "Mutual",
-    "categories": ["branding"],
+    "categories": [
+      "branding"
+    ],
     "blurb": "Identidad de marca y presentación institucional de Pipay.",
-    "images": ["cover.jpg", "02.jpg", "03.png", "04.png"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.png",
+      "04.png"
+    ]
   },
   {
     "slug": "redex",
     "name": "Redex",
     "tagline": "Identidad & campañas",
-    "categories": ["branding", "grafica"],
+    "categories": [
+      "branding",
+      "grafica"
+    ],
     "blurb": "Manual de identidad corporativa, gráfica de premios y piezas de campaña para Redex.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg", "05.png"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.png"
+    ]
   },
   {
     "slug": "segu",
     "name": "Segu",
     "tagline": "Seguros",
-    "categories": ["branding"],
+    "categories": [
+      "branding"
+    ],
     "blurb": "Arquitectura de marca y sub-marcas — Hogar, Auto, Moto y Comercio — para Segu.",
-    "images": ["cover.jpg", "02.jpg", "03.png"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.png"
+    ]
   },
   {
     "slug": "televet",
     "name": "TeleVet",
     "tagline": "Veterinaria online",
-    "categories": ["branding", "grafica"],
+    "categories": [
+      "branding",
+      "grafica"
+    ],
     "blurb": "Identidad, planes y campañas de redes sociales para TeleVet, veterinaria online.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg"
+    ]
   },
   {
     "slug": "triunfo",
     "name": "Triunfo Seguros",
     "tagline": "Seguros",
-    "categories": ["grafica", "merch"],
+    "categories": [
+      "grafica",
+      "merch"
+    ],
     "blurb": "Piezas gráficas, campañas de producto y merchandising para Triunfo Seguros.",
-    "images": ["cover.jpg", "02.png", "03.jpg", "04.jpg", "05.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.png",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
+    ]
   },
   {
     "slug": "vedi",
     "name": "Vedi",
     "tagline": "Broker digital de seguros",
-    "categories": ["branding"],
+    "categories": [
+      "branding"
+    ],
     "blurb": "Identidad visual para Vedi, broker digital de seguros.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg"
+    ]
   },
   {
     "slug": "yumak",
     "name": "Yumak",
     "tagline": "Taller & servicio técnico",
-    "categories": ["branding", "merch"],
+    "categories": [
+      "branding",
+      "merch"
+    ],
     "blurb": "Señalética, ploteo de local y render de espacio para Yumak.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg"
+    ]
   },
   {
     "slug": "coyote",
     "name": "Coyote",
     "tagline": "Presentación de marca",
-    "categories": ["branding"],
+    "categories": [
+      "branding"
+    ],
     "blurb": "Presentación de marca para Coyote.",
     "textOnly": true,
     "pdf": "images/work/coyote/presentacion-coyote.pdf"
@@ -124,7 +235,9 @@
     "slug": "sp-risk",
     "name": "SP Risk Services",
     "tagline": "Seguros & riesgo",
-    "categories": ["branding"],
+    "categories": [
+      "branding"
+    ],
     "blurb": "Identidad y manual de marca para SP Risk Services.",
     "textOnly": true
   },
@@ -132,150 +245,230 @@
     "slug": "blade-king",
     "name": "Blade King",
     "tagline": "Identidad para Twitch",
-    "categories": ["branding", "merch"],
+    "categories": [
+      "branding",
+      "merch"
+    ],
     "blurb": "Identidad visual, key art y diseño de indumentaria (remeras/buzos) para el equipo/streamer Blade King.",
-    "images": ["cover.jpg", "02.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg"
+    ],
+    "blurredImages": [
+      "cover.jpg"
+    ]
   },
   {
     "slug": "travel-express",
     "name": "Travel Express",
     "tagline": "Agencia de viajes",
-    "categories": ["grafica", "merch"],
+    "categories": [
+      "grafica",
+      "merch"
+    ],
     "blurb": "Piezas institucionales para Travel Express: pendones, stand, trípticos y material de campaña para peregrinaciones y viajes grupales.",
-    "images": ["cover.jpg", "02.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg"
+    ]
   },
   {
     "slug": "streamers",
     "name": "Identidad para Streamers",
     "tagline": "Freelance — Twitch",
-    "categories": ["branding", "merch"],
+    "categories": [
+      "branding",
+      "merch"
+    ],
     "blurb": "Logos, overlays de stream y merchandising para creadores de contenido en Twitch: El Viejo Gamer, Laons Store, E-Spartans y más.",
-    "images": ["cover.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"]
+    "images": [
+      "cover.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg"
+    ]
   },
   {
     "slug": "modelo-flyer",
     "name": "Flyer",
     "tagline": "Modelado 3D",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado y renderizado 3D — Flyer.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/898072c5485147908d1d2cc36d5b06ee/embed"
   },
   {
     "slug": "modelo-ebike-matex",
     "name": "E-Bike | Mate X",
     "tagline": "Modelado 3D",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado y renderizado 3D de producto — E-Bike Mate X.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/bb9ecc553d964bd09a63f10304c66f65/embed"
   },
   {
     "slug": "modelo-neceser-mcfit",
     "name": "Neceser McFIT | SULEMA",
     "tagline": "Modelado 3D de producto",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado y renderizado 3D de producto — Neceser McFIT para SULEMA.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/a8f97f97a92f486e80e97bdc029eb867/embed"
   },
   {
     "slug": "modelo-oso-bruno",
     "name": "Oso Bruno",
     "tagline": "Modelado 3D — personaje",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado 3D de personaje — Oso Bruno.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/156429ad020b45ee89c48ad5fa8525ba/embed"
   },
   {
     "slug": "modelo-fizzy",
     "name": "Fizzy | Sweets y Geeks",
     "tagline": "Modelado 3D de producto",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado y renderizado 3D de producto — Fizzy para Sweets y Geeks.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/a1a320eb631a479d9463be15cd106622/embed"
   },
   {
     "slug": "modelo-anya-forger-1",
     "name": "SPY×FAMILY — Anya Forger",
     "tagline": "Modelado 3D — fan art",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado 3D de personaje — Anya Forger (SPY×FAMILY), fan art.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/be308b7e378545519d1d6ab5639f6360/embed"
   },
   {
     "slug": "modelo-anya-forger-2",
     "name": "SPY×FAMILY — Anya Forger (v2)",
     "tagline": "Modelado 3D — fan art",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Segunda versión del modelado 3D de Anya Forger (SPY×FAMILY), fan art.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/1a62776a4cea40e69276a9bfc23928ce/embed"
   },
   {
     "slug": "modelo-anya",
     "name": "Anya",
     "tagline": "Modelado 3D — fan art",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado 3D de personaje — Anya, fan art.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/7b13b0dfd3474fadb168a6a7c355c2a9/embed"
   },
   {
     "slug": "modelo-diorama-1",
     "name": "Diorama",
     "tagline": "Modelado 3D — escena",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Diorama modelado y renderizado en 3D.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/4c3fdeb6c5684a9493b0a3216f6126e2/embed"
   },
   {
     "slug": "modelo-diablo-1",
     "name": "Diablo | How Not to Summon a Demon Lord",
     "tagline": "Modelado 3D — fan art",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado 3D de personaje — Diablo (How Not to Summon a Demon Lord), fan art.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/d8ba23213d8646bc8f7bdda792f33a5c/embed"
   },
   {
     "slug": "modelo-diorama-2",
     "name": "Diorama (v2)",
     "tagline": "Modelado 3D — escena",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Segunda versión de diorama modelado y renderizado en 3D.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/c91ef951be044fb49a85be7633a583ed/embed"
   },
   {
     "slug": "modelo-diablo-2",
     "name": "Diablo | How Not to Summon a Demon Lord (v2)",
     "tagline": "Modelado 3D — fan art",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Segunda versión del modelado 3D de Diablo (How Not to Summon a Demon Lord), fan art.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/5e75df1fa2134055a73ba398a0b60ca8/embed"
   },
   {
     "slug": "modelo-box",
     "name": "Box modeling | high poly",
     "tagline": "Modelado 3D — high poly",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Ejercicio de modelado 3D high poly — caja.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/570f7fb8e87f49ed917ff81bdce08461/embed"
   },
   {
     "slug": "modelo-varita",
     "name": "Varita | How Not to Summon a Demon Lord",
     "tagline": "Modelado 3D — fan art",
-    "categories": ["3d"],
+    "categories": [
+      "3d"
+    ],
     "blurb": "Modelado 3D de prop — varita (How Not to Summon a Demon Lord), fan art.",
-    "images": ["cover.jpg"],
+    "images": [
+      "cover.jpg"
+    ],
     "sketchfab": "https://sketchfab.com/models/fd5e3ab8fa2a40079ed81868800ca554/embed"
   }
 ]
