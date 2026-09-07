@@ -207,3 +207,9 @@ label.f-label { display: block; font-size: 12px; font-weight: 600; color: var(--
   .main { padding: 20px; }
   .field-row.cols-2, .field-row.cols-3 { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 640px) {
+  .wk-item { flex-wrap: wrap; }
+  .wk-item .wk-info { flex-basis: 0; min-width: 120px; }
+  .wk-item .wk-actions { flex: 1 0 100%; justify-content: flex-start; margin-top: 8px; }
+}
