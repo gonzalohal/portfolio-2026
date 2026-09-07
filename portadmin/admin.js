@@ -48,6 +48,7 @@
   let dirtySite = false;
   let dirtyProjects = false;
   let editingProjectIndex = null; // null | number | "new"
+  let selectedSlugs = new Set();
 
   const SECTIONS = [
     { id: "general", label: "General" },
@@ -368,6 +369,21 @@
     });
     setStatus("Imagen subida ✓", "ok");
     return targetPath;
+  }
+
+  async function blurAllImagesOfProject(p, onProgress) {
+    if (p.textOnly || !p.images || !p.images.length) return { blurred: 0 };
+    p.blurredImages = p.blurredImages || [];
+    let count = 0;
+    for (const imgName of p.images) {
+      if (p.blurredImages.includes(imgName)) continue;
+      if (onProgress) onProgress(p, imgName);
+      await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar " + imgName + " (" + p.name + ") desde el panel");
+      p.blurredImages.push(imgName);
+      count++;
+    }
+    if (count > 0) dirtyProjects = true;
+    return { blurred: count };
   }
 
   function nextImageName(images, ext) {
@@ -878,12 +894,63 @@
       return;
     }
 
+    selectedSlugs = new Set();
+
     const listPanel = el("div", "panel");
-    const topRow = el("div");
-    topRow.style.display = "flex";
-    topRow.style.justifyContent = "flex-end";
-    topRow.style.marginBottom = "14px";
-    topRow.appendChild(
+
+    const bulkRow = el("div");
+    bulkRow.style.display = "flex";
+    bulkRow.style.gap = "8px";
+    bulkRow.style.flexWrap = "wrap";
+    bulkRow.style.justifyContent = "flex-end";
+    bulkRow.style.marginBottom = "14px";
+
+    const blurableSlugs = () => projects.filter((p) => !p.textOnly && p.images && p.images.length).map((p) => p.slug);
+
+    const bulkBlurBtn = btn("Difuminar seleccionados (0)", "btn-sm btn-danger", async () => {
+      if (selectedSlugs.size === 0) {
+        setStatus("No seleccionaste ningún trabajo", "err");
+        return;
+      }
+      if (!confirm("¿Difuminar TODAS las imágenes de " + selectedSlugs.size + " trabajo(s) seleccionados, de forma permanente? No se puede deshacer desde el panel.")) return;
+      try {
+        showLoading(true);
+        let total = 0;
+        for (const slug of selectedSlugs) {
+          const proj = projects.find((x) => x.slug === slug);
+          if (!proj) continue;
+          const { blurred } = await blurAllImagesOfProject(proj, (pr, img) => setStatus("Difuminando " + pr.name + " — " + img + "…", ""));
+          total += blurred;
+        }
+        setStatus(total + " imagen(es) difuminadas ✓ — no olvides Guardar y publicar", "ok");
+        renderActiveSection();
+      } catch (e) {
+        setStatus("Error: " + e.message, "err");
+      } finally {
+        showLoading(false);
+      }
+    });
+    bulkBlurBtn.disabled = true;
+
+    function refreshBulkBtn() {
+      bulkBlurBtn.textContent = "Difuminar seleccionados (" + selectedSlugs.size + ")";
+      bulkBlurBtn.disabled = selectedSlugs.size === 0;
+    }
+
+    const selectAllBtn = btn("Seleccionar todo", "btn-sm", () => {
+      const all = blurableSlugs();
+      const allSelected = all.length > 0 && all.every((s) => selectedSlugs.has(s));
+      selectedSlugs = allSelected ? new Set() : new Set(all);
+      list.querySelectorAll("input[type=checkbox][data-slug]").forEach((cb) => {
+        cb.checked = selectedSlugs.has(cb.dataset.slug);
+      });
+      selectAllBtn.textContent = allSelected ? "Seleccionar todo" : "Deseleccionar todo";
+      refreshBulkBtn();
+    });
+
+    bulkRow.appendChild(selectAllBtn);
+    bulkRow.appendChild(bulkBlurBtn);
+    bulkRow.appendChild(
       btn("+ Nuevo trabajo", "btn-primary btn-sm", () => {
         const name = prompt("Nombre de la marca / proyecto:");
         if (!name || !name.trim()) return;
@@ -894,12 +961,30 @@
         renderActiveSection();
       })
     );
-    listPanel.appendChild(topRow);
+    listPanel.appendChild(bulkRow);
 
     const list = el("div", "wk-list");
     projects.forEach((p, idx) => {
       const item = el("div", "wk-item");
-      if (p.textOnly || !p.images || !p.images.length) {
+      const canBlur = !p.textOnly && p.images && p.images.length;
+
+      if (canBlur) {
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.dataset.slug = p.slug;
+        cb.style.flex = "none";
+        cb.style.width = "18px";
+        cb.style.height = "18px";
+        cb.checked = selectedSlugs.has(p.slug);
+        cb.addEventListener("change", () => {
+          if (cb.checked) selectedSlugs.add(p.slug);
+          else selectedSlugs.delete(p.slug);
+          refreshBulkBtn();
+        });
+        item.appendChild(cb);
+      }
+
+      if (!canBlur) {
         const ph = el("div", "ph", p.name.slice(0, 2).toUpperCase());
         item.appendChild(ph);
       } else {
@@ -908,7 +993,8 @@
         item.appendChild(img);
       }
       const info = el("div", "wk-info");
-      info.appendChild(el("strong", null, p.name));
+      const allBlurred = canBlur && p.images.every((f) => (p.blurredImages || []).includes(f));
+      info.appendChild(el("strong", null, p.name + (allBlurred ? " · Difuminado 🔒" : "")));
       info.appendChild(el("span", null, p.tagline || p.slug));
       item.appendChild(info);
 
@@ -937,6 +1023,23 @@
       });
       actions.appendChild(up);
       actions.appendChild(down);
+      if (canBlur && !allBlurred) {
+        actions.appendChild(
+          btn("Difuminar todo", "btn-sm", async () => {
+            if (!confirm('¿Difuminar TODAS las imágenes de "' + p.name + '" de forma permanente? No se puede deshacer desde el panel.')) return;
+            try {
+              showLoading(true);
+              const { blurred } = await blurAllImagesOfProject(p, (pr, img) => setStatus("Difuminando " + img + "…", ""));
+              setStatus(blurred + " imagen(es) difuminada(s) en " + p.name + " ✓ — no olvides Guardar y publicar", "ok");
+              renderActiveSection();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+      }
       actions.appendChild(editB);
       actions.appendChild(delB);
       item.appendChild(actions);
