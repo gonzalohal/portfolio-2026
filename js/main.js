@@ -20,6 +20,7 @@
   }
 
   let PROJECTS = [];
+  let ASSET_V = "";
   const PREVIEW = { token: null, valid: false };
 
   function isLocked(p) {
@@ -32,7 +33,7 @@
     if (isBlurredFile && PREVIEW.valid) {
       return `/api/reveal-image?token=${encodeURIComponent(PREVIEW.token)}&path=${encodeURIComponent("images/work/" + p.slug + "/" + filename)}`;
     }
-    return `images/work/${p.slug}/${filename}`;
+    return `images/work/${p.slug}/${filename}${ASSET_V ? `?v=${encodeURIComponent(ASSET_V)}` : ""}`;
   }
 
   async function checkPreviewToken() {
@@ -400,6 +401,7 @@
   async function boot() {
     try {
       const [siteRes, projectsRes] = await Promise.all([fetch("data/site.json"), fetch("data/projects.json"), checkPreviewToken()]);
+      ASSET_V = projectsRes.headers.get("last-modified") || projectsRes.headers.get("etag") || String(Date.now());
       const site = await siteRes.json();
       PROJECTS = await projectsRes.json();
       renderSite(site);
