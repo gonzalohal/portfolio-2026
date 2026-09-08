@@ -375,6 +375,12 @@
     const nav = $("nav");
     window.addEventListener("scroll", () => nav.classList.toggle("is-scrolled", window.scrollY > 20), { passive: true });
 
+    /* floating scroll-to-top button */
+    const scrollTopBtn = $("scrollTopBtn");
+    if (scrollTopBtn) {
+      window.addEventListener("scroll", () => scrollTopBtn.classList.toggle("is-visible", window.scrollY > 500), { passive: true });
+    }
+
     /* reveal on scroll */
     revealObserver = new IntersectionObserver(
       (entries) => {

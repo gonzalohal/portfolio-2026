@@ -546,6 +546,29 @@ footer {
 }
 .to-top:hover { border-color: var(--ink); transform: translateY(-3px); }
 
+/* ---------- floating scroll-to-top button ---------- */
+.scroll-top-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 26px rgba(22,22,26,0.22);
+  z-index: 400;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
+}
+.scroll-top-btn.is-visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.scroll-top-btn:hover { background: var(--accent); transform: translateY(-3px); }
+@media (max-width: 640px) {
+  .scroll-top-btn { right: 16px; bottom: 16px; width: 42px; height: 42px; }
+}
+
 /* ---------- modal / lightbox ---------- */
 .modal-overlay {
   position: fixed;
