@@ -30,6 +30,7 @@
     deleteAsset: (path, message) => api("/api/delete-asset", { method: "POST", body: { path, message } }),
     blurImage: (path, message) => api("/api/blur-image", { method: "POST", body: { path, message } }),
     restoreImage: (path, message) => api("/api/blur-image", { method: "POST", body: { path, message, restore: true } }),
+    blurBatch: (items, projects, message) => api("/api/blur-image", { method: "POST", body: { items, projects, message } }),
     previewStatus: () => api("/api/preview"),
     previewGenerate: (hours) => api("/api/preview", { method: "POST", body: { hours } }),
     previewRevoke: () => api("/api/preview", { method: "DELETE" }),
@@ -372,34 +373,59 @@
     return targetPath;
   }
 
-  async function saveProjectsNow(message) {
-    await API.save("data/projects.json", projects, message || "Editar trabajos desde el panel");
-    dirtyProjects = false;
-  }
-
-  async function blurCoverImage(p, onProgress) {
-    if (p.textOnly || !p.images || !p.images.length) return { blurred: 0 };
+  // Builds a {path, restore, _apply} item without hitting the API — used to batch many
+  // projects' blur/restore into a single git commit (see runBlurBatch).
+  function coverBlurItem(p) {
+    if (p.textOnly || !p.images || !p.images.length) return null;
     p.blurredImages = p.blurredImages || [];
     const cover = p.images[0];
-    if (p.blurredImages.includes(cover)) return { blurred: 0 };
-    if (onProgress) onProgress(p, cover);
-    await API.blurImage("images/work/" + p.slug + "/" + cover, "Difuminar portada de " + p.name + " desde el panel");
-    p.blurredImages.push(cover);
-    dirtyProjects = true;
+    if (p.blurredImages.includes(cover)) return null;
+    return {
+      path: "images/work/" + p.slug + "/" + cover,
+      restore: false,
+      _apply: () => p.blurredImages.push(cover),
+    };
+  }
+
+  function restoreItemsOfProject(p) {
+    if (!p.blurredImages || !p.blurredImages.length) return [];
+    return [...p.blurredImages].map((imgName) => ({
+      path: "images/work/" + p.slug + "/" + imgName,
+      restore: true,
+      _apply: () => {
+        p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
+      },
+    }));
+  }
+
+  // Commits every item's image (blur or restore) together with the current `projects`
+  // array in ONE single git commit/deploy, instead of one commit per image plus a
+  // separate save — this is what keeps bulk actions from burning through Vercel's
+  // daily deploy quota.
+  async function runBlurBatch(items, message) {
+    if (!items.length) return { count: 0 };
+    await API.blurBatch(
+      items.map(({ path, restore }) => ({ path, restore })),
+      projects,
+      message
+    );
+    items.forEach((it) => it._apply());
+    dirtyProjects = false;
+    return { count: items.length };
+  }
+
+  async function blurCoverImage(p) {
+    const item = coverBlurItem(p);
+    if (!item) return { blurred: 0 };
+    await runBlurBatch([item], "Bloquear " + p.name + " desde el panel");
     return { blurred: 1 };
   }
 
-  async function restoreAllImagesOfProject(p, onProgress) {
-    if (!p.blurredImages || !p.blurredImages.length) return { restored: 0 };
-    let count = 0;
-    for (const imgName of [...p.blurredImages]) {
-      if (onProgress) onProgress(p, imgName);
-      await API.restoreImage("images/work/" + p.slug + "/" + imgName, "Restaurar " + imgName + " (" + p.name + ") desde el panel");
-      p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
-      count++;
-    }
-    if (count > 0) dirtyProjects = true;
-    return { restored: count };
+  async function restoreAllImagesOfProject(p) {
+    const items = restoreItemsOfProject(p);
+    if (!items.length) return { restored: 0 };
+    await runBlurBatch(items, "Desbloquear " + p.name + " desde el panel");
+    return { restored: items.length };
   }
 
   function nextImageName(images, ext) {
@@ -932,17 +958,17 @@
       }
       if (!confirm("¿Bloquear " + selectedSlugs.size + " trabajo(s) seleccionados? (Se difumina solo la portada, el resto de la galería queda inaccesible hasta que la desbloquees. Podés restaurarlos después desde acá.)")) return;
       try {
-        showLoading(true);
-        let total = 0;
+        showLoading(true, "Preparando " + selectedSlugs.size + " trabajo(s)…");
+        const items = [];
         for (const slug of selectedSlugs) {
           const proj = projects.find((x) => x.slug === slug);
           if (!proj) continue;
-          const { blurred } = await blurCoverImage(proj, (pr, img) => showLoading(true, "Difuminando portada de " + pr.name + "…"));
-          total += blurred;
+          const item = coverBlurItem(proj);
+          if (item) items.push(item);
         }
-        showLoading(true, "Publicando…");
-        await saveProjectsNow("Bloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
-        setStatus(total + " trabajo(s) bloqueados y publicados ✓ — se actualiza el sitio en ~30-60s", "ok");
+        showLoading(true, "Publicando en un solo commit…");
+        const { count } = await runBlurBatch(items, "Bloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(count + " trabajo(s) bloqueados y publicados en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -959,17 +985,16 @@
       }
       if (!confirm("¿Desbloquear " + selectedSlugs.size + " trabajo(s) seleccionados y restaurar su portada original?")) return;
       try {
-        showLoading(true);
-        let total = 0;
+        showLoading(true, "Preparando " + selectedSlugs.size + " trabajo(s)…");
+        const items = [];
         for (const slug of selectedSlugs) {
           const proj = projects.find((x) => x.slug === slug);
           if (!proj) continue;
-          const { restored } = await restoreAllImagesOfProject(proj, (pr, img) => showLoading(true, "Restaurando " + pr.name + " — " + img + "…"));
-          total += restored;
+          items.push(...restoreItemsOfProject(proj));
         }
-        showLoading(true, "Publicando…");
-        await saveProjectsNow("Desbloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
-        setStatus(total + " trabajo(s) desbloqueados y publicados ✓ — se actualiza el sitio en ~30-60s", "ok");
+        showLoading(true, "Publicando en un solo commit…");
+        const { count } = await runBlurBatch(items, "Desbloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(count + " imagen(es) restauradas y publicadas en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -1079,11 +1104,9 @@
           btn("Bloquear (difuminar portada)", "btn-sm", async () => {
             if (!confirm('¿Bloquear "' + p.name + '"? Se difumina solo la portada y no se va a poder abrir la galería hasta que lo desbloquees. (Podés restaurarlo después desde acá.)')) return;
             try {
-              showLoading(true);
-              const { blurred } = await blurCoverImage(p, (pr, img) => showLoading(true, "Difuminando portada…"));
-              showLoading(true, "Publicando…");
-              await saveProjectsNow("Bloquear " + p.name + " desde el panel");
-              setStatus((blurred ? "Portada difuminada y " : "") + p.name + " bloqueado y publicado ✓ — se actualiza el sitio en ~30-60s", "ok");
+              showLoading(true, "Difuminando portada y publicando…");
+              await blurCoverImage(p);
+              setStatus(p.name + " bloqueado y publicado en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1098,11 +1121,9 @@
           btn("Desbloquear", "btn-sm", async () => {
             if (!confirm('¿Desbloquear "' + p.name + '" y restaurar su portada original?')) return;
             try {
-              showLoading(true);
-              const { restored } = await restoreAllImagesOfProject(p, (pr, img) => showLoading(true, "Restaurando " + img + "…"));
-              showLoading(true, "Publicando…");
-              await saveProjectsNow("Desbloquear " + p.name + " desde el panel");
-              setStatus(p.name + " desbloqueado y publicado ✓ (" + restored + " imagen(es) restaurada(s)) — se actualiza el sitio en ~30-60s", "ok");
+              showLoading(true, "Restaurando y publicando…");
+              const { restored } = await restoreAllImagesOfProject(p);
+              setStatus(p.name + " desbloqueado y publicado en 1 commit ✓ (" + restored + " imagen(es) restaurada(s)) — se actualiza el sitio en ~30-60s", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1258,12 +1279,12 @@
             btn("Difuminar", "btn-sm", async () => {
               if (!confirm('¿Difuminar "' + imgName + '" de forma permanente en el sitio público? (Podés restaurarla después desde acá si te arrepentís.)')) return;
               try {
-                showLoading(true);
-                await API.blurImage("images/work/" + p.slug + "/" + imgName, "Difuminar imagen desde el panel");
-                p.blurredImages.push(imgName);
-                showLoading(true, "Publicando…");
-                await saveProjectsNow("Difuminar " + imgName + " (" + p.name + ") desde el panel");
-                setStatus("Imagen difuminada y publicada ✓ — se actualiza el sitio en ~30-60s", "ok");
+                showLoading(true, "Difuminando y publicando…");
+                await runBlurBatch(
+                  [{ path: "images/work/" + p.slug + "/" + imgName, restore: false, _apply: () => p.blurredImages.push(imgName) }],
+                  "Difuminar " + imgName + " (" + p.name + ") desde el panel"
+                );
+                setStatus("Imagen difuminada y publicada en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
                 renderActiveSection();
               } catch (e) {
                 setStatus("Error: " + e.message, "err");
@@ -1277,12 +1298,12 @@
             btn("Restaurar original", "btn-sm", async () => {
               if (!confirm('¿Restaurar la versión original de "' + imgName + '"? Vuelve a mostrarse nítida en el sitio público.')) return;
               try {
-                showLoading(true);
-                await API.restoreImage("images/work/" + p.slug + "/" + imgName, "Restaurar imagen desde el panel");
-                p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
-                showLoading(true, "Publicando…");
-                await saveProjectsNow("Restaurar " + imgName + " (" + p.name + ") desde el panel");
-                setStatus("Imagen restaurada y publicada ✓ — se actualiza el sitio en ~30-60s", "ok");
+                showLoading(true, "Restaurando y publicando…");
+                await runBlurBatch(
+                  [{ path: "images/work/" + p.slug + "/" + imgName, restore: true, _apply: () => { p.blurredImages = p.blurredImages.filter((f) => f !== imgName); } }],
+                  "Restaurar " + imgName + " (" + p.name + ") desde el panel"
+                );
+                setStatus("Imagen restaurada y publicada en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
                 renderActiveSection();
               } catch (e) {
                 setStatus("Error: " + e.message, "err");
