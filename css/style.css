@@ -537,15 +537,6 @@ footer {
   font-size: 13px;
   color: var(--ink-faint);
 }
-.to-top {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .2s var(--ease), transform .2s var(--ease);
-}
-.to-top:hover { border-color: var(--ink); transform: translateY(-3px); }
-
 /* ---------- floating scroll-to-top button ---------- */
 .scroll-top-btn {
   position: fixed;
