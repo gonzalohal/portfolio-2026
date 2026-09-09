@@ -373,35 +373,36 @@
     return targetPath;
   }
 
-  // Builds a {path, restore, _apply} item without hitting the API — used to batch many
-  // projects' blur/restore into a single git commit (see runBlurBatch).
-  function coverBlurItem(p) {
-    if (p.textOnly || !p.images || !p.images.length) return null;
+  // Cover lock/unlock is now a pure metadata toggle: the public cover file is NEVER
+  // rewritten (it always stays the sharp original), the site blurs it on the fly when
+  // serving it if the slug is in blurredImages (see api/reveal-image.js). That means
+  // "Bloquear"/"Desbloquear" take effect immediately for every visitor — no image to
+  // commit, no Vercel deploy to wait for, and bulk actions never burn deploy quota.
+  function lockCover(p) {
+    if (p.textOnly || !p.images || !p.images.length) return false;
     p.blurredImages = p.blurredImages || [];
     const cover = p.images[0];
-    if (p.blurredImages.includes(cover)) return null;
-    return {
-      path: "images/work/" + p.slug + "/" + cover,
-      restore: false,
-      _apply: () => p.blurredImages.push(cover),
-    };
+    if (p.blurredImages.includes(cover)) return false;
+    p.blurredImages.push(cover);
+    return true;
   }
 
-  function restoreItemsOfProject(p) {
-    if (!p.blurredImages || !p.blurredImages.length) return [];
-    return [...p.blurredImages].map((imgName) => ({
-      path: "images/work/" + p.slug + "/" + imgName,
-      restore: true,
-      _apply: () => {
-        p.blurredImages = p.blurredImages.filter((f) => f !== imgName);
-      },
-    }));
+  function unlockCover(p) {
+    const cover = p.images && p.images[0];
+    if (!cover || !(p.blurredImages || []).includes(cover)) return false;
+    p.blurredImages = (p.blurredImages || []).filter((f) => f !== cover);
+    return true;
   }
 
-  // Commits every item's image (blur or restore) together with the current `projects`
-  // array in ONE single git commit/deploy, instead of one commit per image plus a
-  // separate save — this is what keeps bulk actions from burning through Vercel's
-  // daily deploy quota.
+  async function saveProjectsLight(message) {
+    await API.save("data/projects.json", projects, message);
+    dirtyProjects = false;
+  }
+
+  // Still used by the manual per-image "Difuminar"/"Restaurar original" controls in the
+  // project editor (any image other than the cover) — those really do redact and commit
+  // the file to git, so it's worth batching them plus the projects.json save into a
+  // single commit when several are done together.
   async function runBlurBatch(items, message) {
     if (!items.length) return { count: 0 };
     await API.blurBatch(
@@ -415,17 +416,15 @@
   }
 
   async function blurCoverImage(p) {
-    const item = coverBlurItem(p);
-    if (!item) return { blurred: 0 };
-    await runBlurBatch([item], "Bloquear " + p.name + " desde el panel");
+    if (!lockCover(p)) return { blurred: 0 };
+    await saveProjectsLight("Bloquear " + p.name + " desde el panel");
     return { blurred: 1 };
   }
 
   async function restoreAllImagesOfProject(p) {
-    const items = restoreItemsOfProject(p);
-    if (!items.length) return { restored: 0 };
-    await runBlurBatch(items, "Desbloquear " + p.name + " desde el panel");
-    return { restored: items.length };
+    if (!unlockCover(p)) return { restored: 0 };
+    await saveProjectsLight("Desbloquear " + p.name + " desde el panel");
+    return { restored: 1 };
   }
 
   function nextImageName(images, ext) {
@@ -958,17 +957,14 @@
       }
       if (!confirm("¿Bloquear " + selectedSlugs.size + " trabajo(s) seleccionados? (Se difumina solo la portada, el resto de la galería queda inaccesible hasta que la desbloquees. Podés restaurarlos después desde acá.)")) return;
       try {
-        showLoading(true, "Preparando " + selectedSlugs.size + " trabajo(s)…");
-        const items = [];
+        showLoading(true, "Bloqueando " + selectedSlugs.size + " trabajo(s)…");
+        let count = 0;
         for (const slug of selectedSlugs) {
           const proj = projects.find((x) => x.slug === slug);
-          if (!proj) continue;
-          const item = coverBlurItem(proj);
-          if (item) items.push(item);
+          if (proj && lockCover(proj)) count++;
         }
-        showLoading(true, "Publicando en un solo commit…");
-        const { count } = await runBlurBatch(items, "Bloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
-        setStatus(count + " trabajo(s) bloqueados y publicados en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
+        await saveProjectsLight("Bloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(count + " trabajo(s) bloqueados ✓ — ya está activo en el sitio, sin esperar deploy", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -985,16 +981,14 @@
       }
       if (!confirm("¿Desbloquear " + selectedSlugs.size + " trabajo(s) seleccionados y restaurar su portada original?")) return;
       try {
-        showLoading(true, "Preparando " + selectedSlugs.size + " trabajo(s)…");
-        const items = [];
+        showLoading(true, "Desbloqueando " + selectedSlugs.size + " trabajo(s)…");
+        let count = 0;
         for (const slug of selectedSlugs) {
           const proj = projects.find((x) => x.slug === slug);
-          if (!proj) continue;
-          items.push(...restoreItemsOfProject(proj));
+          if (proj && unlockCover(proj)) count++;
         }
-        showLoading(true, "Publicando en un solo commit…");
-        const { count } = await runBlurBatch(items, "Desbloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
-        setStatus(count + " imagen(es) restauradas y publicadas en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
+        await saveProjectsLight("Desbloquear " + selectedSlugs.size + " trabajo(s) desde el panel");
+        setStatus(count + " trabajo(s) desbloqueados ✓ — ya está activo en el sitio, sin esperar deploy", "ok");
         renderActiveSection();
       } catch (e) {
         setStatus("Error: " + e.message, "err");
@@ -1098,15 +1092,14 @@
       });
       actions.appendChild(up);
       actions.appendChild(down);
-      const hasSomeBlurred = canBlur && (p.blurredImages || []).length > 0;
       if (canBlur && !coverBlurred) {
         actions.appendChild(
           btn("Bloquear (difuminar portada)", "btn-sm", async () => {
             if (!confirm('¿Bloquear "' + p.name + '"? Se difumina solo la portada y no se va a poder abrir la galería hasta que lo desbloquees. (Podés restaurarlo después desde acá.)')) return;
             try {
-              showLoading(true, "Difuminando portada y publicando…");
+              showLoading(true, "Bloqueando…");
               await blurCoverImage(p);
-              setStatus(p.name + " bloqueado y publicado en 1 commit ✓ — se actualiza el sitio en ~30-60s", "ok");
+              setStatus(p.name + " bloqueado ✓ — ya está activo en el sitio, sin esperar deploy", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1116,14 +1109,14 @@
           })
         );
       }
-      if (hasSomeBlurred) {
+      if (coverBlurred) {
         actions.appendChild(
           btn("Desbloquear", "btn-sm", async () => {
             if (!confirm('¿Desbloquear "' + p.name + '" y restaurar su portada original?')) return;
             try {
-              showLoading(true, "Restaurando y publicando…");
-              const { restored } = await restoreAllImagesOfProject(p);
-              setStatus(p.name + " desbloqueado y publicado en 1 commit ✓ (" + restored + " imagen(es) restaurada(s)) — se actualiza el sitio en ~30-60s", "ok");
+              showLoading(true, "Desbloqueando…");
+              await restoreAllImagesOfProject(p);
+              setStatus(p.name + " desbloqueado ✓ — ya está activo en el sitio, sin esperar deploy", "ok");
               renderActiveSection();
             } catch (e) {
               setStatus("Error: " + e.message, "err");
@@ -1242,7 +1235,7 @@
         el(
           "p",
           "hint",
-          "El botón \"Difuminar\" reemplaza la imagen pública por una versión con blur (estilo vidrio esmerilado) — no es un filtro visual: nadie puede recuperar la nítida inspeccionando la página, porque el original queda guardado en una ruta oculta del repositorio en vez de la pública. Si difuminás la PORTADA, la card queda bloqueada en el sitio (no se puede abrir la galería) con un cartel de \"" + UNLOCK_MSG + "\" — esto es lo que hacen \"Bloquear\" / \"Bloquear seleccionados\" en el listado. Difuminar otra imagen que no sea la portada solo la redacta a ella, sin bloquear la card. Se publica solo, sin necesidad de tocar \"Guardar y publicar\". Podés volver atrás en cualquier momento con \"Restaurar original\". Nota: si el repositorio es público, la versión original puede seguir siendo accesible para alguien que revise el historial de commits de git — para ocultarla también ahí, pasá el repo a privado."
+          "\"Bloquear\" / \"Bloquear seleccionados\" (en el listado de Trabajos) bloquean la PORTADA al instante, sin depender de ningún deploy: el sitio lee el estado en vivo y difumina la portada al mostrarla, con el cartel \"" + UNLOCK_MSG + "\". El archivo público nunca se toca. El botón \"Difuminar\" de acá abajo es distinto y más lento: reemplaza esa imagen puntual por una versión con blur permanente en el repositorio (útil para imágenes que NO son la portada) — nadie puede recuperar la nítida inspeccionando la página, porque el original queda guardado en una ruta oculta. Se publica solo, sin necesidad de tocar \"Guardar y publicar\", pero tarda lo que tarde el próximo deploy de Vercel en reflejarse. Podés volver atrás en cualquier momento con \"Restaurar original\". Nota: si el repositorio es público, la versión original puede seguir siendo accesible para alguien que revise el historial de commits de git — para ocultarla también ahí, pasá el repo a privado."
         )
       );
       p.images = p.images || [];

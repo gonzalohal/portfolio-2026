@@ -22,13 +22,31 @@
   let PROJECTS = [];
   let ASSET_V = "";
   const PREVIEW = { token: null, valid: false };
+  // Which projects are currently locked, read live from the server on every page load
+  // (not from the static, deploy-gated data/projects.json) so that blocking/unblocking a
+  // project's cover from the admin takes effect immediately, without a Vercel deploy.
+  let LIVE_LOCKED = new Set();
+
+  async function fetchLiveLockedStatus() {
+    try {
+      const res = await fetch("/api/reveal-image?locked=1");
+      const data = await res.json();
+      LIVE_LOCKED = new Set(data.locked || []);
+    } catch (e) {
+      console.error("No se pudo obtener el estado de bloqueo en vivo:", e);
+    }
+  }
 
   function isLocked(p) {
-    const cover = p.images && p.images[0];
-    return !!cover && (p.blurredImages || []).includes(cover) && !PREVIEW.valid;
+    return LIVE_LOCKED.has(p.slug) && !PREVIEW.valid;
   }
 
   function imgSrc(p, filename) {
+    const isCover = p.images && p.images[0] === filename;
+    if (isCover) {
+      // Always served live (blurred on the fly if locked) so it can never lag behind a deploy.
+      return `/api/reveal-image?slug=${encodeURIComponent(p.slug)}${PREVIEW.valid ? `&token=${encodeURIComponent(PREVIEW.token)}` : ""}`;
+    }
     const isBlurredFile = (p.blurredImages || []).includes(filename);
     if (isBlurredFile && PREVIEW.valid) {
       return `/api/reveal-image?token=${encodeURIComponent(PREVIEW.token)}&path=${encodeURIComponent("images/work/" + p.slug + "/" + filename)}`;
@@ -400,7 +418,7 @@
   /* ================= BOOT ================= */
   async function boot() {
     try {
-      const [siteRes, projectsRes] = await Promise.all([fetch("data/site.json"), fetch("data/projects.json"), checkPreviewToken()]);
+      const [siteRes, projectsRes] = await Promise.all([fetch("data/site.json"), fetch("data/projects.json"), checkPreviewToken(), fetchLiveLockedStatus()]);
       ASSET_V = projectsRes.headers.get("last-modified") || projectsRes.headers.get("etag") || String(Date.now());
       const site = await siteRes.json();
       PROJECTS = await projectsRes.json();
