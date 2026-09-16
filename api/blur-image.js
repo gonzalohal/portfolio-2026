@@ -1,44 +1,44 @@
 const { getSession } = require("../lib/auth");
-const { getFile, getRawFile, putFile, putFilesBatch } = require("../lib/github");
+const { downloadObject, uploadObject, setKv } = require("../lib/supabase");
 const { redact, hiddenOriginalPath } = require("../lib/redact");
 
 function validPath(targetPath) {
   return targetPath && /^images\//.test(targetPath) && !targetPath.includes("..");
 }
 
-// Blurs/restores any number of images plus (optionally) the updated projects.json
-// as a SINGLE git commit, instead of 2 commits per image — this is what keeps bulk
-// "Bloquear/Desbloquear seleccionados" from burning through Vercel's daily deploy quota.
+function toStoragePath(targetPath) {
+  return targetPath.replace(/^images\//, "");
+}
+
+// Blurs/restores any number of (non-cover) images plus (optionally) the updated
+// projects.json — kept for the manual per-image "Difuminar" feature in the project
+// editor. Cover lock/unlock no longer goes through here at all (see api/reveal-image.js).
 async function handleBatch(req, res) {
-  const { items, projects, message } = req.body || {};
+  const { items, projects } = req.body || {};
   if (!Array.isArray(items) || !items.length) return res.status(400).json({ error: "items vacío" });
 
-  const files = [];
+  let committed = 0;
   for (const item of items) {
     const targetPath = item && item.path;
     if (!validPath(targetPath)) return res.status(400).json({ error: "Ruta no permitida: " + targetPath });
+    const storagePath = toStoragePath(targetPath);
 
     if (item.restore) {
-      const originalPath = hiddenOriginalPath(targetPath);
-      const original = await getRawFile(originalPath);
+      const original = await downloadObject("site-originals", hiddenOriginalPath(storagePath));
       if (!original) continue;
-      files.push({ path: targetPath, content: original });
+      await uploadObject("site-public", storagePath, original);
     } else {
-      const raw = await getRawFile(targetPath);
+      const raw = await downloadObject("site-public", storagePath);
       if (!raw) continue;
-      files.push({ path: hiddenOriginalPath(targetPath), content: raw });
-      files.push({ path: targetPath, content: await redact(raw) });
+      await uploadObject("site-originals", hiddenOriginalPath(storagePath), raw);
+      await uploadObject("site-public", storagePath, await redact(raw));
     }
+    committed++;
   }
 
-  if (projects) {
-    files.push({ path: "data/projects.json", content: Buffer.from(JSON.stringify(projects, null, 2) + "\n", "utf-8") });
-  }
+  if (projects) await setKv("projects", projects);
 
-  if (!files.length) return res.status(200).json({ ok: true, committed: 0 });
-
-  const result = await putFilesBatch(files, message || `Actualizar ${items.length} imagen(es) desde el panel`);
-  return res.status(200).json({ ok: true, committed: files.length, commit: result.commit && result.commit.sha });
+  return res.status(200).json({ ok: true, committed });
 }
 
 module.exports = async (req, res) => {
@@ -53,35 +53,26 @@ module.exports = async (req, res) => {
     }
   }
 
-  const { path: targetPath, message, restore } = req.body || {};
+  const { path: targetPath, restore } = req.body || {};
   if (!validPath(targetPath)) {
     return res.status(400).json({ error: "Ruta no permitida" });
   }
+  const storagePath = toStoragePath(targetPath);
 
   try {
     if (restore) {
-      const originalPath = hiddenOriginalPath(targetPath);
-      const original = await getRawFile(originalPath);
+      const original = await downloadObject("site-originals", hiddenOriginalPath(storagePath));
       if (!original) return res.status(404).json({ error: "No hay original guardado para restaurar" });
-      const current = await getFile(targetPath);
-      const result = await putFile(targetPath, original, message || `Restaurar original de ${targetPath} desde el panel`, current ? current.sha : undefined);
-      return res.status(200).json({ ok: true, path: targetPath, restored: true, commit: result.commit && result.commit.sha });
+      await uploadObject("site-public", storagePath, original);
+      return res.status(200).json({ ok: true, path: targetPath, restored: true });
     }
 
-    const current = await getFile(targetPath);
-    if (!current) return res.status(404).json({ error: "La imagen no existe en el repositorio" });
+    const raw = await downloadObject("site-public", storagePath);
+    if (!raw) return res.status(404).json({ error: "La imagen no existe" });
 
-    const raw = await getRawFile(targetPath);
-    if (!raw) return res.status(404).json({ error: "No se pudo leer la imagen original" });
-
-    // Preserve the sharp original at a hidden path (only ever served via a valid preview token).
-    const originalPath = hiddenOriginalPath(targetPath);
-    const existingOriginal = await getFile(originalPath);
-    await putFile(originalPath, raw, `Guardar original oculto de ${targetPath}`, existingOriginal ? existingOriginal.sha : undefined);
-
-    const redacted = await redact(raw);
-    const result = await putFile(targetPath, redacted, message || `Difuminar ${targetPath} desde el panel`, current.sha);
-    res.status(200).json({ ok: true, path: targetPath, commit: result.commit && result.commit.sha });
+    await uploadObject("site-originals", hiddenOriginalPath(storagePath), raw);
+    await uploadObject("site-public", storagePath, await redact(raw));
+    res.status(200).json({ ok: true, path: targetPath });
   } catch (err) {
     res.status(500).json({ error: String(err.message || err) });
   }

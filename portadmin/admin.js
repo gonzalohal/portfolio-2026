@@ -36,8 +36,12 @@
     previewRevoke: () => api("/api/preview", { method: "DELETE" }),
   };
 
+  const STORAGE_BASE = "https://iafxjnxxohzkbephzbxu.supabase.co/storage/v1/object/public/site-public";
+
   function assetUrl(path) {
-    return "/" + String(path).replace(/^\/+/, "");
+    const clean = String(path).replace(/^\/+/, "");
+    const storagePath = clean.startsWith("images/") ? clean.slice("images/".length) : clean;
+    return `${STORAGE_BASE}/${storagePath}`;
   }
 
   const UNLOCK_MSG = "Desbloqueá en la entrevista";

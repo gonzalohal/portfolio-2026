@@ -19,12 +19,35 @@
     return `<div class="blur-badge"><span class="pill">${LOCK_ICON}${esc(UNLOCK_MSG)}</span></div>`;
   }
 
+  // Public Supabase project — safe to expose: the anon key only grants read access,
+  // enforced by row-level security policies on the database side.
+  const SUPABASE_URL = "https://iafxjnxxohzkbephzbxu.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZnhqbnh4b2h6a2JlcGh6Ynh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MTQ1MTQsImV4cCI6MjEwNTA5MDUxNH0.GvWsqRe_nLG0fBcEiS7b5HlkkEyMsdafH_XNX_uDP-c";
+  const STORAGE_BASE = `${SUPABASE_URL}/storage/v1/object/public/site-public`;
+
+  // Converts a relative path as stored in site.json/projects.json ("images/work/x/y.jpg",
+  // "assets/CV.pdf") into a public Supabase Storage URL. Content now lives there instead
+  // of in the git-deployed static files, so editing it never needs a Vercel deploy.
+  function assetUrl(relPath) {
+    const clean = String(relPath).replace(/^\/+/, "");
+    const storagePath = clean.startsWith("images/") ? clean.slice("images/".length) : clean;
+    return `${STORAGE_BASE}/${storagePath}`;
+  }
+
+  async function fetchKv(key) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(key)}&select=value,updated_at`, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+    const rows = await res.json();
+    return rows[0] || null;
+  }
+
   let PROJECTS = [];
-  let ASSET_V = "";
   const PREVIEW = { token: null, valid: false };
   // Which projects are currently locked, read live from the server on every page load
-  // (not from the static, deploy-gated data/projects.json) so that blocking/unblocking a
-  // project's cover from the admin takes effect immediately, without a Vercel deploy.
+  // (not from any deploy-baked copy) so that blocking/unblocking a project's cover from
+  // the admin takes effect immediately, without a Vercel deploy.
   let LIVE_LOCKED = new Set();
 
   async function fetchLiveLockedStatus() {
@@ -51,7 +74,7 @@
     if (isBlurredFile && PREVIEW.valid) {
       return `/api/reveal-image?token=${encodeURIComponent(PREVIEW.token)}&path=${encodeURIComponent("images/work/" + p.slug + "/" + filename)}`;
     }
-    return `images/work/${p.slug}/${filename}${ASSET_V ? `?v=${encodeURIComponent(ASSET_V)}` : ""}`;
+    return assetUrl(`images/work/${p.slug}/${filename}`);
   }
 
   async function checkPreviewToken() {
@@ -93,8 +116,8 @@
       if ($("navContactLabel") && site.nav.ctaLabel) $("navContactLabel").textContent = site.nav.ctaLabel;
     }
     if (site.cvFile) {
-      if ($("navCvLink")) $("navCvLink").href = site.cvFile;
-      if ($("mobileCvLink")) $("mobileCvLink").href = site.cvFile;
+      if ($("navCvLink")) $("navCvLink").href = assetUrl(site.cvFile);
+      if ($("mobileCvLink")) $("mobileCvLink").href = assetUrl(site.cvFile);
     }
 
     // hero
@@ -129,13 +152,13 @@
     // client logos
     if ($("clientsInner")) {
       $("clientsInner").innerHTML = (site.clientLogos || [])
-        .map((c) => `<img src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy">`)
+        .map((c) => `<img src="${esc(assetUrl(c.image))}" alt="${esc(c.name)}" loading="lazy">`)
         .join("");
     }
 
     // about
     const about = site.about || {};
-    if (about.photo && $("aboutPhoto")) $("aboutPhoto").src = about.photo;
+    if (about.photo && $("aboutPhoto")) $("aboutPhoto").src = assetUrl(about.photo);
     if ($("aboutParagraphs")) {
       $("aboutParagraphs").innerHTML = (about.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join("");
     }
@@ -418,10 +441,9 @@
   /* ================= BOOT ================= */
   async function boot() {
     try {
-      const [siteRes, projectsRes] = await Promise.all([fetch("data/site.json"), fetch("data/projects.json"), checkPreviewToken(), fetchLiveLockedStatus()]);
-      ASSET_V = projectsRes.headers.get("last-modified") || projectsRes.headers.get("etag") || String(Date.now());
-      const site = await siteRes.json();
-      PROJECTS = await projectsRes.json();
+      const [siteRow, projectsRow] = await Promise.all([fetchKv("site"), fetchKv("projects"), checkPreviewToken(), fetchLiveLockedStatus()]);
+      const site = (siteRow && siteRow.value) || {};
+      PROJECTS = (projectsRow && projectsRow.value) || [];
       renderSite(site);
       renderWork();
     } catch (err) {

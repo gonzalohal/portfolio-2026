@@ -16,17 +16,15 @@ module.exports = async (req, res) => {
       const { hours } = req.body || {};
       const h = Number(hours);
       if (!h || h <= 0 || h > 24 * 30) return res.status(400).json({ error: "Duración inválida" });
-      const { sha } = await readPreviewAccess();
       const token = generateToken();
       const now = Date.now();
       const data = { token, createdAt: now, expiresAt: now + h * 60 * 60 * 1000 };
-      await writePreviewAccess(data, sha, "Generar link de vista previa desde el panel");
+      await writePreviewAccess(data);
       return res.status(200).json(data);
     }
 
     if (req.method === "DELETE") {
-      const { sha } = await readPreviewAccess();
-      await writePreviewAccess({ token: null, expiresAt: null, createdAt: null }, sha, "Revocar link de vista previa desde el panel");
+      await writePreviewAccess({ token: null, expiresAt: null, createdAt: null });
       return res.status(200).json({ ok: true });
     }
 
