@@ -377,6 +377,159 @@
     return targetPath;
   }
 
+  async function uploadDataUrlToPath(dataUrl, targetPath) {
+    setStatus("Subiendo imagen…", "");
+    // skipResize: the cropper already rendered the exact final pixels.
+    await api("/api/upload", {
+      method: "POST",
+      body: { path: targetPath, dataUrl, message: "Actualizar encuadre de " + targetPath + " desde el panel", skipResize: true },
+    });
+    setStatus("Imagen subida ✓", "ok");
+    return targetPath;
+  }
+
+  // Interactive crop/pan/zoom picker. `imgSrc` can be a blob: URL (freshly picked
+  // file) or a remote URL (existing photo — needs CORS, which Supabase's public
+  // buckets allow). `aspect` is a CSS aspect-ratio string, e.g. "3/3.6", matching
+  // the frame the photo is actually displayed in on the live site. Resolves to a
+  // JPEG data URL of the cropped result, or null if the user cancels.
+  function openCropper(imgSrc, aspect) {
+    return new Promise((resolve) => {
+      const overlay = el("div", "cropper-overlay");
+      const modal = el("div", "cropper-modal");
+      modal.appendChild(el("h3", null, "Encuadrar imagen"));
+      modal.appendChild(el("p", "hint", "Arrastrá para mover, usá la rueda del mouse o el control para hacer zoom."));
+
+      const viewportWrap = el("div", "cropper-viewport-wrap");
+      const viewport = el("div", "cropper-viewport");
+      viewport.style.aspectRatio = aspect;
+      const img = document.createElement("img");
+      img.crossOrigin = "anonymous";
+      viewport.appendChild(img);
+      viewportWrap.appendChild(viewport);
+      modal.appendChild(viewportWrap);
+
+      const zoomRow = el("div", "cropper-zoom-row");
+      zoomRow.appendChild(el("span", "hint", "Zoom"));
+      const zoomSlider = document.createElement("input");
+      zoomSlider.type = "range";
+      zoomSlider.min = "100";
+      zoomSlider.max = "320";
+      zoomSlider.value = "100";
+      zoomRow.appendChild(zoomSlider);
+      modal.appendChild(zoomRow);
+
+      const actions = el("div", "cropper-actions");
+      const errMsg = el("span", "hint");
+      modal.appendChild(errMsg);
+      modal.appendChild(actions);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      function cleanup(result) {
+        document.body.removeChild(overlay);
+        window.removeEventListener("resize", layout);
+        resolve(result);
+      }
+
+      const cancelBtn = btn("Cancelar", "btn-sm", () => cleanup(null));
+      const saveBtn = btn("Guardar encuadre", "btn-primary btn-sm", () => {
+        try {
+          cleanup(renderCrop());
+        } catch (e) {
+          errMsg.textContent = "No se pudo procesar esta imagen (" + e.message + "). Probá cambiar la foto de nuevo.";
+        }
+      });
+      actions.appendChild(cancelBtn);
+      actions.appendChild(saveBtn);
+
+      let natW = 0, natH = 0, baseScale = 1, scale = 1, offX = 0, offY = 0, vpW = 0, vpH = 0;
+
+      function clampOffset() {
+        const w = natW * baseScale * scale;
+        const h = natH * baseScale * scale;
+        offX = Math.min(0, Math.max(vpW - w, offX));
+        offY = Math.min(0, Math.max(vpH - h, offY));
+      }
+      function applyTransform() {
+        clampOffset();
+        img.style.width = natW * baseScale * scale + "px";
+        img.style.height = natH * baseScale * scale + "px";
+        img.style.transform = "translate(" + offX + "px, " + offY + "px)";
+      }
+      function layout() {
+        const rect = viewport.getBoundingClientRect();
+        vpW = rect.width;
+        vpH = rect.height;
+        baseScale = Math.max(vpW / natW, vpH / natH);
+        applyTransform();
+      }
+
+      img.onload = () => {
+        natW = img.naturalWidth;
+        natH = img.naturalHeight;
+        layout();
+        offX = (vpW - natW * baseScale) / 2;
+        offY = (vpH - natH * baseScale) / 2;
+        applyTransform();
+      };
+      img.onerror = () => {
+        errMsg.textContent = "No se pudo cargar la imagen para encuadrar.";
+      };
+      img.src = imgSrc;
+
+      let dragging = false, startX = 0, startY = 0, startOffX = 0, startOffY = 0;
+      viewport.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startOffX = offX;
+        startOffY = offY;
+        viewport.setPointerCapture(e.pointerId);
+      });
+      viewport.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        offX = startOffX + (e.clientX - startX);
+        offY = startOffY + (e.clientY - startY);
+        applyTransform();
+      });
+      viewport.addEventListener("pointerup", () => (dragging = false));
+      viewport.addEventListener("pointercancel", () => (dragging = false));
+      viewport.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const next = Math.min(320, Math.max(100, Number(zoomSlider.value) + (e.deltaY < 0 ? 10 : -10)));
+          zoomSlider.value = String(next);
+          scale = next / 100;
+          applyTransform();
+        },
+        { passive: false }
+      );
+      zoomSlider.addEventListener("input", () => {
+        scale = Number(zoomSlider.value) / 100;
+        applyTransform();
+      });
+      window.addEventListener("resize", layout);
+
+      function renderCrop() {
+        const canvas = document.createElement("canvas");
+        const outW = 900;
+        const outH = Math.round(outW * (vpH / vpW));
+        canvas.width = outW;
+        canvas.height = outH;
+        const ctx = canvas.getContext("2d");
+        const totalScale = baseScale * scale;
+        const srcX = -offX / totalScale;
+        const srcY = -offY / totalScale;
+        const srcW = vpW / totalScale;
+        const srcH = vpH / totalScale;
+        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+        return canvas.toDataURL("image/jpeg", 0.85);
+      }
+    });
+  }
+
   // Cover lock/unlock is now a pure metadata toggle: the public cover file is NEVER
   // rewritten (it always stays the sharp original), the site blurs it on the fly when
   // serving it if the slug is in blurredImages (see api/reveal-image.js). That means
@@ -654,9 +807,28 @@
       btn("Cambiar foto", "btn-sm", async () => {
         const file = await pickFile("image/*");
         if (!file) return;
+        const objectUrl = URL.createObjectURL(file);
+        const cropped = await openCropper(objectUrl, "3/3.6");
+        URL.revokeObjectURL(objectUrl);
+        if (!cropped) return;
         try {
           showLoading(true);
-          await uploadToPath(file, about.photo, 900);
+          await uploadDataUrlToPath(cropped, about.photo);
+          img.src = assetUrl(about.photo) + "?v=" + Date.now();
+        } catch (e) {
+          setStatus("Error: " + e.message, "err");
+        } finally {
+          showLoading(false);
+        }
+      })
+    );
+    photoRow.appendChild(
+      btn("Encuadrar", "btn-sm", async () => {
+        const cropped = await openCropper(assetUrl(about.photo) + "?v=" + Date.now(), "3/3.6");
+        if (!cropped) return;
+        try {
+          showLoading(true);
+          await uploadDataUrlToPath(cropped, about.photo);
           img.src = assetUrl(about.photo) + "?v=" + Date.now();
         } catch (e) {
           setStatus("Error: " + e.message, "err");
