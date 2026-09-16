@@ -423,6 +423,27 @@
       window.addEventListener("scroll", () => scrollTopBtn.classList.toggle("is-visible", window.scrollY > 500), { passive: true });
     }
 
+    /* hero visual — shapes drift toward the cursor for a subtle parallax feel */
+    const heroVisual = $("heroVisual");
+    if (heroVisual && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const heroEl = document.querySelector(".hero");
+      heroEl.addEventListener(
+        "pointermove",
+        (e) => {
+          const rect = heroEl.getBoundingClientRect();
+          const px = (e.clientX - rect.left) / rect.width - 0.5;
+          const py = (e.clientY - rect.top) / rect.height - 0.5;
+          heroVisual.style.setProperty("--px", px.toFixed(3));
+          heroVisual.style.setProperty("--py", py.toFixed(3));
+        },
+        { passive: true }
+      );
+      heroEl.addEventListener("pointerleave", () => {
+        heroVisual.style.setProperty("--px", 0);
+        heroVisual.style.setProperty("--py", 0);
+      });
+    }
+
     /* reveal on scroll */
     revealObserver = new IntersectionObserver(
       (entries) => {
