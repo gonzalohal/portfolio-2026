@@ -1002,11 +1002,35 @@
     });
     bulkRestoreBtn.disabled = true;
 
+    const bulkDeleteBtn = btn("Eliminar seleccionados (0)", "btn-sm btn-danger", async () => {
+      if (selectedSlugs.size === 0) {
+        setStatus("No seleccionaste ningún trabajo", "err");
+        return;
+      }
+      const names = projects.filter((p) => selectedSlugs.has(p.slug)).map((p) => p.name);
+      if (!confirm('¿Eliminar ' + selectedSlugs.size + ' trabajo(s) del sitio?\n\n' + names.join("\n") + '\n\n(Las imágenes ya subidas quedan en el storage, solo se quitan del listado. No se puede deshacer.)')) return;
+      try {
+        showLoading(true, "Eliminando " + selectedSlugs.size + " trabajo(s)…");
+        projects = projects.filter((p) => !selectedSlugs.has(p.slug));
+        await saveProjectsLight("Eliminar " + selectedSlugs.size + " trabajo(s) desde el panel");
+        selectedSlugs = new Set();
+        setStatus(names.length + " trabajo(s) eliminados ✓", "ok");
+        renderActiveSection();
+      } catch (e) {
+        setStatus("Error: " + e.message, "err");
+      } finally {
+        showLoading(false);
+      }
+    });
+    bulkDeleteBtn.disabled = true;
+
     function refreshBulkBtn() {
       bulkBlurBtn.textContent = "Bloquear seleccionados (" + selectedSlugs.size + ")";
       bulkBlurBtn.disabled = selectedSlugs.size === 0;
       bulkRestoreBtn.textContent = "Desbloquear seleccionados (" + selectedSlugs.size + ")";
       bulkRestoreBtn.disabled = selectedSlugs.size === 0;
+      bulkDeleteBtn.textContent = "Eliminar seleccionados (" + selectedSlugs.size + ")";
+      bulkDeleteBtn.disabled = selectedSlugs.size === 0;
     }
 
     const selectAllBtn = btn("Seleccionar todo", "btn-sm", () => {
@@ -1023,6 +1047,7 @@
     bulkRow.appendChild(selectAllBtn);
     bulkRow.appendChild(bulkBlurBtn);
     bulkRow.appendChild(bulkRestoreBtn);
+    bulkRow.appendChild(bulkDeleteBtn);
     bulkRow.appendChild(
       btn("+ Nuevo trabajo", "btn-primary btn-sm", () => {
         const name = prompt("Nombre de la marca / proyecto:");

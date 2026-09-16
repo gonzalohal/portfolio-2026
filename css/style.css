@@ -266,49 +266,63 @@ h1, h2, h3, h4 {
   position: absolute;
   border-radius: 50%;
   transition: transform 0.35s var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.hv-mono {
+  font-family: var(--ff-head);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.hv-icon { width: 52%; height: 52%; }
 .hv-1 {
   width: 190px; height: 190px;
   right: 6%; top: 10%;
-  background: radial-gradient(circle at 32% 28%, #ff8a63, var(--accent) 70%);
-  filter: blur(0.5px);
-  box-shadow: 0 30px 60px -20px rgba(255, 90, 51, 0.55);
+  border-radius: 42px;
+  background: linear-gradient(150deg, #2b0400 0%, #d1360a 55%, #ff9a00 100%);
+  box-shadow: 0 30px 60px -20px rgba(255, 90, 51, 0.5);
   animation: hv-float 7s ease-in-out infinite;
   transform: translate(calc(var(--px, 0) * 18px), calc(var(--py, 0) * 18px));
 }
+.hv-1 .hv-mono { font-size: 56px; }
 .hv-2 {
   width: 96px; height: 96px;
   left: 4%; top: 6%;
-  background: var(--ink);
+  border-radius: 24px;
+  background: linear-gradient(150deg, #00005b 0%, #4b3bb0 60%, #9999ff 100%);
   animation: hv-float 6s ease-in-out infinite 0.4s;
   transform: translate(calc(var(--px, 0) * -26px), calc(var(--py, 0) * -14px));
 }
+.hv-2 .hv-mono { font-size: 30px; }
 .hv-3 {
   width: 64px; height: 64px;
   left: 10%; bottom: 16%;
-  background: #fff;
+  background: #fdf9f2;
   border: 1.5px solid var(--line);
   animation: hv-float 5.5s ease-in-out infinite 0.8s;
   transform: translate(calc(var(--px, 0) * 30px), calc(var(--py, 0) * -20px));
 }
+.hv-3 .hv-icon { width: 60%; height: 60%; }
 .hv-4 {
   width: 128px; height: 128px;
   right: 12%; bottom: 8%;
-  border-radius: 34px;
-  background: var(--card);
-  border: 1.5px solid var(--line);
+  border-radius: 30px;
+  background: linear-gradient(150deg, #001e36 0%, #0a5f9e 60%, #31a8ff 100%);
   box-shadow: 0 24px 48px -24px rgba(22, 22, 26, 0.28);
   animation: hv-float 8s ease-in-out infinite 0.2s;
-  transform: translate(calc(var(--px, 0) * -14px), calc(var(--py, 0) * 22px)) rotate(-8deg);
+  transform: translate(calc(var(--px, 0) * -14px), calc(var(--py, 0) * 22px));
 }
+.hv-4 .hv-mono { font-size: 38px; }
 .hv-5 {
   width: 46px; height: 46px;
   left: 38%; top: 40%;
   background: var(--accent);
-  opacity: 0.9;
   animation: hv-float 6.5s ease-in-out infinite 1.1s;
   transform: translate(calc(var(--px, 0) * 34px), calc(var(--py, 0) * 10px));
 }
+.hv-5 .hv-icon { width: 46%; height: 69%; }
 .hero-visual .hv-dot {
   position: absolute;
   width: 8px; height: 8px;
