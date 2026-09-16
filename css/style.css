@@ -299,8 +299,8 @@ h1, h2, h3, h4 {
 .hv-3 {
   width: 64px; height: 64px;
   left: 10%; bottom: 16%;
-  background: #fdf9f2;
-  border: 1.5px solid var(--line);
+  background: #D97757;
+  box-shadow: 0 20px 40px -18px rgba(217, 119, 87, 0.6);
   animation: hv-float 5.5s ease-in-out infinite 0.8s;
   transform: translate(calc(var(--px, 0) * 30px), calc(var(--py, 0) * -20px));
 }
@@ -318,11 +318,11 @@ h1, h2, h3, h4 {
 .hv-5 {
   width: 46px; height: 46px;
   left: 38%; top: 40%;
-  background: var(--accent);
+  background: #2C2C2C;
   animation: hv-float 6.5s ease-in-out infinite 1.1s;
   transform: translate(calc(var(--px, 0) * 34px), calc(var(--py, 0) * 10px));
 }
-.hv-5 .hv-icon { width: 46%; height: 69%; }
+.hv-5 .hv-icon { width: 40%; height: 60%; }
 .hero-visual .hv-dot {
   position: absolute;
   width: 8px; height: 8px;
