@@ -461,7 +461,9 @@
         const rect = viewport.getBoundingClientRect();
         vpW = rect.width;
         vpH = rect.height;
-        baseScale = Math.max(vpW / natW, vpH / natH);
+        // Overscan a bit past the exact-fit scale so there's always room to drag,
+        // even when the source image's aspect ratio already matches the frame.
+        baseScale = Math.max(vpW / natW, vpH / natH) * 1.12;
         applyTransform();
       }
 
