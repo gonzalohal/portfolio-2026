@@ -151,7 +151,9 @@
 
     // client logos
     if ($("clientsInner")) {
-      $("clientsInner").innerHTML = (site.clientLogos || [])
+      const logos = site.clientLogos || [];
+      const doubledLogos = logos.concat(logos);
+      $("clientsInner").innerHTML = doubledLogos
         .map((c) => `<img src="${esc(assetUrl(c.image))}" alt="${esc(c.name)}" loading="lazy">`)
         .join("");
     }

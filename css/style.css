@@ -382,27 +382,37 @@ h1, h2, h3, h4 {
 
 /* ---------- clients strip ---------- */
 .clients {
-  padding: 46px var(--pad);
+  padding: 52px 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 .clients-inner {
-  max-width: var(--maxw);
-  margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 44px;
-  flex-wrap: wrap;
-  justify-content: center;
-  opacity: 0.85;
+  gap: 76px;
+  width: max-content;
+  animation: clients-marquee 38s linear infinite;
 }
+.clients:hover .clients-inner { animation-play-state: paused; }
 .clients img {
-  height: 26px;
+  height: 46px;
   width: auto;
+  max-width: 160px;
   object-fit: contain;
+  flex: none;
   filter: grayscale(1);
-  opacity: 0.62;
+  opacity: 0.68;
   transition: opacity .25s var(--ease), filter .25s var(--ease);
 }
 .clients img:hover { opacity: 1; filter: grayscale(0); }
+@keyframes clients-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clients-inner { animation: none; }
+}
 
 /* ---------- section shell ---------- */
 section { padding: 100px var(--pad); }
