@@ -390,15 +390,15 @@ h1, h2, h3, h4 {
 .clients-inner {
   display: flex;
   align-items: center;
-  gap: 76px;
+  gap: 54px;
   width: max-content;
   animation: clients-marquee 38s linear infinite;
 }
 .clients:hover .clients-inner { animation-play-state: paused; }
 .clients img {
-  height: 46px;
+  height: 86px;
   width: auto;
-  max-width: 160px;
+  max-width: 220px;
   object-fit: contain;
   flex: none;
   filter: grayscale(1);
