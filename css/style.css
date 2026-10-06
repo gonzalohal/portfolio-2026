@@ -972,3 +972,7 @@ button.ig-card { border: 0; padding: 0; font: inherit; text-align: left; cursor:
 .video-gallery .vg-sub { color: var(--ink-soft); font-size: 15px; margin-bottom: 4px; }
 .video-gallery .mx-sec { margin-top: 34px; }
 .video-gallery .mx-sec-head h5 { font-size: 19px; }
+
+/* project images open enlarged on click */
+.modal-hero img, .modal-strip img { cursor: zoom-in; }
+.ig-viewer-stage img { max-width: min(94vw, 1200px); max-height: 78vh; }

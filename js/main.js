@@ -482,7 +482,7 @@
       const url = (f) => assetUrl(`images/work/${vSlug}/${f}`);
       stage.innerHTML = m.type === "video"
         ? `<video controls autoplay playsinline ${m.poster ? `poster="${esc(url(m.poster))}"` : ""} src="${esc(url(m.src))}"></video>`
-        : `<img src="${esc(url(m.src))}" alt="">`;
+        : `<img src="${esc(m.url || url(m.src))}" alt="${esc(m.alt || "")}">`;
       vCount.textContent = vMedia.length > 1 ? `${vIndex + 1} / ${vMedia.length}` : "";
       viewer.classList.toggle("is-single", vMedia.length < 2);
     }
@@ -490,9 +490,9 @@
       vIndex = (vIndex + d + vMedia.length) % vMedia.length;
       viewerShow();
     }
-    function openViewer(p, it) {
+    function openViewer(p, it, start) {
       vMedia = it.media;
-      vIndex = 0;
+      vIndex = start || 0;
       vSlug = p.slug;
       vCaption.textContent = it.caption || "";
       viewerShow();
@@ -530,11 +530,22 @@
       more.textContent = open ? "Ver menos" : `Ver todos (${more.dataset.total})`;
     }
     modalExtra.addEventListener("click", onIgClick);
+
+    // Any project image (hero or strip) opens enlarged, with arrows through the project's whole gallery.
+    $("modal").addEventListener("click", (e) => {
+      const img = e.target.closest(".modal-hero img, #modalStrip img");
+      if (!img || !viewingProject || !viewingProject.images) return;
+      const p = viewingProject;
+      const idx = img.closest("#modalStrip") ? Array.from($("modalStrip").children).indexOf(img) + 1 : 0;
+      openViewer(p, { media: p.images.map((f) => ({ type: "image", url: imgSrc(p, f), alt: p.name })), caption: p.name }, idx);
+    });
     if ($("videoGallery")) $("videoGallery").addEventListener("click", onIgClick);
 
+    let viewingProject = null;
     function openModal(slug) {
       const p = PROJECTS.find((x) => x.slug === slug);
       if (!p || isLocked(p)) return;
+      viewingProject = p;
 
       modalTag.textContent = CATEGORY_LABELS[p.categories[0]] || "";
       modalTitle.textContent = p.name;
