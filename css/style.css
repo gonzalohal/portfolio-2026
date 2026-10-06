@@ -809,3 +809,69 @@ footer {
 @media (max-width: 340px) {
   .work-grid { grid-template-columns: 1fr; }
 }
+
+/* ---------- project modal extras: video + Instagram posts ---------- */
+.mx-block { margin-top: 44px; padding-top: 30px; border-top: 1px solid var(--line); }
+.mx-title { font-family: var(--ff-head); font-size: clamp(20px, 2.4vw, 26px); letter-spacing: -0.01em; }
+.mx-videos { margin-top: 18px; display: grid; gap: 18px; }
+.mx-videos video { width: 100%; max-height: 70vh; border-radius: var(--radius-sm); background: #000; display: block; }
+.mx-videos figcaption { margin-top: 8px; font-size: 13px; color: var(--ink-faint); }
+.mx-sec { margin-top: 30px; }
+.mx-sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.mx-sec-head h5 { font-family: var(--ff-head); font-size: 16px; font-weight: 700; }
+.mx-sec-head span { font-size: 12.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.ig-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ig-grid .is-extra { display: none; }
+.ig-grid.is-open .is-extra { display: block; }
+.ig-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--bg-alt);
+}
+.ig-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease); }
+.ig-card:hover img { transform: scale(1.06); }
+.ig-card::after {
+  content: "";
+  position: absolute;
+  inset: 45% 0 0;
+  background: linear-gradient(transparent, rgba(22, 22, 26, .72));
+  pointer-events: none;
+}
+.ig-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ig-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  color: var(--ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.ig-card.is-ia .ig-badge { background: var(--accent); color: #fff; }
+.ig-meta {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.25;
+  text-transform: capitalize;
+}
+.ig-meta em { font-style: normal; text-transform: none; font-size: 11px; opacity: .9; }
+.mx-more { margin-top: 14px; }
+@media (max-width: 640px) {
+  .ig-grid { grid-template-columns: repeat(2, 1fr); }
+}

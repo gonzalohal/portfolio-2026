@@ -326,6 +326,62 @@
     }
   }
 
+  /* ================= PROJECT EXTRAS: videos + Instagram posts ================= */
+  const IG_SECTIONS = [
+    { key: "ia", title: "Generados con IA", badge: "IA" },
+    { key: "reels", title: "Reels", badge: "Reel" },
+    { key: "stories", title: "Stories", badge: "Story" },
+    { key: "carruseles", title: "Carruseles", badge: "Carrusel" },
+    { key: "feed", title: "Feed / Placa única", badge: "Post" },
+  ];
+  const IG_PREVIEW = 8;
+
+  function igDate(iso) {
+    const d = new Date(iso + "T12:00:00");
+    return d.toLocaleDateString("es-AR", { month: "short", year: "numeric" }).replace(".", "");
+  }
+
+  function igCard(p, sec, it, extra) {
+    if (!/^https:\/\/(www\.)?instagram\.com\//.test(it.url || "")) return "";
+    const when = igDate(it.date);
+    const thumb = it.thumb ? assetUrl(`images/work/${p.slug}/${it.thumb}`) : "";
+    return `
+      <a class="ig-card${sec.key === "ia" ? " is-ia" : ""}${extra ? " is-extra" : ""}" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(sec.badge)} de ${esc(when)} en Instagram">
+        ${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy">` : ""}
+        <span class="ig-badge">${esc(sec.badge)}</span>
+        <span class="ig-meta"><b>${esc(when)}</b>${it.note ? `<em>${esc(it.note)}</em>` : ""}</span>
+      </a>`;
+  }
+
+  function igSectionMarkup(p, sec) {
+    const items = ((p.instagram || {})[sec.key] || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    if (!items.length) return "";
+    const cards = items.map((it, i) => igCard(p, sec, it, i >= IG_PREVIEW));
+    return `
+      <section class="mx-sec">
+        <div class="mx-sec-head"><h5>${esc(sec.title)}</h5><span>${items.length}</span></div>
+        <div class="ig-grid">${cards.join("")}</div>
+        ${items.length > IG_PREVIEW ? `<button type="button" class="btn btn-ghost btn-sm mx-more" data-total="${items.length}">Ver todos (${items.length})</button>` : ""}
+      </section>`;
+  }
+
+  function modalExtrasMarkup(p) {
+    let html = "";
+    const videos = p.videos || [];
+    if (videos.length) {
+      html += `<section class="mx-block"><h4 class="mx-title">Video</h4><div class="mx-videos">${videos
+        .map(
+          (v) => `<figure><video controls preload="metadata" playsinline src="${esc(assetUrl(`images/work/${p.slug}/${v.src}`))}"></video><figcaption>${esc(v.label || "")}${v.label && v.title ? " — " : ""}${esc(v.title || "")}</figcaption></figure>`
+        )
+        .join("")}</div></section>`;
+    }
+    const blocks = IG_SECTIONS.map((sec) => igSectionMarkup(p, sec)).filter(Boolean);
+    if (blocks.length) {
+      html += `<div class="mx-block"><h4 class="mx-title">Publicaciones en Instagram</h4>${blocks.join("")}</div>`;
+    }
+    return html;
+  }
+
   /* ================= INTERACTIONS (bound once) ================= */
   function bindInteractions() {
     /* filters */
@@ -355,7 +411,16 @@
     const modalTitle = $("modalTitle");
     const modalDesc = $("modalDesc");
     const modalStrip = $("modalStrip");
+    const modalExtra = $("modalExtra");
     const modalCloseBtn = $("modalClose");
+
+    modalExtra.addEventListener("click", (e) => {
+      const more = e.target.closest(".mx-more");
+      if (!more) return;
+      const grid = more.parentElement.querySelector(".ig-grid");
+      const open = grid.classList.toggle("is-open");
+      more.textContent = open ? "Ver menos" : `Ver todos (${more.dataset.total})`;
+    });
 
     function openModal(slug) {
       const p = PROJECTS.find((x) => x.slug === slug);
@@ -366,6 +431,7 @@
       modalDesc.textContent = p.blurb;
 
       const modalHeroEl = document.querySelector(".modal-hero");
+      modalExtra.innerHTML = "";
       if (p.sketchfab) {
         modalHeroEl.innerHTML = `<iframe title="${esc(p.name)}" src="${esc(p.sketchfab)}" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe>`;
         modalStrip.innerHTML = "";
@@ -382,7 +448,10 @@
           .slice(1)
           .map((img) => `<img src="${imgSrc(p, img)}" alt="${esc(p.name)}" loading="lazy">`)
           .join("");
+        modalExtra.innerHTML = modalExtrasMarkup(p);
       }
+
+      $("modal").scrollTop = 0;
 
       overlay.classList.add("is-open");
       document.body.style.overflow = "hidden";
