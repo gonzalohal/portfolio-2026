@@ -358,22 +358,22 @@
     if (!items.length) return "";
     const cards = items.map((it, i) => igCard(p, sec, it, i >= IG_PREVIEW));
     return `
-      <section class="mx-sec">
+      <div class="mx-sec">
         <div class="mx-sec-head"><h5>${esc(sec.title)}</h5><span>${items.length}</span></div>
         <div class="ig-grid">${cards.join("")}</div>
         ${items.length > IG_PREVIEW ? `<button type="button" class="btn btn-ghost btn-sm mx-more" data-total="${items.length}">Ver todos (${items.length})</button>` : ""}
-      </section>`;
+      </div>`;
   }
 
   function modalExtrasMarkup(p) {
     let html = "";
     const videos = p.videos || [];
     if (videos.length) {
-      html += `<section class="mx-block"><h4 class="mx-title">Video</h4><div class="mx-videos">${videos
+      html += `<div class="mx-block"><h4 class="mx-title">Video</h4><div class="mx-videos">${videos
         .map(
           (v) => `<figure><video controls preload="metadata" playsinline src="${esc(assetUrl(`images/work/${p.slug}/${v.src}`))}"></video><figcaption>${esc(v.label || "")}${v.label && v.title ? " — " : ""}${esc(v.title || "")}</figcaption></figure>`
         )
-        .join("")}</div></section>`;
+        .join("")}</div></div>`;
     }
     const blocks = IG_SECTIONS.map((sec) => igSectionMarkup(p, sec)).filter(Boolean);
     if (blocks.length) {
