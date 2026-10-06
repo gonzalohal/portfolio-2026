@@ -149,6 +149,35 @@
       $("heroTicker").innerHTML = doubled.map((t) => `<span>${esc(t)}</span>`).join("");
     }
 
+    // label above the client logos strip
+    if ($("clientsLabel")) $("clientsLabel").textContent = site.clientsLabel || "Empresas con las que colaboré y colaboro actualmente";
+
+    // 3D printers
+    const pr = site.printers || {};
+    const printItems = pr.items || [];
+    const printSec = $("impresion-3d");
+    if (printSec) {
+      printSec.hidden = !printItems.length;
+      if ($("printEyebrow")) $("printEyebrow").textContent = pr.eyebrow || "";
+      if ($("printTitle")) $("printTitle").textContent = pr.title || "";
+      if ($("printSub")) $("printSub").textContent = pr.sub || "";
+      if ($("printersGrid")) {
+        $("printersGrid").innerHTML = printItems
+          .map(
+            (it) => `
+          <article class="work-card reveal${it.image ? "" : " is-textonly"}">
+            <div class="work-thumb">${it.image ? `<img src="${esc(assetUrl(it.image))}" alt="${esc(it.name)}" loading="lazy">` : `<span class="mono">${esc(it.name)}</span>`}</div>
+            <div class="work-body">
+              ${it.tag ? `<span class="tag">${esc(it.tag)}</span>` : ""}
+              <h3>${esc(it.name)}</h3>
+              ${it.desc ? `<p>${esc(it.desc)}</p>` : ""}
+            </div>
+          </article>`
+          )
+          .join("");
+      }
+    }
+
     // client logos
     if ($("clientsInner")) {
       const logos = site.clientLogos || [];

@@ -63,6 +63,7 @@
     { id: "sobre-mi", label: "Sobre mí" },
     { id: "servicios", label: "Servicios" },
     { id: "trabajos", label: "Trabajos" },
+    { id: "impresoras", label: "Impresoras 3D" },
     { id: "experiencia", label: "Experiencia" },
     { id: "formacion", label: "Formación" },
     { id: "contacto", label: "Contacto" },
@@ -724,6 +725,13 @@
   function renderMarcas(container) {
     container.appendChild(el("p", "section-desc", "Logos que aparecen en la franja arriba de “Sobre mí”."));
     const panel = el("div", "panel");
+    panel.appendChild(
+      textField(
+        "Texto sobre el slide",
+        site.clientsLabel || "Empresas con las que colaboré y colaboro actualmente",
+        (v) => { site.clientsLabel = v; dirtySite = true; }
+      )
+    );
     const wrap = el("div");
     panel.appendChild(wrap);
 
@@ -788,6 +796,92 @@
       wrap.appendChild(
         btn("+ Agregar marca", "btn-sm", () => {
           site.clientLogos.push({ name: "Nueva marca", image: "images/site/clients/placeholder.png" });
+          dirtySite = true;
+          draw();
+        })
+      );
+    }
+    draw();
+    container.appendChild(panel);
+  }
+
+  function renderImpresoras(container) {
+    site.printers = site.printers || { eyebrow: "Impresión 3D", title: "", sub: "", items: [] };
+    const pr = site.printers;
+    pr.items = pr.items || [];
+    container.appendChild(el("p", "section-desc", "Sección con tus impresoras 3D (entre las marcas y Experiencia). Si no hay ninguna, la sección no se muestra."));
+
+    const head = el("div", "panel");
+    head.appendChild(el("h3", null, "Encabezado"));
+    head.appendChild(textField("Etiqueta", pr.eyebrow, (v) => { pr.eyebrow = v; dirtySite = true; }));
+    head.appendChild(textField("Título", pr.title, (v) => { pr.title = v; dirtySite = true; }));
+    head.appendChild(textareaField("Texto de apoyo", pr.sub, (v) => { pr.sub = v; dirtySite = true; }, { rows: 2 }));
+    container.appendChild(head);
+
+    const panel = el("div", "panel");
+    panel.appendChild(el("h3", null, "Impresoras"));
+    const wrap = el("div");
+    panel.appendChild(wrap);
+
+    function draw() {
+      wrap.innerHTML = "";
+      pr.items.forEach((it, idx) => {
+        const row = el("div", "list-row printer-row");
+        if (it.image) {
+          const img = document.createElement("img");
+          img.src = assetUrl(it.image) + "?v=" + Date.now();
+          row.appendChild(img);
+        } else {
+          row.appendChild(el("div", "ph", "Sin foto"));
+        }
+        const body = el("div", "row-body");
+        body.appendChild(textField("Nombre", it.name, (v) => { it.name = v; dirtySite = true; }));
+        body.appendChild(textField("Etiqueta (ej: Principal)", it.tag, (v) => { it.tag = v; dirtySite = true; }));
+        body.appendChild(textareaField("Descripción", it.desc, (v) => { it.desc = v; dirtySite = true; }, { rows: 2 }));
+        body.appendChild(
+          btn(it.image ? "Cambiar foto" : "Subir foto", "btn-sm", async () => {
+            const file = await pickFile("image/*");
+            if (!file) return;
+            try {
+              showLoading(true);
+              const path = "images/site/printers/" + slugify(it.name || "impresora") + extFromFile(file);
+              await uploadToPath(file, path, 1400);
+              it.image = path;
+              dirtySite = true;
+              draw();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+        row.appendChild(body);
+
+        const ctrl = el("div", "row-ctrl");
+        ctrl.appendChild(btn("↑", "btn-sm", () => {
+          if (idx === 0) return;
+          [pr.items[idx - 1], pr.items[idx]] = [pr.items[idx], pr.items[idx - 1]];
+          dirtySite = true;
+          draw();
+        }));
+        ctrl.appendChild(btn("↓", "btn-sm", () => {
+          if (idx === pr.items.length - 1) return;
+          [pr.items[idx + 1], pr.items[idx]] = [pr.items[idx], pr.items[idx + 1]];
+          dirtySite = true;
+          draw();
+        }));
+        ctrl.appendChild(btn("✕", "btn-sm btn-danger", () => {
+          pr.items.splice(idx, 1);
+          dirtySite = true;
+          draw();
+        }));
+        row.appendChild(ctrl);
+        wrap.appendChild(row);
+      });
+      wrap.appendChild(
+        btn("+ Agregar impresora", "btn-sm", () => {
+          pr.items.push({ name: "Nueva impresora", tag: "", desc: "", image: "" });
           dirtySite = true;
           draw();
         })
@@ -1574,6 +1668,7 @@
     "sobre-mi": renderSobreMi,
     servicios: renderServicios,
     trabajos: renderTrabajos,
+    impresoras: renderImpresoras,
     experiencia: renderExperiencia,
     formacion: renderFormacion,
     contacto: renderContacto,

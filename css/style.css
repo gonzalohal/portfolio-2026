@@ -976,3 +976,18 @@ button.ig-card { border: 0; padding: 0; font: inherit; text-align: left; cursor:
 /* project images open enlarged on click */
 .modal-hero img, .modal-strip img { cursor: zoom-in; }
 .ig-viewer-stage img { max-width: min(94vw, 1200px); max-height: 78vh; }
+
+/* ---------- clients label + printers ---------- */
+.clients-label {
+  text-align: center;
+  margin: 0 var(--pad) 26px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.clients-label:empty { display: none; }
+.printers-grid .work-card { cursor: default; }
+.printers-grid .work-card:hover { transform: none; box-shadow: none; }
+.printers-grid .work-card.is-textonly .work-thumb .mono { font-size: 22px; }

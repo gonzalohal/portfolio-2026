@@ -177,6 +177,8 @@ label.f-label { display: block; font-size: 12px; font-weight: 600; color: var(--
 /* ---- image pickers ---- */
 .photo-picker { display: flex; align-items: center; gap: 16px; }
 .photo-picker img { width: 90px; height: 90px; object-fit: cover; border-radius: 10px; background: var(--a-bg); border: 1px solid var(--a-line); }
+.printer-row img, .printer-row .ph { width: 110px; height: 82px; border-radius: 8px; object-fit: cover; background: var(--a-bg); border: 1px solid var(--a-line); flex: none; }
+.printer-row .ph { display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--a-soft); border-style: dashed; }
 .logo-row img { width: 44px; height: 44px; object-fit: contain; background: var(--a-bg); border-radius: 8px; border: 1px solid var(--a-line); }
 
 /* ---- work grid (admin) ---- */
