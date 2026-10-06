@@ -477,9 +477,17 @@
     const vCaption = $("igViewerCaption");
     let vMedia = [], vIndex = 0, vSlug = "";
 
+    const mediaUrl = (m) => m.url || assetUrl(`images/work/${vSlug}/${m.src}`);
+    // Warm the browser cache so stepping between slides doesn't wait on the network.
+    function preload(m) {
+      if (m && m.type !== "video") new Image().src = mediaUrl(m);
+    }
+
     function viewerShow() {
       const m = vMedia[vIndex];
       const url = (f) => assetUrl(`images/work/${vSlug}/${f}`);
+      preload(vMedia[(vIndex + 1) % vMedia.length]);
+      preload(vMedia[(vIndex - 1 + vMedia.length) % vMedia.length]);
       stage.innerHTML = m.type === "video"
         ? `<video controls autoplay playsinline ${m.poster ? `poster="${esc(url(m.poster))}"` : ""} src="${esc(url(m.src))}"></video>`
         : `<img src="${esc(m.url || url(m.src))}" alt="${esc(m.alt || "")}">`;
@@ -497,6 +505,7 @@
       vCaption.textContent = it.caption || "";
       viewerShow();
       viewer.classList.add("is-open");
+      vMedia.slice(0, 12).forEach(preload);
     }
     function closeViewer() {
       viewer.classList.remove("is-open");
