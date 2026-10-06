@@ -999,51 +999,45 @@ button.ig-card { border: 0; padding: 0; font: inherit; text-align: left; cursor:
 a.site-card { display: block; color: inherit; text-decoration: none; }
 .site-host { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--accent); }
 
-/* ---------- highlighted Adobe skills ---------- */
-.adobe-block {
-  margin-top: 30px;
-  padding: 18px 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--bg);
-}
+/* ---------- highlighted Adobe skills (kept quiet) ---------- */
+.adobe-block { margin-top: 30px; }
 .adobe-block[hidden] { display: none; }
-.adobe-head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-.adobe-level {
-  padding: 4px 11px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .05em;
+.adobe-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
   text-transform: uppercase;
+  color: var(--ink-faint);
 }
-.adobe-title { font-family: var(--ff-head); font-weight: 700; font-size: 15px; }
+.adobe-level + .adobe-title::before { content: "·"; margin: 0 8px; }
 .adobe-tools { display: flex; flex-wrap: wrap; gap: 10px; }
 .adobe-tool {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 6px 15px 6px 6px;
+  gap: 8px;
+  padding: 6px 16px 6px 7px;
   border-radius: 999px;
-  background: #fff;
   border: 1px solid var(--line);
   font-size: 13px;
   font-weight: 600;
   color: var(--ink);
 }
 .adobe-ico {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-style: normal;
   font-family: var(--ff-head);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
-  color: #fff;
+  background: var(--bg-alt);
+  color: var(--ink-soft);
 }
-.adobe-block + .skill-pills { margin-top: 18px; }
+.adobe-block + .skill-pills { margin-top: 10px; }

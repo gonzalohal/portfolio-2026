@@ -103,22 +103,11 @@
   }
 
   /* ================= SITE RENDER ================= */
-  const ADOBE_ICONS = {
-    illustrator: ["Ai", "linear-gradient(150deg,#2b0400,#d1360a 55%,#ff9a00)"],
-    photoshop: ["Ps", "linear-gradient(150deg,#001e36,#0a5f9e 60%,#31a8ff)"],
-    "after effects": ["Ae", "linear-gradient(150deg,#00005b,#4b3bb0 60%,#9999ff)"],
-    premiere: ["Pr", "linear-gradient(150deg,#1b0035,#6a2fc7 60%,#c9a8ff)"],
-    "premiere pro": ["Pr", "linear-gradient(150deg,#1b0035,#6a2fc7 60%,#c9a8ff)"],
-    indesign: ["Id", "linear-gradient(150deg,#49021f,#d1124f 60%,#ff6b9a)"],
-    lightroom: ["Lr", "linear-gradient(150deg,#001e36,#0a5f9e 60%,#31a8ff)"],
-    xd: ["Xd", "linear-gradient(150deg,#2b0033,#8a1fa8 60%,#ff61f6)"],
-  };
+  const ADOBE_ABBR = { illustrator: "Ai", photoshop: "Ps", "after effects": "Ae", premiere: "Pr", "premiere pro": "Pr", indesign: "Id", lightroom: "Lr", xd: "Xd" };
 
   function adobeTool(name) {
-    const hit = ADOBE_ICONS[String(name).toLowerCase().trim()];
-    const abbr = hit ? hit[0] : String(name).slice(0, 2);
-    const bg = hit ? hit[1] : "linear-gradient(150deg,#16161a,#4a4a52)";
-    return `<span class="adobe-tool"><i class="adobe-ico" style="background:${bg}">${esc(abbr)}</i>${esc(name)}</span>`;
+    const abbr = ADOBE_ABBR[String(name).toLowerCase().trim()] || String(name).slice(0, 2);
+    return `<span class="adobe-tool"><i class="adobe-ico">${esc(abbr)}</i>${esc(name)}</span>`;
   }
 
   function siteCard(w) {
