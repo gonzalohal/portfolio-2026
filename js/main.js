@@ -318,8 +318,17 @@
     const visible = all.slice(0, visibleCount);
     grid.innerHTML = visible.map(cardMarkup).join("");
 
+    // "Audiovisual" shows every video (AI, reels, stories) instead of the project cards.
+    const gallery = $("videoGallery");
+    const galleryHtml = currentFilter === "audiovisual" && gallery ? videoGalleryMarkup() : "";
+    if (gallery) {
+      gallery.innerHTML = galleryHtml;
+      gallery.hidden = !galleryHtml;
+    }
+    grid.style.display = galleryHtml ? "none" : "";
+
     const moreWrap = $("workMore");
-    if (moreWrap) moreWrap.hidden = visibleCount >= all.length;
+    if (moreWrap) moreWrap.hidden = !!galleryHtml || visibleCount >= all.length;
 
     if (revealObserver) {
       grid.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
@@ -341,20 +350,59 @@
     return d.toLocaleDateString("es-AR", { month: "short", year: "numeric" }).replace(".", "");
   }
 
-  function igCard(p, sec, it, extra) {
-    if (!/^https:\/\/(www\.)?instagram\.com\//.test(it.url || "")) return "";
+  function igItems(p, key) {
+    return ((p.instagram || {})[key] || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  }
+
+  // `brand` (project name) is shown on the card when posts from several projects are mixed together.
+  function igCard(p, sec, it, extra, idx, brand) {
     const when = igDate(it.date);
     const thumb = it.thumb ? assetUrl(`images/work/${p.slug}/${it.thumb}`) : "";
-    return `
-      <a class="ig-card${sec.key === "ia" ? " is-ia" : ""}${extra ? " is-extra" : ""}" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(sec.badge)} de ${esc(when)} en Instagram">
+    const cls = `ig-card${sec.key === "ia" ? " is-ia" : ""}${extra ? " is-extra" : ""}`;
+    const note = [brand, it.note].filter(Boolean).join(" · ");
+    const inner = `
         ${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy">` : ""}
         <span class="ig-badge">${esc(sec.badge)}</span>
-        <span class="ig-meta"><b>${esc(when)}</b>${it.note ? `<em>${esc(it.note)}</em>` : ""}</span>
-      </a>`;
+        ${it.media && it.media[0] && it.media[0].type === "video" ? '<span class="ig-play" aria-hidden="true"></span>' : ""}
+        <span class="ig-meta"><b>${esc(when)}</b>${note ? `<em>${esc(note)}</em>` : ""}</span>`;
+    // Posts whose media was downloaded open in the on-site viewer; the rest link out to Instagram.
+    if (it.media && it.media.length) {
+      return `<button type="button" class="${cls}" data-slug="${esc(p.slug)}" data-sec="${sec.key}" data-idx="${idx}" aria-label="Ver ${esc(sec.badge)} de ${esc(when)}">${inner}</button>`;
+    }
+    if (!/^https:\/\/(www\.)?instagram\.com\//.test(it.url || "")) return "";
+    return `<a class="${cls}" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(sec.badge)} de ${esc(when)} en Instagram">${inner}</a>`;
+  }
+
+  // Audiovisual filter: every video-type post (AI, reels, stories) across all unlocked projects, newest first.
+  const VIDEO_KEYS = ["ia", "reels", "stories"];
+  const VG_PREVIEW = 12;
+
+  function videoGalleryMarkup() {
+    let total = 0;
+    const blocks = VIDEO_KEYS.map((key) => {
+      const sec = IG_SECTIONS.find((s) => s.key === key);
+      const entries = [];
+      PROJECTS.forEach((p) => {
+        if (isLocked(p) || p.textOnly) return;
+        igItems(p, key).forEach((it, idx) => entries.push({ p, it, idx }));
+      });
+      if (!entries.length) return "";
+      entries.sort((a, b) => String(b.it.date).localeCompare(String(a.it.date)));
+      total += entries.length;
+      const cards = entries.map((e, i) => igCard(e.p, sec, e.it, i >= VG_PREVIEW, e.idx, e.p.name));
+      return `
+        <div class="mx-sec">
+          <div class="mx-sec-head"><h5>${esc(sec.title)}</h5><span>${entries.length}</span></div>
+          <div class="ig-grid">${cards.join("")}</div>
+          ${entries.length > VG_PREVIEW ? `<button type="button" class="btn btn-ghost btn-sm mx-more" data-total="${entries.length}">Ver todos (${entries.length})</button>` : ""}
+        </div>`;
+    }).filter(Boolean);
+    if (!blocks.length) return "";
+    return `<p class="vg-sub">${total} videos de todos los trabajos — del más reciente al más antiguo.</p>${blocks.join("")}`;
   }
 
   function igSectionMarkup(p, sec) {
-    const items = ((p.instagram || {})[sec.key] || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    const items = igItems(p, sec.key);
     if (!items.length) return "";
     const cards = items.map((it, i) => igCard(p, sec, it, i >= IG_PREVIEW, i));
     return `
@@ -420,7 +468,6 @@
     const modalDesc = $("modalDesc");
     const modalStrip = $("modalStrip");
     const modalExtra = $("modalExtra");
-    let openProject = null;
     const modalCloseBtn = $("modalClose");
 
     /* on-site viewer for posts whose media was downloaded */
@@ -467,11 +514,13 @@
       if (e.key === "ArrowRight" && vMedia.length > 1) viewerStep(1);
     });
 
-    modalExtra.addEventListener("click", (e) => {
+    // Shared by the project modal and the Audiovisual video gallery.
+    function onIgClick(e) {
       const card = e.target.closest("button.ig-card");
-      if (card && openProject) {
-        const it = igItems(openProject, card.dataset.sec)[Number(card.dataset.idx)];
-        if (it && it.media) openViewer(openProject, it);
+      if (card) {
+        const p = PROJECTS.find((x) => x.slug === card.dataset.slug);
+        const it = p && igItems(p, card.dataset.sec)[Number(card.dataset.idx)];
+        if (it && it.media) openViewer(p, it);
         return;
       }
       const more = e.target.closest(".mx-more");
@@ -479,12 +528,13 @@
       const grid = more.parentElement.querySelector(".ig-grid");
       const open = grid.classList.toggle("is-open");
       more.textContent = open ? "Ver menos" : `Ver todos (${more.dataset.total})`;
-    });
+    }
+    modalExtra.addEventListener("click", onIgClick);
+    if ($("videoGallery")) $("videoGallery").addEventListener("click", onIgClick);
 
     function openModal(slug) {
       const p = PROJECTS.find((x) => x.slug === slug);
       if (!p || isLocked(p)) return;
-      openProject = p;
 
       modalTag.textContent = CATEGORY_LABELS[p.categories[0]] || "";
       modalTitle.textContent = p.name;

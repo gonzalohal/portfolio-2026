@@ -966,3 +966,9 @@ button.ig-card { border: 0; padding: 0; font: inherit; text-align: left; cursor:
   .ig-viewer-nav.is-prev { left: 6px; }
   .ig-viewer-nav.is-next { right: 6px; }
 }
+
+/* ---------- Audiovisual filter: all videos ---------- */
+.video-gallery[hidden] { display: none; }
+.video-gallery .vg-sub { color: var(--ink-soft); font-size: 15px; margin-bottom: 4px; }
+.video-gallery .mx-sec { margin-top: 34px; }
+.video-gallery .mx-sec-head h5 { font-size: 19px; }
