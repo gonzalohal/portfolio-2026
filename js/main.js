@@ -356,7 +356,7 @@
   function igSectionMarkup(p, sec) {
     const items = ((p.instagram || {})[sec.key] || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
     if (!items.length) return "";
-    const cards = items.map((it, i) => igCard(p, sec, it, i >= IG_PREVIEW));
+    const cards = items.map((it, i) => igCard(p, sec, it, i >= IG_PREVIEW, i));
     return `
       <div class="mx-sec">
         <div class="mx-sec-head"><h5>${esc(sec.title)}</h5><span>${items.length}</span></div>
@@ -372,6 +372,14 @@
       html += `<div class="mx-block"><h4 class="mx-title">Video</h4><div class="mx-videos">${videos
         .map(
           (v) => `<figure><video controls preload="metadata" playsinline src="${esc(assetUrl(`images/work/${p.slug}/${v.src}`))}"></video><figcaption>${esc(v.label || "")}${v.label && v.title ? " — " : ""}${esc(v.title || "")}</figcaption></figure>`
+        )
+        .join("")}</div></div>`;
+    }
+    const models = (p.models || []).filter((m) => /^https:\/\/sketchfab\.com\//.test(m.embed || ""));
+    if (models.length) {
+      html += `<div class="mx-block"><h4 class="mx-title">Modelo 3D</h4><div class="mx-models">${models
+        .map(
+          (m) => `<figure><iframe title="${esc(m.title || p.name)}" src="${esc(m.embed)}" loading="lazy" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe>${m.title ? `<figcaption>${esc(m.title)}</figcaption>` : ""}</figure>`
         )
         .join("")}</div></div>`;
     }
@@ -412,9 +420,60 @@
     const modalDesc = $("modalDesc");
     const modalStrip = $("modalStrip");
     const modalExtra = $("modalExtra");
+    let openProject = null;
     const modalCloseBtn = $("modalClose");
 
+    /* on-site viewer for posts whose media was downloaded */
+    const viewer = $("igViewer");
+    const stage = $("igViewerStage");
+    const vCount = $("igViewerCount");
+    const vCaption = $("igViewerCaption");
+    let vMedia = [], vIndex = 0, vSlug = "";
+
+    function viewerShow() {
+      const m = vMedia[vIndex];
+      const url = (f) => assetUrl(`images/work/${vSlug}/${f}`);
+      stage.innerHTML = m.type === "video"
+        ? `<video controls autoplay playsinline ${m.poster ? `poster="${esc(url(m.poster))}"` : ""} src="${esc(url(m.src))}"></video>`
+        : `<img src="${esc(url(m.src))}" alt="">`;
+      vCount.textContent = vMedia.length > 1 ? `${vIndex + 1} / ${vMedia.length}` : "";
+      viewer.classList.toggle("is-single", vMedia.length < 2);
+    }
+    function viewerStep(d) {
+      vIndex = (vIndex + d + vMedia.length) % vMedia.length;
+      viewerShow();
+    }
+    function openViewer(p, it) {
+      vMedia = it.media;
+      vIndex = 0;
+      vSlug = p.slug;
+      vCaption.textContent = it.caption || "";
+      viewerShow();
+      viewer.classList.add("is-open");
+    }
+    function closeViewer() {
+      viewer.classList.remove("is-open");
+      stage.innerHTML = "";
+    }
+    $("igViewerClose").addEventListener("click", closeViewer);
+    $("igViewerPrev").addEventListener("click", () => viewerStep(-1));
+    $("igViewerNext").addEventListener("click", () => viewerStep(1));
+    viewer.addEventListener("click", (e) => {
+      if (e.target === viewer || e.target === stage) closeViewer();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (!viewer.classList.contains("is-open")) return;
+      if (e.key === "ArrowLeft" && vMedia.length > 1) viewerStep(-1);
+      if (e.key === "ArrowRight" && vMedia.length > 1) viewerStep(1);
+    });
+
     modalExtra.addEventListener("click", (e) => {
+      const card = e.target.closest("button.ig-card");
+      if (card && openProject) {
+        const it = igItems(openProject, card.dataset.sec)[Number(card.dataset.idx)];
+        if (it && it.media) openViewer(openProject, it);
+        return;
+      }
       const more = e.target.closest(".mx-more");
       if (!more) return;
       const grid = more.parentElement.querySelector(".ig-grid");
@@ -425,6 +484,7 @@
     function openModal(slug) {
       const p = PROJECTS.find((x) => x.slug === slug);
       if (!p || isLocked(p)) return;
+      openProject = p;
 
       modalTag.textContent = CATEGORY_LABELS[p.categories[0]] || "";
       modalTitle.textContent = p.name;
@@ -458,6 +518,7 @@
     }
 
     function closeModal() {
+      closeViewer();
       overlay.classList.remove("is-open");
       document.body.style.overflow = "";
     }
@@ -472,7 +533,7 @@
       if (e.target === overlay) closeModal();
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeModal();
+      if (e.key === "Escape") (viewer.classList.contains("is-open") ? closeViewer : closeModal)();
     });
 
     /* mobile menu */

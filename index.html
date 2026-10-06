@@ -215,6 +215,24 @@
   </div>
 </div>
 
+<!-- ================= POST VIEWER ================= -->
+<div class="ig-viewer" id="igViewer" role="dialog" aria-modal="true" aria-label="Vista previa de la publicación">
+  <button class="ig-viewer-close" id="igViewerClose" aria-label="Cerrar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <button class="ig-viewer-nav is-prev" id="igViewerPrev" aria-label="Anterior">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <div class="ig-viewer-stage" id="igViewerStage"></div>
+  <button class="ig-viewer-nav is-next" id="igViewerNext" aria-label="Siguiente">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+  <div class="ig-viewer-info">
+    <span class="ig-viewer-count" id="igViewerCount"></span>
+    <p class="ig-viewer-caption" id="igViewerCaption"></p>
+  </div>
+</div>
+
 <script src="js/main.js"></script>
 </body>
 </html>
