@@ -657,13 +657,16 @@ section { padding: 100px var(--pad); }
 footer {
   padding: 40px var(--pad) 60px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
+  gap: 6px;
+  text-align: center;
   font-size: 13px;
   color: var(--ink-faint);
 }
+.footer-credit { font-size: 12px; letter-spacing: .02em; opacity: .85; }
+.footer-credit:empty { display: none; }
 /* ---------- floating scroll-to-top button ---------- */
 .scroll-top-btn {
   position: fixed;
@@ -991,3 +994,56 @@ button.ig-card { border: 0; padding: 0; font: inherit; text-align: left; cursor:
 .printers-grid .work-card { cursor: default; }
 .printers-grid .work-card:hover { transform: none; box-shadow: none; }
 .printers-grid .work-card.is-textonly .work-thumb .mono { font-size: 22px; }
+
+/* ---------- websites section ---------- */
+a.site-card { display: block; color: inherit; text-decoration: none; }
+.site-host { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--accent); }
+
+/* ---------- highlighted Adobe skills ---------- */
+.adobe-block {
+  margin-top: 30px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.adobe-block[hidden] { display: none; }
+.adobe-head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.adobe-level {
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.adobe-title { font-family: var(--ff-head); font-weight: 700; font-size: 15px; }
+.adobe-tools { display: flex; flex-wrap: wrap; gap: 10px; }
+.adobe-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 15px 6px 6px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.adobe-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  font-family: var(--ff-head);
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+}
+.adobe-block + .skill-pills { margin-top: 18px; }

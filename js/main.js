@@ -103,6 +103,46 @@
   }
 
   /* ================= SITE RENDER ================= */
+  const ADOBE_ICONS = {
+    illustrator: ["Ai", "linear-gradient(150deg,#2b0400,#d1360a 55%,#ff9a00)"],
+    photoshop: ["Ps", "linear-gradient(150deg,#001e36,#0a5f9e 60%,#31a8ff)"],
+    "after effects": ["Ae", "linear-gradient(150deg,#00005b,#4b3bb0 60%,#9999ff)"],
+    premiere: ["Pr", "linear-gradient(150deg,#1b0035,#6a2fc7 60%,#c9a8ff)"],
+    "premiere pro": ["Pr", "linear-gradient(150deg,#1b0035,#6a2fc7 60%,#c9a8ff)"],
+    indesign: ["Id", "linear-gradient(150deg,#49021f,#d1124f 60%,#ff6b9a)"],
+    lightroom: ["Lr", "linear-gradient(150deg,#001e36,#0a5f9e 60%,#31a8ff)"],
+    xd: ["Xd", "linear-gradient(150deg,#2b0033,#8a1fa8 60%,#ff61f6)"],
+  };
+
+  function adobeTool(name) {
+    const hit = ADOBE_ICONS[String(name).toLowerCase().trim()];
+    const abbr = hit ? hit[0] : String(name).slice(0, 2);
+    const bg = hit ? hit[1] : "linear-gradient(150deg,#16161a,#4a4a52)";
+    return `<span class="adobe-tool"><i class="adobe-ico" style="background:${bg}">${esc(abbr)}</i>${esc(name)}</span>`;
+  }
+
+  function siteCard(w) {
+    const locked = !!w.locked && !PREVIEW.valid;
+    const src = `/api/reveal-image?site=${encodeURIComponent(w.id)}${PREVIEW.valid ? `&token=${encodeURIComponent(PREVIEW.token)}` : ""}`;
+    const safeUrl = /^https?:\/\//.test(w.url || "") ? w.url : "";
+    let host = "";
+    try { host = new URL(safeUrl).hostname.replace(/^www\./, ""); } catch (e) {}
+    const body = `
+        <div class="work-thumb"><img src="${src}" alt="${esc(w.name)}" loading="lazy"></div>
+        <div class="work-body">
+          <span class="tag">Sitio web</span>
+          <h3>${esc(w.name)}</h3>
+          ${w.desc ? `<p>${esc(w.desc)}</p>` : ""}
+          ${host && !locked ? `<span class="site-host">${esc(host)} ↗</span>` : ""}
+        </div>`;
+    if (locked) {
+      return `<article class="work-card reveal is-locked"><div class="work-card-inner">${body}</div>${blurBadge()}</article>`;
+    }
+    return safeUrl
+      ? `<a class="work-card site-card reveal" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">${body}</a>`
+      : `<article class="work-card reveal">${body}</article>`;
+  }
+
   function renderSite(site) {
     applyTheme(site.theme);
 
@@ -178,6 +218,18 @@
       }
     }
 
+    // websites (lockable: the screenshot is blurred server-side while locked)
+    const wsData = site.websites || {};
+    const wsItems = wsData.items || [];
+    const wsSec = $("sitios-web");
+    if (wsSec) {
+      wsSec.hidden = !wsItems.length;
+      if ($("sitesEyebrow")) $("sitesEyebrow").textContent = wsData.eyebrow || "";
+      if ($("sitesTitle")) $("sitesTitle").textContent = wsData.title || "";
+      if ($("sitesSub")) $("sitesSub").textContent = wsData.sub || "";
+      if ($("sitesGrid")) $("sitesGrid").innerHTML = wsItems.map(siteCard).join("");
+    }
+
     // client logos
     if ($("clientsInner")) {
       const logos = site.clientLogos || [];
@@ -192,6 +244,16 @@
     if (about.photo && $("aboutPhoto")) $("aboutPhoto").src = assetUrl(about.photo);
     if ($("aboutParagraphs")) {
       $("aboutParagraphs").innerHTML = (about.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join("");
+    }
+    // highlighted Adobe tools (advanced level)
+    const adobe = about.adobe || {};
+    const adobeEl = $("aboutAdobe");
+    if (adobeEl) {
+      const tools = adobe.items || [];
+      adobeEl.hidden = !tools.length;
+      adobeEl.innerHTML = tools.length
+        ? `<div class="adobe-head">${adobe.level ? `<span class="adobe-level">${esc(adobe.level)}</span>` : ""}<span class="adobe-title">${esc(adobe.title || "")}</span></div><div class="adobe-tools">${tools.map(adobeTool).join("")}</div>`
+        : "";
     }
     if ($("aboutSkills")) {
       $("aboutSkills").innerHTML = (about.skills || []).map((s) => `<span>${esc(s)}</span>`).join("");
@@ -285,6 +347,9 @@
     // footer
     if ($("footerText") && site.footer) {
       $("footerText").innerHTML = `© <span id="year"></span> ${esc(site.footer.text || "")}`;
+    }
+    if ($("footerCredit")) {
+      $("footerCredit").textContent = (site.footer && site.footer.credit) || "Sitio web diseñado y desarrollado por Gonzalo Hal";
     }
     const yearEl = $("year");
     if (yearEl) yearEl.textContent = new Date().getFullYear();

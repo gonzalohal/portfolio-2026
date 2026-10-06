@@ -50,6 +50,23 @@ async function serveCover(req, res, slug, token) {
   sendImage(res, storagePath, bytes, showBlurred ? "public, max-age=300, must-revalidate" : "public, max-age=3600, must-revalidate");
 }
 
+// Serves a "sitios web" screenshot, blurred on the fly while the site is locked (unless a valid
+// preview token is supplied). The lock flag is read live, so toggling it needs no deploy.
+async function serveSite(req, res, id, token) {
+  if (!/^[a-z0-9-]+$/i.test(id)) return res.status(400).json({ error: "Id inválido" });
+  const site = (await getKv("site")) || {};
+  const item = ((site.websites || {}).items || []).find((w) => w.id === id);
+  if (!item || !item.image) return res.status(404).json({ error: "Sitio no encontrado" });
+
+  const storagePath = String(item.image).replace(/^images\//, "");
+  const raw = await downloadObject("site-public", storagePath);
+  if (!raw) return res.status(404).json({ error: "No se encontró la imagen" });
+
+  const showBlurred = !!item.locked && !(await isTokenValid(token));
+  const bytes = showBlurred ? await redact(raw) : raw;
+  sendImage(res, storagePath, bytes, "public, max-age=300, must-revalidate");
+}
+
 // Public endpoint, gated by a valid (non-expired) preview token — serves the un-redacted
 // original of a manually-blurred (non-cover) image so a shared preview link can show it.
 async function serveOriginal(req, res, imgPath, token) {
@@ -69,9 +86,11 @@ module.exports = async (req, res) => {
   const slug = req.query?.slug || url.searchParams.get("slug");
   const status = req.query?.locked || url.searchParams.get("locked");
   const imgPath = req.query?.path || url.searchParams.get("path");
+  const siteId = req.query?.site || url.searchParams.get("site");
 
   try {
     if (status) return await serveLockedStatus(req, res);
+    if (siteId) return await serveSite(req, res, siteId, token);
     if (slug) return await serveCover(req, res, slug, token);
     return await serveOriginal(req, res, imgPath, token);
   } catch (err) {

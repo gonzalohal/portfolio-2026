@@ -64,6 +64,7 @@
     { id: "servicios", label: "Servicios" },
     { id: "trabajos", label: "Trabajos" },
     { id: "impresoras", label: "Impresoras 3D" },
+    { id: "sitios", label: "Sitios web" },
     { id: "experiencia", label: "Experiencia" },
     { id: "formacion", label: "Formación" },
     { id: "contacto", label: "Contacto" },
@@ -891,6 +892,105 @@
     container.appendChild(panel);
   }
 
+  function renderSitios(container) {
+    site.websites = site.websites || { eyebrow: "Desarrollo web", title: "", sub: "", items: [] };
+    const ws = site.websites;
+    ws.items = ws.items || [];
+    container.appendChild(el("p", "section-desc", "Sitios web desarrollados (debajo de las impresoras). Los marcados como bloqueados se ven difuminados con el mensaje “Desbloquear en la entrevista” y no muestran el link. Si no hay ninguno, la sección no se muestra."));
+
+    const head = el("div", "panel");
+    head.appendChild(el("h3", null, "Encabezado"));
+    head.appendChild(textField("Etiqueta", ws.eyebrow, (v) => { ws.eyebrow = v; dirtySite = true; }));
+    head.appendChild(textField("Título", ws.title, (v) => { ws.title = v; dirtySite = true; }));
+    head.appendChild(textareaField("Texto de apoyo", ws.sub, (v) => { ws.sub = v; dirtySite = true; }, { rows: 2 }));
+    container.appendChild(head);
+
+    const panel = el("div", "panel");
+    panel.appendChild(el("h3", null, "Sitios"));
+    const wrap = el("div");
+    panel.appendChild(wrap);
+
+    function draw() {
+      wrap.innerHTML = "";
+      ws.items.forEach((it, idx) => {
+        const row = el("div", "list-row printer-row");
+        if (it.image) {
+          const img = document.createElement("img");
+          img.src = assetUrl(it.image) + "?v=" + Date.now();
+          row.appendChild(img);
+        } else {
+          row.appendChild(el("div", "ph", "Sin captura"));
+        }
+        const body = el("div", "row-body");
+        body.appendChild(textField("Nombre", it.name, (v) => { it.name = v; dirtySite = true; }));
+        body.appendChild(textField("Link (https://…)", it.url, (v) => { it.url = v; dirtySite = true; }, { placeholder: "https://" }));
+        body.appendChild(textareaField("Descripción", it.desc, (v) => { it.desc = v; dirtySite = true; }, { rows: 2 }));
+
+        const lockRow = el("label", "checkbox-row");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = !!it.locked;
+        cb.addEventListener("change", () => { it.locked = cb.checked; dirtySite = true; });
+        lockRow.appendChild(cb);
+        lockRow.appendChild(document.createTextNode("Bloquear: difuminar y mostrar “Desbloquear en la entrevista”"));
+        body.appendChild(lockRow);
+
+        body.appendChild(
+          btn(it.image ? "Cambiar captura" : "Subir captura", "btn-sm", async () => {
+            const file = await pickFile("image/*");
+            if (!file) return;
+            try {
+              showLoading(true);
+              const path = "images/site/websites/" + it.id + extFromFile(file);
+              await uploadToPath(file, path, 1400);
+              it.image = path;
+              dirtySite = true;
+              draw();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+        row.appendChild(body);
+
+        const ctrl = el("div", "row-ctrl");
+        ctrl.appendChild(btn("↑", "btn-sm", () => {
+          if (idx === 0) return;
+          [ws.items[idx - 1], ws.items[idx]] = [ws.items[idx], ws.items[idx - 1]];
+          dirtySite = true;
+          draw();
+        }));
+        ctrl.appendChild(btn("↓", "btn-sm", () => {
+          if (idx === ws.items.length - 1) return;
+          [ws.items[idx + 1], ws.items[idx]] = [ws.items[idx], ws.items[idx + 1]];
+          dirtySite = true;
+          draw();
+        }));
+        ctrl.appendChild(btn("✕", "btn-sm btn-danger", () => {
+          ws.items.splice(idx, 1);
+          dirtySite = true;
+          draw();
+        }));
+        row.appendChild(ctrl);
+        wrap.appendChild(row);
+      });
+      wrap.appendChild(
+        btn("+ Agregar sitio", "btn-sm", () => {
+          const taken = new Set(ws.items.map((w) => w.id));
+          let n = ws.items.length + 1;
+          while (taken.has("sitio-" + n)) n++;
+          ws.items.push({ id: "sitio-" + n, name: "Nuevo sitio", url: "", desc: "", image: "", locked: false });
+          dirtySite = true;
+          draw();
+        })
+      );
+    }
+    draw();
+    container.appendChild(panel);
+  }
+
   function renderSobreMi(container) {
     const about = site.about;
     const panel1 = el("div", "panel");
@@ -944,7 +1044,15 @@
     container.appendChild(panel2);
 
     const panel3 = el("div", "panel");
-    panel3.appendChild(el("h3", null, "Software / skills (pills)"));
+    panel3.appendChild(el("h3", null, "Herramientas destacadas (Adobe)"));
+    about.adobe = about.adobe || { level: "Nivel avanzado", title: "Adobe Creative Cloud", items: [] };
+    about.adobe.items = about.adobe.items || [];
+    panel3.appendChild(textField("Etiqueta de nivel", about.adobe.level, (v) => { about.adobe.level = v; dirtySite = true; }));
+    panel3.appendChild(textField("Título", about.adobe.title, (v) => { about.adobe.title = v; dirtySite = true; }));
+    const adobeWrap = el("div");
+    panel3.appendChild(adobeWrap);
+    renderChipList(adobeWrap, about.adobe.items, { placeholder: "Ej: Illustrator", onChange: () => (dirtySite = true) });
+    panel3.appendChild(el("h3", null, "Otras herramientas (pills)"));
     const skillsWrap = el("div");
     panel3.appendChild(skillsWrap);
     renderChipList(skillsWrap, about.skills, { placeholder: "Ej: Figma", onChange: () => (dirtySite = true) });
@@ -1067,6 +1175,7 @@
   function renderFooter(container) {
     const panel = el("div", "panel");
     panel.appendChild(textField("Texto del footer (después del año ©)", site.footer.text, (v) => { site.footer.text = v; dirtySite = true; }));
+    panel.appendChild(textField("Línea de crédito (debajo)", site.footer.credit || "Sitio web diseñado y desarrollado por Gonzalo Hal", (v) => { site.footer.credit = v; dirtySite = true; }));
     container.appendChild(panel);
   }
 
@@ -1669,6 +1778,7 @@
     servicios: renderServicios,
     trabajos: renderTrabajos,
     impresoras: renderImpresoras,
+    sitios: renderSitios,
     experiencia: renderExperiencia,
     formacion: renderFormacion,
     contacto: renderContacto,
