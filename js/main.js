@@ -275,6 +275,36 @@
       : `<article class="work-card reveal">${body}</article>`;
   }
 
+  // "Sitios web" slider: native scroll-snap track + always-visible arrows that page by one card.
+  let siteSliderBound = false;
+  function initSiteSlider() {
+    const track = $("sitesGrid"), prev = $("sitesPrev"), next = $("sitesNext"), box = $("siteSlider");
+    if (!track || !prev || !next || !box) return;
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      box.classList.toggle("no-scroll", max <= 2);
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max - 2;
+    };
+    update();
+    if (siteSliderBound) return;
+    siteSliderBound = true;
+    const step = () => {
+      const card = track.querySelector(".work-card");
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return card ? card.getBoundingClientRect().width + gap : track.clientWidth;
+    };
+    const go = (dir) => track.scrollBy({ left: dir * step(), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    prev.addEventListener("click", () => go(-1));
+    next.addEventListener("click", () => go(1));
+    track.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    track.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
+    });
+  }
+
   function renderSite(site) {
     applyTheme(site.theme);
 
@@ -360,6 +390,7 @@
       if ($("sitesTitle")) $("sitesTitle").textContent = wsData.title || "";
       if ($("sitesSub")) $("sitesSub").textContent = wsData.sub || "";
       if ($("sitesGrid")) $("sitesGrid").innerHTML = wsItems.map(siteCard).join("");
+      initSiteSlider();
     }
 
     // brand manuals (interactive PDF flipbook)

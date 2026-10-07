@@ -1001,6 +1001,61 @@ button.ig-card { border: 0; padding: 0; font: inherit; text-align: left; cursor:
 .printers-grid .work-card.is-textonly .work-thumb .mono { font-size: 22px; }
 
 /* ---------- websites section ---------- */
+.site-slider { position: relative; }
+.sites-track {
+  --gap: 22px;
+  display: flex;
+  gap: var(--gap);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* room for the cards' hover lift / shadow, which overflow-x would otherwise clip */
+  padding: 10px 2px 30px;
+  margin: -10px -2px -30px;
+}
+.sites-track::-webkit-scrollbar { display: none; }
+.sites-track > .reveal { opacity: 1; }
+.sites-track > .reveal:not(:hover) { transform: none; }
+.sites-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--radius-md); }
+.sites-track > .work-card { flex: 0 0 calc((100% - 2 * var(--gap)) / 3); scroll-snap-align: start; }
+.slider-arrow {
+  position: absolute;
+  top: 36%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(22, 22, 26, .16);
+  cursor: pointer;
+  transition: background .2s, color .2s, opacity .2s, transform .2s var(--ease);
+}
+.slider-arrow svg { width: 20px; height: 20px; }
+.slider-prev { left: -23px; }
+.slider-next { right: -23px; }
+.slider-arrow:hover:not(:disabled) { background: var(--ink); color: #fff; transform: scale(1.06); }
+.slider-arrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.slider-arrow:disabled { opacity: .35; cursor: default; box-shadow: none; }
+.site-slider.no-scroll .slider-arrow { display: none; }
+@media (max-width: 980px) {
+  .sites-track > .work-card { flex-basis: calc((100% - var(--gap)) / 2); }
+}
+@media (max-width: 640px) {
+  .sites-track { --gap: 14px; }
+  .sites-track > .work-card { flex-basis: 84%; }
+  .slider-prev { left: 6px; }
+  .slider-next { right: 6px; }
+  .slider-arrow { width: 40px; height: 40px; top: 28%; }
+}
+@media (prefers-reduced-motion: reduce) { .slider-arrow { transition: none; } }
+
 a.site-card { display: block; color: inherit; text-decoration: none; }
 .site-host { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--accent); }
 
