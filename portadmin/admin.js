@@ -1084,6 +1084,15 @@
         visRow.appendChild(document.createTextNode("Visible en el portfolio"));
         body.appendChild(visRow);
 
+        const lockRow = el("label", "checkbox-row");
+        const lockCb = document.createElement("input");
+        lockCb.type = "checkbox";
+        lockCb.checked = !!it.locked;
+        lockCb.addEventListener("change", () => { it.locked = lockCb.checked; dirtySite = true; });
+        lockRow.appendChild(lockCb);
+        lockRow.appendChild(document.createTextNode("Bloquear: sin vista previa, difuminado con “Desbloqueá en la entrevista”"));
+        body.appendChild(lockRow);
+
         body.appendChild(
           textField(
             "Páginas ocultas (opcional): números separados por coma, ej. 4, 5",

@@ -1086,3 +1086,46 @@ a.site-card { display: block; color: inherit; text-decoration: none; }
   .manual-stage, .manual-pick { transition: none; }
 }
 
+
+/* ---------- locked brand manual: blurred cover + "can't preview" dialog ---------- */
+.manual-locked { position: relative; display: block; width: fit-content; max-width: 100%; margin: 8px auto 0; cursor: pointer; border-radius: 8px; }
+.manual-locked img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(620px, 72vh);
+  border-radius: 8px;
+  box-shadow: 0 26px 50px -22px rgba(22, 22, 26, .32), 0 8px 18px -10px rgba(22, 22, 26, .18);
+}
+.manual-locked:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+.manual-locked .blur-badge .pill { background: rgba(22, 22, 26, .8); }
+.manual-locked:hover .blur-badge .pill { background: rgba(22, 22, 26, .92); }
+
+.mlock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(14, 14, 17, .6);
+  backdrop-filter: blur(4px);
+}
+.mlock-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 32px 30px 28px;
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, .3);
+  animation: mlock-in .25s var(--ease);
+}
+.mlock-ico { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; margin-bottom: 14px; border-radius: 50%; background: var(--ink); color: #fff; }
+.mlock-ico svg { width: 20px; height: 20px; }
+.mlock-card h3 { margin: 0 0 8px; font-family: var(--ff-head); font-size: 22px; }
+.mlock-card p { margin: 0 0 22px; font-size: 15px; color: var(--ink-soft); }
+@keyframes mlock-in { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .mlock-card { animation: none; } }

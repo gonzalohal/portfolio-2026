@@ -229,7 +229,7 @@
       var back = total % 2 === 0 && state.page === total - 1;
       countEl.textContent = state.page + 1 + " / " + total;
       // la única hoja visible de una tapa/contratapa sola se centra corriendo el libro un cuarto de su ancho
-      stage.style.transform = isMobile() ? "" : front ? "translateX(-25%)" : back ? "translateX(25%)" : "";
+      stage.style.transform = isMobile() ? "" : total === 1 ? "translateX(25%)" : front ? "translateX(-25%)" : back ? "translateX(25%)" : "";
       gutter.style.display = front || back || isMobile() ? "none" : "";
       gutter.style.opacity = state.settled ? "1" : "0";
       var progress = total > 1 ? state.page / (total - 1) : 0;

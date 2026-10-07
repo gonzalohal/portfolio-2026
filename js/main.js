@@ -118,6 +118,45 @@
   let manualMountToken = 0;
   const MANUAL_START_PAGE = 1; // índice 1 = arranca abierto en el spread de las páginas 2 y 3
 
+  // Manual bloqueado: sin visor ni PDF; sólo se ve la portada difuminada (la difumina el servidor) y un cartel.
+  const manualIsLocked = (m) => !!m.locked && !PREVIEW.valid;
+  const lockedCoverUrl = (m) => `/api/reveal-image?manual=${encodeURIComponent(m.id)}${m.rev ? "&v=" + m.rev : ""}`;
+
+  function lockedManualMarkup(m) {
+    return `<div class="manual-locked" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Manual bloqueado: ${esc(m.name)}. Se desbloquea en la entrevista">
+      <img src="${esc(lockedCoverUrl(m))}" alt="">
+      ${blurBadge()}
+    </div>`;
+  }
+
+  function showManualLockedDialog(trigger) {
+    if (document.getElementById("manualLockDialog")) return;
+    const ov = document.createElement("div");
+    ov.id = "manualLockDialog";
+    ov.className = "mlock-overlay";
+    ov.innerHTML = `<div class="mlock-card" role="dialog" aria-modal="true" aria-labelledby="mlockTitle">
+      <span class="mlock-ico">${LOCK_ICON}</span>
+      <h3 id="mlockTitle">No se puede previsualizar</h3>
+      <p>Este manual se desbloquea en la entrevista.</p>
+      <button type="button" class="btn btn-primary" id="mlockOk">Entendido</button>
+    </div>`;
+    document.body.appendChild(ov);
+    const onKey = (e) => {
+      if (e.key === "Escape") close();
+    };
+    const close = () => {
+      ov.remove();
+      document.removeEventListener("keydown", onKey);
+      if (trigger && trigger.focus) trigger.focus();
+    };
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) close();
+    });
+    ov.querySelector("#mlockOk").addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
+    ov.querySelector("#mlockOk").focus();
+  }
+
   // "Manual de marca | Random Comex" -> "Random Comex"
   function shortManualName(name) {
     const parts = String(name || "").split("|");
@@ -135,8 +174,8 @@
     picker.hidden = !show;
     picker.innerHTML = show
       ? MANUALS.map(
-          (m) => `<button type="button" class="manual-pick" data-manual="${esc(m.id)}" aria-pressed="false" aria-label="Ver manual: ${esc(m.name)}">${
-            m.cover ? `<img src="${esc(assetUrl(m.cover))}${m.rev ? "?v=" + m.rev : ""}" alt="" loading="lazy">` : ""
+          (m) => `<button type="button" class="manual-pick${manualIsLocked(m) ? " is-locked" : ""}" data-manual="${esc(m.id)}" aria-pressed="false" aria-label="Ver manual: ${esc(m.name)}${manualIsLocked(m) ? " (bloqueado)" : ""}">${
+            m.cover ? `<img src="${esc(manualIsLocked(m) ? lockedCoverUrl(m) : assetUrl(m.cover) + (m.rev ? "?v=" + m.rev : ""))}" alt="" loading="lazy">` : ""
           }<span>${esc(shortManualName(m.name))}</span></button>`
         ).join("")
       : "";
@@ -180,6 +219,11 @@
         manualViewer = null;
       }
       stage.innerHTML = "";
+      if (manualIsLocked(m)) {
+        stage.innerHTML = lockedManualMarkup(m);
+        requestAnimationFrame(() => stage.classList.remove("is-fading"));
+        return;
+      }
       loadManualViewer()
         .then(() => {
           if (token !== manualMountToken) return;
@@ -811,6 +855,20 @@
         activeManualId = b.dataset.manual;
         syncManualUI();
         if (manualMounted) mountActiveManual(true);
+      });
+    }
+    const manualStageEl = $("manualStage");
+    if (manualStageEl) {
+      manualStageEl.addEventListener("click", (e) => {
+        const t = e.target.closest(".manual-locked");
+        if (t) showManualLockedDialog(t);
+      });
+      manualStageEl.addEventListener("keydown", (e) => {
+        const t = e.target.closest(".manual-locked");
+        if (t && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          showManualLockedDialog(t);
+        }
       });
     }
     const deepLink = /^#manual=(.+)$/.exec(location.hash);
