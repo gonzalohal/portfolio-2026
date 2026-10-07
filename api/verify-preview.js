@@ -9,6 +9,6 @@ module.exports = async (req, res) => {
     const { data } = await readPreviewAccess();
     res.status(200).json({ valid: true, expiresAt: data.expiresAt });
   } catch (err) {
-    res.status(500).json({ valid: false, error: String(err.message || err) });
+    res.status(500).json({ valid: false, error: "Error interno" });
   }
 };

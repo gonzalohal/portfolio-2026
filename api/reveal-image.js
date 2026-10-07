@@ -113,6 +113,6 @@ module.exports = async (req, res) => {
     if (slug) return await serveCover(req, res, slug, token);
     return await serveOriginal(req, res, imgPath, token);
   } catch (err) {
-    res.status(500).json({ error: String(err.message || err) });
+    res.status(500).json({ error: "Error interno" });
   }
 };
