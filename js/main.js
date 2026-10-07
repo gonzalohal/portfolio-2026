@@ -187,6 +187,9 @@
             title: m.name,
             fileUrl: manualFileUrl(m),
             startPage: MANUAL_START_PAGE,
+            // páginas ocultas (desenfocadas) hasta que se entra con el link de la entrevista
+            hiddenPages: PREVIEW.valid ? [] : m.hiddenPages || [],
+            hiddenLabel: "Oculto · " + UNLOCK_MSG,
             // pantalla completa = el modal, en la misma hoja que se estaba viendo (reusa lo ya procesado)
             onFullscreen: ({ page, data }) => window.ManualViewer.open({ title: m.name, fileUrl: manualFileUrl(m), data, startPage: page }),
           });

@@ -50,8 +50,33 @@
 
   var SAFE_LINK = /^(https?:|mailto:|tel:)/i;
 
+  // Desenfoque "horneado" en la imagen de la página (se achica y se vuelve a agrandar con suavizado): la versión
+  // nítida de una página oculta nunca llega al DOM. No usa ctx.filter porque Safari no lo soporta.
+  function blurCanvas(src) {
+    function scaled(from, w, h) {
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(w));
+      c.height = Math.max(1, Math.round(h));
+      var x = c.getContext("2d");
+      x.imageSmoothingEnabled = true;
+      x.imageSmoothingQuality = "high";
+      x.drawImage(from, 0, 0, c.width, c.height);
+      return c;
+    }
+    var tiny = scaled(src, src.width / 26, src.height / 26);
+    var mid = scaled(tiny, src.width / 8, src.height / 8);
+    var out = scaled(mid, src.width, src.height);
+    var ctx = out.getContext("2d");
+    ctx.fillStyle = "rgba(255,255,255,.22)"; // velo claro: se nota que está "tapada"
+    ctx.fillRect(0, 0, out.width, out.height);
+    return out;
+  }
+
   /* ---- PDF -> imágenes + links (igual que use-pdf-pages.ts del módulo) ---- */
-  async function renderPdf(url, onProgress, isCancelled) {
+  async function renderPdf(url, onProgress, isCancelled, hiddenPages) {
+    var hidden = {};
+    (hiddenPages || []).forEach(function (n) { hidden[n] = true; });
+    var hiddenIdx = [];
     var pdf = await window.pdfjsLib.getDocument({ url: url }).promise;
     var targetWidth = 900;
     var images = [];
@@ -68,11 +93,19 @@
       canvas.height = viewport.height;
       var ctx = canvas.getContext("2d");
       await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-      images.push(canvas.toDataURL("image/jpeg", 0.85));
+      var isHidden = !!hidden[i];
+      if (isHidden) {
+        var blurred = blurCanvas(canvas);
+        images.push(blurred.toDataURL("image/jpeg", 0.8));
+        blurred.width = blurred.height = 0;
+        hiddenIdx.push(i - 1);
+      } else {
+        images.push(canvas.toDataURL("image/jpeg", 0.85));
+      }
       canvas.width = canvas.height = 0; // libera la memoria del lienzo
 
       var boxes = [];
-      var annots = await page.getAnnotations({ intent: "display" });
+      var annots = isHidden ? [] : await page.getAnnotations({ intent: "display" });
       for (var k = 0; k < annots.length; k++) {
         var a = annots[k];
         if (a.subtype !== "Link") continue;
@@ -117,7 +150,7 @@
     }
 
     pdf.destroy(); // suelta el documento y su worker: ya tenemos todo renderizado
-    return { images: images, links: links, size: size };
+    return { images: images, links: links, size: size, hidden: hiddenIdx };
   }
 
   var ICON = {
@@ -126,6 +159,7 @@
     next: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
     full: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
     exit: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
+    lock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
     zoomOut: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg>',
   };
 
@@ -261,6 +295,12 @@
         img.alt = "Página " + (i + 1);
         img.draggable = false;
         el.appendChild(img);
+        if (data.hidden && data.hidden.indexOf(i) !== -1) {
+          var veil = document.createElement("div");
+          veil.className = "mv-hidden";
+          veil.innerHTML = '<span class="mv-hidden-pill">' + ICON.lock + esc(opts.hiddenLabel || "Contenido oculto") + "</span>";
+          el.appendChild(veil);
+        }
         data.links[i].forEach(function (l) {
           var a = document.createElement("a");
           a.className = "mv-link";
@@ -418,7 +458,8 @@
       return renderPdf(
         opts.fileUrl,
         function (done, total) { status.querySelector("p").textContent = "Preparando página " + done + " de " + total + "…"; },
-        function () { return state.cancelled; }
+        function () { return state.cancelled; },
+        opts.hiddenPages
       );
     });
 

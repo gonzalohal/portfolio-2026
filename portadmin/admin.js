@@ -1084,6 +1084,19 @@
         visRow.appendChild(document.createTextNode("Visible en el portfolio"));
         body.appendChild(visRow);
 
+        body.appendChild(
+          textField(
+            "Páginas ocultas (opcional): números separados por coma, ej. 4, 5",
+            (it.hiddenPages || []).join(", "),
+            (v) => {
+              it.hiddenPages = v.split(/[,;\s]+/).map(Number).filter((n) => Number.isInteger(n) && n >= 1);
+              dirtySite = true;
+            },
+            { placeholder: "4, 5" }
+          )
+        );
+        body.appendChild(el("p", "hint", "Esas páginas se ven desenfocadas con el cartel “Oculto · Desbloqueá en la entrevista”."));
+
         if (it.file) body.appendChild(el("p", "hint", "PDF cargado" + (it.pages ? " · " + it.pages + " páginas" : "")));
 
         const actions = el("div");
@@ -1111,7 +1124,7 @@
             btn("Probar visor", "btn-sm", async () => {
               try {
                 await loadScriptOnce("/js/manual-viewer.js");
-                window.ManualViewer.open({ title: it.name, fileUrl: assetUrl(it.file) + "?v=" + (it.rev || "") });
+                window.ManualViewer.open({ title: it.name, fileUrl: assetUrl(it.file) + "?v=" + (it.rev || ""), hiddenPages: it.hiddenPages || [], hiddenLabel: "Oculto · Desbloqueá en la entrevista" });
               } catch (e) {
                 setStatus("Error: " + e.message, "err");
               }
