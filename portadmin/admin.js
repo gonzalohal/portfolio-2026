@@ -1095,7 +1095,7 @@
             { placeholder: "4, 5" }
           )
         );
-        body.appendChild(el("p", "hint", "Esas páginas se ven desenfocadas con el cartel “Oculto · Desbloqueá en la entrevista”."));
+        body.appendChild(el("p", "hint", "Esas páginas se ven desenfocadas con el cartel “Oculto”."));
 
         if (it.file) body.appendChild(el("p", "hint", "PDF cargado" + (it.pages ? " · " + it.pages + " páginas" : "")));
 
@@ -1124,7 +1124,7 @@
             btn("Probar visor", "btn-sm", async () => {
               try {
                 await loadScriptOnce("/js/manual-viewer.js");
-                window.ManualViewer.open({ title: it.name, fileUrl: assetUrl(it.file) + "?v=" + (it.rev || ""), hiddenPages: it.hiddenPages || [], hiddenLabel: "Oculto · Desbloqueá en la entrevista" });
+                window.ManualViewer.open({ title: it.name, fileUrl: assetUrl(it.file) + "?v=" + (it.rev || ""), hiddenPages: it.hiddenPages || [], hiddenLabel: "Oculto" });
               } catch (e) {
                 setStatus("Error: " + e.message, "err");
               }
