@@ -200,6 +200,8 @@
       gutter.style.opacity = state.settled ? "1" : "0";
       var progress = total > 1 ? state.page / (total - 1) : 0;
       if (state.bookEl) {
+        // con una sola hoja visible, la sombra la lleva la hoja y no el contenedor (que sigue midiendo dos hojas)
+        state.bookEl.classList.toggle("is-single", front || back);
         state.bookEl.style.setProperty("--stack-left", String(progress));
         state.bookEl.style.setProperty("--stack-right", String(1 - progress));
       }
