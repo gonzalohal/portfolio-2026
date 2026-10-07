@@ -65,6 +65,7 @@
     { id: "trabajos", label: "Trabajos" },
     { id: "impresoras", label: "Impresoras 3D" },
     { id: "sitios", label: "Sitios web" },
+    { id: "manuales", label: "Manuales de marca (PDF)" },
     { id: "experiencia", label: "Experiencia" },
     { id: "formacion", label: "Formación" },
     { id: "contacto", label: "Contacto" },
@@ -991,6 +992,176 @@
     container.appendChild(panel);
   }
 
+  // ---- Manuales de marca: PDFs que se muestran como revista interactiva (js/manual-viewer.js) ----
+  const scriptPromises = {};
+  function loadScriptOnce(src) {
+    if (!scriptPromises[src]) {
+      scriptPromises[src] = new Promise((resolve, reject) => {
+        const sc = document.createElement("script");
+        sc.src = src;
+        sc.onload = resolve;
+        sc.onerror = () => reject(new Error("No se pudo cargar " + src));
+        document.head.appendChild(sc);
+      });
+    }
+    return scriptPromises[src];
+  }
+
+  // Portada = primera página del PDF renderizada con pdf.js (el mismo que usa el visor).
+  async function pdfCover(file) {
+    await loadScriptOnce("/js/vendor/pdf.min.js");
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/js/vendor/pdf.worker.min.js";
+    const pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    const page = await pdf.getPage(1);
+    const base = page.getViewport({ scale: 1 });
+    const viewport = page.getViewport({ scale: 900 / base.width });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+    return { dataUrl: canvas.toDataURL("image/jpeg", 0.85), pages: pdf.numPages };
+  }
+
+  const MANUAL_MAX_MB = 40;
+
+  async function uploadManualPdf(it, file) {
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) throw new Error("El archivo tiene que ser un PDF");
+    if (file.size > MANUAL_MAX_MB * 1024 * 1024) throw new Error("El PDF pesa más de " + MANUAL_MAX_MB + " MB");
+    const cover = await pdfCover(file); // si el PDF está roto falla acá, antes de subir nada
+    const path = "images/manuals/" + it.id + ".pdf";
+    setStatus("Subiendo PDF…", "");
+    const { uploadUrl } = await api("/api/upload-url", { method: "POST", body: { path } });
+    const put = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": "application/pdf" }, body: file });
+    if (!put.ok) throw new Error("No se pudo subir el PDF (" + put.status + ")");
+    const coverPath = "images/manuals/" + it.id + ".jpg";
+    await uploadDataUrlToPath(cover.dataUrl, coverPath);
+    it.file = path;
+    it.cover = coverPath;
+    it.pages = cover.pages;
+    it.rev = Date.now();
+    dirtySite = true;
+  }
+
+  function renderManuales(container) {
+    site.manuals = site.manuals || { eyebrow: "Manuales de marca", title: "", sub: "", items: [] };
+    const mn = site.manuals;
+    mn.items = mn.items || [];
+    container.appendChild(el("p", "section-desc", "Manuales de marca en PDF que se muestran como revista interactiva (se hojean, con zoom y links). Subí el PDF (hasta " + MANUAL_MAX_MB + " MB) y elegí cuáles se ven en el portfolio: los que dejes sin tildar quedan guardados pero ocultos. Si no hay ninguno visible, la sección no se muestra."));
+
+    const head = el("div", "panel");
+    head.appendChild(el("h3", null, "Encabezado"));
+    head.appendChild(textField("Etiqueta", mn.eyebrow, (v) => { mn.eyebrow = v; dirtySite = true; }));
+    head.appendChild(textField("Título", mn.title, (v) => { mn.title = v; dirtySite = true; }));
+    head.appendChild(textareaField("Texto de apoyo", mn.sub, (v) => { mn.sub = v; dirtySite = true; }, { rows: 2 }));
+    container.appendChild(head);
+
+    const panel = el("div", "panel");
+    panel.appendChild(el("h3", null, "Manuales"));
+    const wrap = el("div");
+    panel.appendChild(wrap);
+
+    function draw() {
+      wrap.innerHTML = "";
+      mn.items.forEach((it, idx) => {
+        const row = el("div", "list-row printer-row");
+        if (it.cover) {
+          const img = document.createElement("img");
+          img.src = assetUrl(it.cover) + "?v=" + (it.rev || Date.now());
+          row.appendChild(img);
+        } else {
+          row.appendChild(el("div", "ph", "Sin PDF"));
+        }
+        const body = el("div", "row-body");
+        body.appendChild(textField("Nombre", it.name, (v) => { it.name = v; dirtySite = true; }));
+        body.appendChild(textareaField("Descripción", it.desc, (v) => { it.desc = v; dirtySite = true; }, { rows: 2 }));
+
+        const visRow = el("label", "checkbox-row");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = it.visible !== false;
+        cb.addEventListener("change", () => { it.visible = cb.checked; dirtySite = true; });
+        visRow.appendChild(cb);
+        visRow.appendChild(document.createTextNode("Visible en el portfolio"));
+        body.appendChild(visRow);
+
+        if (it.file) body.appendChild(el("p", "hint", "PDF cargado" + (it.pages ? " · " + it.pages + " páginas" : "")));
+
+        const actions = el("div");
+        actions.style.display = "flex";
+        actions.style.gap = "8px";
+        actions.style.flexWrap = "wrap";
+        actions.appendChild(
+          btn(it.file ? "Reemplazar PDF" : "Subir PDF", "btn-sm", async () => {
+            const file = await pickFile("application/pdf");
+            if (!file) return;
+            try {
+              showLoading(true, "Subiendo el PDF…");
+              await uploadManualPdf(it, file);
+              setStatus("PDF subido ✓ — recordá “Guardar y publicar”", "ok");
+              draw();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+        if (it.file) {
+          actions.appendChild(
+            btn("Probar visor", "btn-sm", async () => {
+              try {
+                await loadScriptOnce("/js/manual-viewer.js");
+                window.ManualViewer.open({ title: it.name, fileUrl: assetUrl(it.file) + "?v=" + (it.rev || "") });
+              } catch (e) {
+                setStatus("Error: " + e.message, "err");
+              }
+            })
+          );
+        }
+        body.appendChild(actions);
+        row.appendChild(body);
+
+        const ctrl = el("div", "row-ctrl");
+        ctrl.appendChild(btn("↑", "btn-sm", () => {
+          if (idx === 0) return;
+          [mn.items[idx - 1], mn.items[idx]] = [mn.items[idx], mn.items[idx - 1]];
+          dirtySite = true;
+          draw();
+        }));
+        ctrl.appendChild(btn("↓", "btn-sm", () => {
+          if (idx === mn.items.length - 1) return;
+          [mn.items[idx + 1], mn.items[idx]] = [mn.items[idx], mn.items[idx + 1]];
+          dirtySite = true;
+          draw();
+        }));
+        ctrl.appendChild(btn("✕", "btn-sm btn-danger", async () => {
+          if (!window.confirm("¿Eliminar este manual y su PDF? No se puede deshacer.")) return;
+          const files = [it.file, it.cover].filter(Boolean);
+          mn.items.splice(idx, 1);
+          dirtySite = true;
+          draw();
+          for (const f of files) {
+            try { await api("/api/delete-asset", { method: "POST", body: { path: f } }); } catch (e) { /* ya no estaba */ }
+          }
+        }));
+        row.appendChild(ctrl);
+        wrap.appendChild(row);
+      });
+      wrap.appendChild(
+        btn("+ Agregar manual", "btn-sm", () => {
+          const taken = new Set(mn.items.map((m) => m.id));
+          let n = mn.items.length + 1;
+          while (taken.has("manual-" + n)) n++;
+          mn.items.push({ id: "manual-" + n, name: "Nuevo manual de marca", desc: "", file: "", cover: "", visible: true });
+          dirtySite = true;
+          draw();
+        })
+      );
+    }
+    draw();
+    container.appendChild(panel);
+  }
+
   function renderSobreMi(container) {
     const about = site.about;
     const panel1 = el("div", "panel");
@@ -1779,6 +1950,7 @@
     trabajos: renderTrabajos,
     impresoras: renderImpresoras,
     sitios: renderSitios,
+    manuales: renderManuales,
     experiencia: renderExperiencia,
     formacion: renderFormacion,
     contacto: renderContacto,

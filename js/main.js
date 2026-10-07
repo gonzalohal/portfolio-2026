@@ -110,6 +110,52 @@
     return `<span class="adobe-tool"><i class="adobe-ico">${esc(abbr)}</i>${esc(name)}</span>`;
   }
 
+  let MANUALS = [];
+
+  function manualCard(m) {
+    const cover = m.cover
+      ? `<img src="${esc(assetUrl(m.cover))}${m.rev ? "?v=" + m.rev : ""}" alt="${esc(m.name)}" loading="lazy">`
+      : `<span class="mono">${esc(m.name)}</span>`;
+    return `
+      <button type="button" class="work-card manual-card reveal${m.cover ? "" : " is-textonly"}" data-manual="${esc(m.id)}">
+        <div class="work-thumb">${cover}</div>
+        <div class="work-body">
+          <span class="tag">Manual de marca</span>
+          <h3>${esc(m.name)}</h3>
+          ${m.desc ? `<p>${esc(m.desc)}</p>` : ""}
+          <span class="site-host">Abrir manual interactivo →</span>
+        </div>
+      </button>`;
+  }
+
+  let manualViewerReady = null;
+  function loadManualViewer() {
+    if (window.ManualViewer) return Promise.resolve();
+    if (!manualViewerReady) {
+      manualViewerReady = new Promise((resolve, reject) => {
+        const sc = document.createElement("script");
+        sc.src = "/js/manual-viewer.js";
+        sc.onload = resolve;
+        sc.onerror = () => reject(new Error("No se pudo cargar el visor de manuales"));
+        document.head.appendChild(sc);
+      });
+    }
+    return manualViewerReady;
+  }
+
+  function openManual(m) {
+    loadManualViewer()
+      .then(() => {
+        history.replaceState(null, "", "#manual=" + encodeURIComponent(m.id));
+        window.ManualViewer.open({
+          title: m.name,
+          fileUrl: assetUrl(m.file) + (m.rev ? "?v=" + m.rev : ""),
+          onClose: () => history.replaceState(null, "", location.pathname + location.search),
+        });
+      })
+      .catch((e) => console.error(e));
+  }
+
   function siteCard(w) {
     const locked = !!w.locked && !PREVIEW.valid;
     const src = `/api/reveal-image?site=${encodeURIComponent(w.id)}${PREVIEW.valid ? `&token=${encodeURIComponent(PREVIEW.token)}` : ""}`;
@@ -217,6 +263,18 @@
       if ($("sitesTitle")) $("sitesTitle").textContent = wsData.title || "";
       if ($("sitesSub")) $("sitesSub").textContent = wsData.sub || "";
       if ($("sitesGrid")) $("sitesGrid").innerHTML = wsItems.map(siteCard).join("");
+    }
+
+    // brand manuals (interactive PDF flipbook)
+    const mnData = site.manuals || {};
+    MANUALS = (mnData.items || []).filter((m) => m.visible !== false && m.file);
+    const mnSec = $("manuales");
+    if (mnSec) {
+      mnSec.hidden = !MANUALS.length;
+      if ($("manualsEyebrow")) $("manualsEyebrow").textContent = mnData.eyebrow || "";
+      if ($("manualsTitle")) $("manualsTitle").textContent = mnData.title || "";
+      if ($("manualsSub")) $("manualsSub").textContent = mnData.sub || "";
+      if ($("manualsGrid")) $("manualsGrid").innerHTML = MANUALS.map(manualCard).join("");
     }
 
     // client logos
@@ -688,6 +746,21 @@
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") (viewer.classList.contains("is-open") ? closeViewer : closeModal)();
     });
+
+    /* brand manuals */
+    const manualsGrid = $("manualsGrid");
+    if (manualsGrid) {
+      manualsGrid.addEventListener("click", (e) => {
+        const card = e.target.closest("[data-manual]");
+        const m = card && MANUALS.find((x) => x.id === card.dataset.manual);
+        if (m) openManual(m);
+      });
+    }
+    const deepLink = /^#manual=(.+)$/.exec(location.hash);
+    if (deepLink) {
+      const m = MANUALS.find((x) => x.id === decodeURIComponent(deepLink[1]));
+      if (m) openManual(m);
+    }
 
     /* mobile menu */
     const navToggle = $("navToggle");
