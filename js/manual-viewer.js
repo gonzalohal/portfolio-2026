@@ -4,7 +4,14 @@
  * Port a JavaScript simple del visor del módulo "PDF Interactivo" (flipbook-viewer.tsx):
  * tapa sola + hojas dobles, pantalla completa, zoom con Z + rueda, links del PDF clickeables.
  *
- * Uso: ManualViewer.open({ title, fileUrl })
+ * Dos modos con el mismo código:
+ *   ManualViewer.open({ title, fileUrl, startPage?, data?, onClose? })
+ *       -> modal de pantalla completa (fondo oscuro).
+ *   ManualViewer.mount(container, { title, fileUrl, startPage?, onReady?, onFullscreen? })
+ *       -> visor embebido en la página (fondo claro). Devuelve { destroy(), getPage(), getData() }.
+ *
+ * startPage es el índice (0 = portada, 1 = página 2). `data` permite reabrir un PDF ya renderizado
+ * (lo usa el botón de pantalla completa del visor embebido) sin volver a procesarlo.
  */
 (function () {
   "use strict";
@@ -52,7 +59,7 @@
     var size = { width: 440, height: 580 };
 
     for (var i = 1; i <= pdf.numPages; i++) {
-      if (isCancelled()) return null;
+      if (isCancelled()) { pdf.destroy(); return null; }
       var page = await pdf.getPage(i);
       var base = page.getViewport({ scale: 1 });
       var viewport = page.getViewport({ scale: targetWidth / base.width });
@@ -62,6 +69,7 @@
       var ctx = canvas.getContext("2d");
       await page.render({ canvasContext: ctx, viewport: viewport }).promise;
       images.push(canvas.toDataURL("image/jpeg", 0.85));
+      canvas.width = canvas.height = 0; // libera la memoria del lienzo
 
       var boxes = [];
       var annots = await page.getAnnotations({ intent: "display" });
@@ -85,6 +93,7 @@
         }
       }
       links.push(boxes);
+      page.cleanup();
 
       if (i === 1) {
         var th = 580;
@@ -107,6 +116,7 @@
       links[pi] = links[pi].filter(function (x) { return x.url || typeof x.goto === "number"; });
     }
 
+    pdf.destroy(); // suelta el documento y su worker: ya tenemos todo renderizado
     return { images: images, links: links, size: size };
   }
 
@@ -125,44 +135,51 @@
     });
   }
 
-  var current = null; // sólo un visor abierto a la vez
+  var currentModal = null; // un solo modal abierto a la vez
 
-  function open(opts) {
-    if (current) current.close();
-
-    var overlay = document.createElement("div");
-    overlay.className = "mv";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-label", "Manual de marca: " + (opts.title || ""));
-    overlay.innerHTML =
-      '<div class="mv-head">' +
-      '<button type="button" class="mv-btn mv-close" aria-label="Cerrar">' + ICON.close + "</button>" +
-      '<h2 class="mv-title">' + esc(opts.title) + "</h2>" +
-      '<span class="mv-spacer"></span>' +
-      "</div>" +
+  /* ---- núcleo: arma el visor dentro de `host` (body para el modal, un contenedor para el embebido) ---- */
+  function createViewer(embedded, host, opts) {
+    var root = document.createElement("div");
+    root.className = "mv" + (embedded ? " mv--embedded" : "");
+    if (embedded) {
+      root.tabIndex = 0;
+      root.setAttribute("role", "region");
+      root.setAttribute("aria-label", "Visor del manual: " + (opts.title || ""));
+    } else {
+      root.setAttribute("role", "dialog");
+      root.setAttribute("aria-modal", "true");
+      root.setAttribute("aria-label", "Manual de marca: " + (opts.title || ""));
+    }
+    root.innerHTML =
+      (embedded
+        ? ""
+        : '<div class="mv-head">' +
+          '<button type="button" class="mv-btn mv-close" aria-label="Cerrar">' + ICON.close + "</button>" +
+          '<h2 class="mv-title">' + esc(opts.title) + "</h2>" +
+          '<span class="mv-spacer"></span>' +
+          "</div>") +
       '<div class="mv-body">' +
-      '<div class="mv-status"><span class="mv-spin"></span><p>Abriendo el PDF…</p></div>' +
+      '<div class="mv-status"><div class="mv-skel" aria-hidden="true"></div><span class="mv-spin"></span><p>Abriendo el PDF…</p></div>' +
       '<div class="mv-zoom" hidden><div class="mv-stage"><div class="mv-gutter"></div></div></div>' +
       "</div>" +
       '<div class="mv-controls" hidden>' +
       '<button type="button" class="mv-btn mv-reset" aria-label="Restablecer zoom" title="Restablecer zoom" hidden>' + ICON.zoomOut + "</button>" +
       '<button type="button" class="mv-btn mv-prev" aria-label="Página anterior">' + ICON.prev + "</button>" +
-      '<span class="mv-count"></span>' +
+      '<span class="mv-count" aria-live="polite"></span>' +
       '<button type="button" class="mv-btn mv-next" aria-label="Página siguiente">' + ICON.next + "</button>" +
       '<button type="button" class="mv-btn mv-fs" aria-label="Pantalla completa" title="Pantalla completa">' + ICON.full + "</button>" +
       "</div>" +
       '<p class="mv-hint" hidden>Mantené presionada la tecla <kbd>Z</kbd> y girá la rueda del mouse para hacer zoom; con <kbd>Z</kbd> apretada podés arrastrar para moverte por la hoja.</p>';
 
-    document.body.appendChild(overlay);
+    host.appendChild(root);
     var prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (!embedded) document.body.style.overflow = "hidden";
 
-    var q = function (sel) { return overlay.querySelector(sel); };
+    var q = function (sel) { return root.querySelector(sel); };
     var body = q(".mv-body"), status = q(".mv-status"), zoomEl = q(".mv-zoom"), stage = q(".mv-stage"), gutter = q(".mv-gutter");
     var controls = q(".mv-controls"), countEl = q(".mv-count"), hint = q(".mv-hint"), resetBtn = q(".mv-reset"), fsBtn = q(".mv-fs");
 
-    var state = { cancelled: false, pf: null, bookEl: null, pageEls: [], size: null, page: 0, total: 0, settled: true, zoom: 1, pan: { x: 0, y: 0 }, zDown: false, panning: false };
+    var state = { cancelled: false, pf: null, bookEl: null, pageEls: [], size: null, page: 0, total: 0, settled: true, zoom: 1, pan: { x: 0, y: 0 }, zDown: false, data: null, startPage: opts.startPage || 0 };
     var isMobile = function () { return window.innerWidth < 640; };
 
     function applyTransform() {
@@ -198,7 +215,10 @@
       state.bookEl = book;
       stage.style.maxWidth = isMobile() ? "380px" : "";
 
-      var maxPageHeight = Math.min(760, Math.max(320, body.clientHeight - 56));
+      var maxPageHeight = embedded
+        ? Math.min(620, Math.max(320, window.innerHeight - 240))
+        : Math.min(760, Math.max(320, body.clientHeight - 56));
+      var start = Math.min(Math.max(startPage || 0, 0), Math.max(state.total - 1, 0));
       var pf = new window.St.PageFlip(book, {
         width: state.size.width,
         height: state.size.height,
@@ -207,7 +227,7 @@
         maxWidth: 560,
         minHeight: 280,
         maxHeight: maxPageHeight,
-        startPage: startPage || 0,
+        startPage: start,
         drawShadow: true,
         flippingTime: 600,
         usePortrait: true,
@@ -226,7 +246,7 @@
       pf.on("flip", function (e) { state.page = e.data; updateChrome(); });
       pf.on("changeState", function (e) { state.settled = e.data === "read"; updateChrome(); });
       state.pf = pf;
-      state.page = startPage || 0;
+      state.page = start;
       updateChrome();
     }
 
@@ -265,14 +285,17 @@
       });
     }
 
-    function onKey(e) {
-      var k = e.key.toLowerCase();
-      if (k === "z") { state.zDown = true; zoomEl.classList.add("is-z"); }
-      if (e.key === "ArrowRight" && state.pf) state.pf.flipNext();
-      if (e.key === "ArrowLeft" && state.pf) state.pf.flipPrev();
-      if (e.key === "Escape" && !document.fullscreenElement) close();
+    function flipKeys(e) {
+      if (e.key === "ArrowRight" && state.pf) { e.preventDefault(); state.pf.flipNext(); }
+      if (e.key === "ArrowLeft" && state.pf) { e.preventDefault(); state.pf.flipPrev(); }
     }
-    function onKeyUp(e) { if (e.key.toLowerCase() === "z") { state.zDown = false; zoomEl.classList.remove("is-z"); } }
+    // modal: teclado global; embebido: sólo cuando el visor tiene el foco (no se pisa el scroll/teclado de la página)
+    function onModalKey(e) {
+      flipKeys(e);
+      if (e.key === "Escape" && !document.fullscreenElement) destroy();
+    }
+    function onZDown(e) { if (e.key.toLowerCase() === "z") { state.zDown = true; zoomEl.classList.add("is-z"); } }
+    function onZUp(e) { if (e.key.toLowerCase() === "z") { state.zDown = false; zoomEl.classList.remove("is-z"); } }
 
     function onWheel(e) {
       if (isMobile()) return;
@@ -295,7 +318,6 @@
       if (!state.zDown || e.button !== 0) return;
       e.preventDefault();
       e.stopPropagation();
-      state.panning = true;
       zoomEl.classList.add("is-panning");
       drag = { x: e.clientX, y: e.clientY, pan: { x: state.pan.x, y: state.pan.y } };
       window.addEventListener("mousemove", onMouseMove);
@@ -309,69 +331,99 @@
     }
     function onMouseUp() {
       drag = null;
-      state.panning = false;
       zoomEl.classList.remove("is-panning");
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     }
 
     var resizeTimer = null;
+    var lastWidth = window.innerWidth;
     function onResize() {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () { if (state.pf && !state.cancelled) build(state.page); }, 200);
+      resizeTimer = setTimeout(function () {
+        if (!state.pf || state.cancelled) return;
+        // en el embebido el scroll de un celular dispara resize por la barra del navegador: sólo rearmar si cambió el ancho
+        if (embedded && window.innerWidth === lastWidth) return;
+        lastWidth = window.innerWidth;
+        build(state.page);
+        hint.hidden = isMobile();
+      }, 200);
     }
     function onFsChange() {
-      var on = document.fullscreenElement === overlay;
-      overlay.classList.toggle("is-fullscreen", on);
+      var on = document.fullscreenElement === root;
+      root.classList.toggle("is-fullscreen", on);
       fsBtn.innerHTML = on ? ICON.exit : ICON.full;
       fsBtn.setAttribute("aria-label", on ? "Salir de pantalla completa" : "Pantalla completa");
       onResize();
     }
 
-    function close() {
+    function destroy() {
       if (state.cancelled) return;
       state.cancelled = true;
-      if (document.fullscreenElement === overlay) document.exitFullscreen();
-      if (state.pf) { try { state.pf.destroy(); } catch (e) {} }
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("keyup", onKeyUp);
-      document.removeEventListener("fullscreenchange", onFsChange);
+      if (document.fullscreenElement === root) document.exitFullscreen();
+      if (state.pf) { try { state.pf.destroy(); } catch (e) {} state.pf = null; }
+      document.removeEventListener("keydown", onZDown);
+      document.removeEventListener("keyup", onZUp);
+      if (!embedded) {
+        document.removeEventListener("keydown", onModalKey);
+        document.removeEventListener("fullscreenchange", onFsChange);
+      } else {
+        root.removeEventListener("keydown", flipKeys);
+      }
       window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-      overlay.remove();
-      document.body.style.overflow = prevOverflow;
-      if (current && current.overlay === overlay) current = null;
-      if (typeof opts.onClose === "function") opts.onClose();
+      clearTimeout(resizeTimer);
+      state.pageEls = [];
+      state.data = null;
+      root.remove();
+      if (!embedded) {
+        document.body.style.overflow = prevOverflow;
+        if (currentModal && currentModal.root === root) currentModal = null;
+        if (typeof opts.onClose === "function") opts.onClose();
+      }
     }
 
-    q(".mv-close").addEventListener("click", close);
+    var closeBtn = q(".mv-close");
+    if (closeBtn) closeBtn.addEventListener("click", destroy);
     q(".mv-prev").addEventListener("click", function () { if (state.pf) state.pf.flipPrev(); });
     q(".mv-next").addEventListener("click", function () { if (state.pf) state.pf.flipNext(); });
     resetBtn.addEventListener("click", resetZoom);
     fsBtn.addEventListener("click", function () {
+      if (embedded) {
+        // el visor embebido delega: la página abre el modal en la hoja que se estaba viendo
+        if (typeof opts.onFullscreen === "function") opts.onFullscreen({ page: state.page, data: state.data });
+        else if (root.requestFullscreen) root.requestFullscreen();
+        return;
+      }
       if (document.fullscreenElement) document.exitFullscreen();
-      else if (overlay.requestFullscreen) overlay.requestFullscreen();
+      else if (root.requestFullscreen) root.requestFullscreen();
     });
     zoomEl.addEventListener("wheel", onWheel, { passive: false });
     zoomEl.addEventListener("mousedown", onMouseDown, { capture: true });
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("keyup", onKeyUp);
-    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("keydown", onZDown);
+    document.addEventListener("keyup", onZUp);
     window.addEventListener("resize", onResize);
+    if (embedded) {
+      root.addEventListener("keydown", flipKeys);
+    } else {
+      document.addEventListener("keydown", onModalKey);
+      document.addEventListener("fullscreenchange", onFsChange);
+    }
 
-    current = { overlay: overlay, close: close };
+    var ready = ensureLibs().then(function () {
+      if (opts.data) return opts.data;
+      return renderPdf(
+        opts.fileUrl,
+        function (done, total) { status.querySelector("p").textContent = "Preparando página " + done + " de " + total + "…"; },
+        function () { return state.cancelled; }
+      );
+    });
 
-    ensureLibs()
-      .then(function () {
-        return renderPdf(
-          opts.fileUrl,
-          function (done, total) { status.querySelector("p").textContent = "Preparando página " + done + " de " + total + "…"; },
-          function () { return state.cancelled; }
-        );
-      })
+    ready
       .then(function (data) {
         if (!data || state.cancelled) return;
+        state.data = data;
         state.size = data.size;
         state.total = data.images.length;
         state.pageEls = makePages(data);
@@ -379,16 +431,34 @@
         zoomEl.hidden = false;
         controls.hidden = false;
         hint.hidden = isMobile();
-        build(0);
+        build(state.startPage);
+        root.classList.add("is-ready");
+        if (typeof opts.onReady === "function") opts.onReady(data);
       })
       .catch(function (err) {
         if (state.cancelled) return;
         console.error("Visor de manuales:", err);
         status.innerHTML = '<p class="mv-error">No pudimos abrir este PDF. Probá recargar la página.</p>';
+        if (typeof opts.onError === "function") opts.onError(err);
       });
 
-    return current;
+    return {
+      root: root,
+      destroy: destroy,
+      getPage: function () { return state.page; },
+      getData: function () { return state.data; },
+    };
   }
 
-  window.ManualViewer = { open: open };
+  function open(opts) {
+    if (currentModal) currentModal.destroy();
+    currentModal = createViewer(false, document.body, opts);
+    return currentModal;
+  }
+
+  function mount(container, opts) {
+    return createViewer(true, container, opts);
+  }
+
+  window.ManualViewer = { open: open, mount: mount };
 })();

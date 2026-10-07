@@ -110,22 +110,46 @@
     return `<span class="adobe-tool"><i class="adobe-ico">${esc(abbr)}</i>${esc(name)}</span>`;
   }
 
+  /* ---- Manuales de marca: visor tipo revista embebido en la sección + selector ---- */
   let MANUALS = [];
+  let activeManualId = null;
+  let manualViewer = null; // instancia embebida activa (se destruye al cambiar de manual)
+  let manualMounted = false; // el visor se inicializa recién cuando la sección entra en pantalla
+  let manualMountToken = 0;
+  const MANUAL_START_PAGE = 1; // índice 1 = arranca abierto en el spread de las páginas 2 y 3
 
-  function manualCard(m) {
-    const cover = m.cover
-      ? `<img src="${esc(assetUrl(m.cover))}${m.rev ? "?v=" + m.rev : ""}" alt="${esc(m.name)}" loading="lazy">`
-      : `<span class="mono">${esc(m.name)}</span>`;
-    return `
-      <button type="button" class="work-card manual-card reveal${m.cover ? "" : " is-textonly"}" data-manual="${esc(m.id)}">
-        <div class="work-thumb">${cover}</div>
-        <div class="work-body">
-          <span class="tag">Manual de marca</span>
-          <h3>${esc(m.name)}</h3>
-          ${m.desc ? `<p>${esc(m.desc)}</p>` : ""}
-          <span class="site-host">Abrir manual interactivo →</span>
-        </div>
-      </button>`;
+  // "Manual de marca | Random Comex" -> "Random Comex"
+  function shortManualName(name) {
+    const parts = String(name || "").split("|");
+    return (parts[parts.length - 1] || name || "").trim();
+  }
+
+  function manualFileUrl(m) {
+    return assetUrl(m.file) + (m.rev ? "?v=" + m.rev : "");
+  }
+
+  function renderManualPicker() {
+    const picker = $("manualPicker");
+    if (!picker) return;
+    const show = MANUALS.length > 1;
+    picker.hidden = !show;
+    picker.innerHTML = show
+      ? MANUALS.map(
+          (m) => `<button type="button" class="manual-pick" data-manual="${esc(m.id)}" aria-pressed="false" aria-label="Ver manual: ${esc(m.name)}">${
+            m.cover ? `<img src="${esc(assetUrl(m.cover))}${m.rev ? "?v=" + m.rev : ""}" alt="" loading="lazy">` : ""
+          }<span>${esc(shortManualName(m.name))}</span></button>`
+        ).join("")
+      : "";
+  }
+
+  function syncManualUI() {
+    const m = MANUALS.find((x) => x.id === activeManualId);
+    if ($("manualActiveTitle")) $("manualActiveTitle").textContent = m ? m.name : "";
+    document.querySelectorAll("#manualPicker .manual-pick").forEach((b) => {
+      const on = b.dataset.manual === activeManualId;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
   }
 
   let manualViewerReady = null;
@@ -143,17 +167,42 @@
     return manualViewerReady;
   }
 
-  function openManual(m) {
-    loadManualViewer()
-      .then(() => {
-        history.replaceState(null, "", "#manual=" + encodeURIComponent(m.id));
-        window.ManualViewer.open({
-          title: m.name,
-          fileUrl: assetUrl(m.file) + (m.rev ? "?v=" + m.rev : ""),
-          onClose: () => history.replaceState(null, "", location.pathname + location.search),
+  // Monta el manual activo en #manualStage. Sólo se carga el PDF activo; al cambiar se destruye la instancia anterior.
+  function mountActiveManual(animate) {
+    const m = MANUALS.find((x) => x.id === activeManualId);
+    const stage = $("manualStage");
+    if (!m || !stage) return;
+    const token = ++manualMountToken;
+    const run = () => {
+      if (token !== manualMountToken) return;
+      if (manualViewer) {
+        manualViewer.destroy();
+        manualViewer = null;
+      }
+      stage.innerHTML = "";
+      loadManualViewer()
+        .then(() => {
+          if (token !== manualMountToken) return;
+          manualViewer = window.ManualViewer.mount(stage, {
+            title: m.name,
+            fileUrl: manualFileUrl(m),
+            startPage: MANUAL_START_PAGE,
+            // pantalla completa = el modal, en la misma hoja que se estaba viendo (reusa lo ya procesado)
+            onFullscreen: ({ page, data }) => window.ManualViewer.open({ title: m.name, fileUrl: manualFileUrl(m), data, startPage: page }),
+          });
+          requestAnimationFrame(() => stage.classList.remove("is-fading"));
+        })
+        .catch((e) => {
+          console.error(e);
+          stage.classList.remove("is-fading");
         });
-      })
-      .catch((e) => console.error(e));
+    };
+    if (animate && manualViewer) {
+      stage.classList.add("is-fading");
+      setTimeout(run, 220);
+    } else {
+      run();
+    }
   }
 
   function siteCard(w) {
@@ -274,7 +323,9 @@
       if ($("manualsEyebrow")) $("manualsEyebrow").textContent = mnData.eyebrow || "";
       if ($("manualsTitle")) $("manualsTitle").textContent = mnData.title || "";
       if ($("manualsSub")) $("manualsSub").textContent = mnData.sub || "";
-      if ($("manualsGrid")) $("manualsGrid").innerHTML = MANUALS.map(manualCard).join("");
+      activeManualId = MANUALS.length ? MANUALS[0].id : null;
+      renderManualPicker();
+      syncManualUI();
     }
 
     // client logos
@@ -747,19 +798,44 @@
       if (e.key === "Escape") (viewer.classList.contains("is-open") ? closeViewer : closeModal)();
     });
 
-    /* brand manuals */
-    const manualsGrid = $("manualsGrid");
-    if (manualsGrid) {
-      manualsGrid.addEventListener("click", (e) => {
-        const card = e.target.closest("[data-manual]");
-        const m = card && MANUALS.find((x) => x.id === card.dataset.manual);
-        if (m) openManual(m);
+    /* brand manuals: visor embebido, se inicializa al entrar en pantalla (lazy) */
+    const manualsSec = $("manuales");
+    const pickerEl = $("manualPicker");
+    if (pickerEl) {
+      pickerEl.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-manual]");
+        if (!b || b.dataset.manual === activeManualId) return;
+        activeManualId = b.dataset.manual;
+        syncManualUI();
+        if (manualMounted) mountActiveManual(true);
       });
     }
     const deepLink = /^#manual=(.+)$/.exec(location.hash);
-    if (deepLink) {
-      const m = MANUALS.find((x) => x.id === decodeURIComponent(deepLink[1]));
-      if (m) openManual(m);
+    if (deepLink && MANUALS.some((x) => x.id === decodeURIComponent(deepLink[1]))) {
+      activeManualId = decodeURIComponent(deepLink[1]);
+      syncManualUI();
+      if (manualsSec) setTimeout(() => manualsSec.scrollIntoView(), 300);
+    }
+    if (manualsSec && MANUALS.length) {
+      const startManuals = () => {
+        if (manualMounted) return;
+        manualMounted = true;
+        mountActiveManual(false);
+      };
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            if (entries.some((en) => en.isIntersecting)) {
+              io.disconnect();
+              startManuals();
+            }
+          },
+          { rootMargin: "300px 0px" }
+        );
+        io.observe(manualsSec);
+      } else {
+        startManuals();
+      }
     }
 
     /* mobile menu */

@@ -1043,7 +1043,46 @@ a.site-card { display: block; color: inherit; text-decoration: none; }
 }
 .adobe-block + .skill-pills { margin-top: 10px; }
 
-/* ---------- brand manuals section ---------- */
-button.manual-card { width: 100%; padding: 0; font: inherit; text-align: left; color: inherit; }
-button.manual-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.manual-card .work-thumb img { object-position: top center; }
+/* ---------- brand manuals section (embedded flipbook + picker) ---------- */
+.manuals-embed { max-width: 1000px; margin: 0 auto; }
+.manual-active-title {
+  text-align: center;
+  font-family: var(--ff-head);
+  font-size: clamp(18px, 2.4vw, 24px);
+  margin-bottom: 18px;
+}
+.manual-active-title:empty { display: none; }
+.manual-stage { transition: opacity .25s ease; }
+.manual-stage.is-fading { opacity: 0; }
+.manual-picker { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
+.manual-picker[hidden] { display: none; }
+.manual-pick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 250px;
+  padding: 6px 16px 6px 6px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--ease);
+}
+.manual-pick:hover { transform: translateY(-2px); }
+.manual-pick:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.manual-pick img { width: 64px; height: 46px; flex: none; object-fit: cover; object-position: top center; border-radius: 6px; background: var(--bg-alt); }
+.manual-pick span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.manual-pick.is-active { border-color: var(--accent); box-shadow: 0 8px 20px -10px rgba(255, 90, 51, .55); }
+@media (max-width: 640px) {
+  .manual-picker { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x proximity; padding: 4px 2px 10px; -webkit-overflow-scrolling: touch; }
+  .manual-pick { flex: none; scroll-snap-align: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manual-stage, .manual-pick { transition: none; }
+}
+

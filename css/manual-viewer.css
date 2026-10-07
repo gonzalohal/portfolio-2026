@@ -165,3 +165,54 @@
 @media (prefers-reduced-motion: reduce) {
   .mv-stage, .flipbook--depth, .mv-gutter, .mv-spin { transition: none; animation: none; }
 }
+
+/* ======================= Modo embebido (dentro de la sección, fondo claro) ======================= */
+.mv-skel { display: none; }
+.mv--embedded .mv-skel {
+  display: block;
+  width: min(760px, 100%);
+  aspect-ratio: 16 / 8.5;
+  max-height: 380px;
+  border-radius: 10px;
+  background: linear-gradient(100deg, #e8e4da 30%, #f4f1ea 50%, #e8e4da 70%);
+  background-size: 200% 100%;
+  animation: mv-shimmer 1.4s linear infinite;
+}
+@keyframes mv-shimmer { to { background-position: -200% 0; } }
+.mv--embedded .mv-spin { display: none; }
+
+.mv--embedded {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  display: block;
+  background: transparent;
+  color: var(--ink, #16161a);
+  outline: none;
+}
+.mv--embedded:focus-visible { outline: 2px solid var(--accent, #ff5a33); outline-offset: 8px; border-radius: 6px; }
+.mv--embedded .mv-body { min-height: 420px; padding: 8px 0 4px; overflow: visible; }
+.mv--embedded .mv-status { color: var(--ink-soft, #5d5d66); }
+.mv--embedded .mv-error { color: #c2410c; }
+.mv--embedded .mv-btn { border-color: var(--line, #e2ddd0); background: #fff; color: var(--ink, #16161a); }
+.mv--embedded .mv-btn:hover { background: var(--bg-alt, #ece8df); }
+.mv--embedded .mv-count { color: var(--ink-soft, #5d5d66); }
+.mv--embedded .mv-hint { padding: 0; color: var(--ink-faint, #8a8a92); }
+.mv--embedded .mv-hint kbd { border-color: rgba(22, 22, 26, .28); }
+.mv--embedded .flipbook--depth {
+  box-shadow:
+    0 26px 50px -22px rgba(22, 22, 26, .32),
+    0 8px 18px -10px rgba(22, 22, 26, .18),
+    calc(-7px * var(--stack-left, 1)) 2px 0 -3px #f4f1ea,
+    calc(-13px * var(--stack-left, 1)) 4px 0 -6px #e3ddd0,
+    calc(7px * var(--stack-right, 1)) 2px 0 -3px #f4f1ea,
+    calc(13px * var(--stack-right, 1)) 4px 0 -6px #e3ddd0;
+}
+.mv--embedded .mv-gutter {
+  background: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, .07) 42%, rgba(0, 0, 0, .14) 50%, rgba(0, 0, 0, .07) 58%, transparent 100%);
+}
+.mv--embedded.is-fullscreen { background: #121216; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mv--embedded .mv-skel { animation: none; }
+}
