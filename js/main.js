@@ -12,6 +12,7 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+  const DOC_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>';
   const LOCK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   const UNLOCK_MSG = "Desbloqueá en la entrevista";
 
@@ -446,6 +447,7 @@
           <div class="timeline-role">
             <h3>${esc(it.role)}${it.company ? ` · <span class="company">${esc(it.company)}</span>` : ""}</h3>
             ${it.desc ? `<p>${esc(it.desc)}</p>` : ""}
+            ${/^https?:\/\//i.test(it.link || "") ? `<a class="timeline-link" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">${DOC_ICON}<span>${esc(it.linkLabel || "Ver documento")}</span></a>` : ""}
           </div>
         </div>`
         )

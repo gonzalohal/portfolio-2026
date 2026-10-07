@@ -613,6 +613,10 @@ section { padding: 100px var(--pad); }
 .timeline-date { font-size: 13px; color: var(--ink-faint); font-weight: 600; padding-top: 3px; }
 .timeline-role h3 { font-size: 19px; font-weight: 700; font-family: var(--ff-body); letter-spacing: 0; }
 .timeline-role .company { color: var(--accent); font-weight: 600; }
+.timeline-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px 14px 7px 11px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--bg); transition: border-color .2s, color .2s; }
+.timeline-link svg { width: 15px; height: 15px; flex: none; color: var(--accent); }
+.timeline-link:hover { border-color: var(--accent); color: var(--accent); }
+.timeline-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .timeline-role p { margin-top: 8px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
 
 .edu-list { display: flex; flex-direction: column; gap: 22px; }

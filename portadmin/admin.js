@@ -1308,9 +1308,11 @@
         { key: "role", label: "Puesto" },
         { key: "company", label: "Empresa" },
         { key: "desc", label: "Descripción", type: "textarea" },
+        { key: "link", label: "Enlace a un documento (opcional, ej: carta de recomendación en PDF)" },
+        { key: "linkLabel", label: "Texto del enlace (ej: Carta de recomendación)" },
       ],
       addLabel: "+ Agregar experiencia",
-      newItem: () => ({ date: "", role: "", company: "", desc: "" }),
+      newItem: () => ({ date: "", role: "", company: "", desc: "", link: "", linkLabel: "" }),
       onChange: () => (dirtySite = true),
     });
     container.appendChild(panel2);
