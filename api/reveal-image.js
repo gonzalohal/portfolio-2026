@@ -47,7 +47,7 @@ async function serveCover(req, res, slug, token) {
 
   const showBlurred = locked && !(await isTokenValid(token));
   const bytes = showBlurred ? await redact(raw) : raw;
-  sendImage(res, storagePath, bytes, showBlurred ? "public, max-age=300, must-revalidate" : "public, max-age=3600, must-revalidate");
+  sendImage(res, storagePath, bytes, "public, max-age=300, must-revalidate");
 }
 
 // Serves a "sitios web" screenshot, blurred on the fly while the site is locked (unless a valid

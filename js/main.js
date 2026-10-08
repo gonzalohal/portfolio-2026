@@ -45,6 +45,8 @@
   }
 
   let PROJECTS = [];
+  // projects row timestamp: appended to cover URLs so every admin save busts the browser cache
+  let PROJECTS_VER = "";
   const PREVIEW = { token: null, valid: false };
   // Which projects are currently locked, read live from the server on every page load
   // (not from any deploy-baked copy) so that blocking/unblocking a project's cover from
@@ -69,7 +71,7 @@
     const isCover = p.images && p.images[0] === filename;
     if (isCover) {
       // Always served live (blurred on the fly if locked) so it can never lag behind a deploy.
-      return `/api/reveal-image?slug=${encodeURIComponent(p.slug)}${PREVIEW.valid ? `&token=${encodeURIComponent(PREVIEW.token)}` : ""}`;
+      return `/api/reveal-image?slug=${encodeURIComponent(p.slug)}${PREVIEW.valid ? `&token=${encodeURIComponent(PREVIEW.token)}` : ""}${PROJECTS_VER ? "&v=" + encodeURIComponent(PROJECTS_VER) : ""}`;
     }
     const isBlurredFile = (p.blurredImages || []).includes(filename);
     if (isBlurredFile && PREVIEW.valid) {
@@ -993,6 +995,7 @@
       const [siteRow, projectsRow] = await Promise.all([fetchKv("site"), fetchKv("projects"), checkPreviewToken(), fetchLiveLockedStatus()]);
       const site = (siteRow && siteRow.value) || {};
       PROJECTS = (projectsRow && projectsRow.value) || [];
+      PROJECTS_VER = (projectsRow && projectsRow.updated_at) || "";
       renderSite(site);
       renderWork();
     } catch (err) {
