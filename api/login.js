@@ -22,7 +22,13 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: "El panel no está configurado (faltan variables de entorno en Vercel)." });
   }
 
-  if (turnstileOn()) {
+  // Automation key (set as ADMIN_API_KEY in Vercel): skips ONLY the Turnstile challenge. The password,
+  // the rate limit and everything else still apply.
+  const apiKey = process.env.ADMIN_API_KEY;
+  const sent = String(req.headers["x-admin-key"] || "");
+  const hasKey = !!apiKey && sent.length === apiKey.length && require("crypto").timingSafeEqual(Buffer.from(sent), Buffer.from(apiKey));
+
+  if (turnstileOn() && !hasKey) {
     const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
     if (!(await verifyTurnstile(turnstileToken, ip))) {
       return res.status(403).json({ error: "No pudimos verificar que sos una persona. Recargá la página e intentá de nuevo." });
