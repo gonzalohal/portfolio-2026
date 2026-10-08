@@ -701,7 +701,7 @@
     if (yt.length) {
       html += `<div class="mx-block"><h4 class="mx-title">Videos en YouTube</h4><div class="mx-yt">${yt
         .map(
-          (v) => `<figure><button type="button" class="yt-lite" data-yt="${esc(v.id)}" data-title="${esc(v.title || p.name)}" aria-label="Reproducir: ${esc(v.title || p.name)}"><img src="https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg" alt="" loading="lazy"><span class="yt-play" aria-hidden="true"></span></button><figcaption>${esc(v.label || "")}${v.label && v.title ? " — " : ""}${esc(v.title || "")}</figcaption></figure>`
+          (v) => `<figure><button type="button" class="yt-lite" data-yt="${esc(v.id)}" data-title="${esc(v.title || p.name)}" aria-label="Reproducir: ${esc(v.title || p.name)}"><img src="https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg" alt="" loading="lazy"><span class="yt-play" aria-hidden="true"></span></button><figcaption>${esc(v.label || "")}${v.label && v.title ? " — " : ""}${esc(v.title || "")} · <a class="yt-open" href="https://www.youtube.com/watch?v=${esc(v.id)}" target="_blank" rel="noopener noreferrer">Ver en YouTube ↗</a></figcaption></figure>`
         )
         .join("")}</div></div>`;
     }
