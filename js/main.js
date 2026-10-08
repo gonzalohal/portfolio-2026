@@ -697,6 +697,14 @@
         )
         .join("")}</div></div>`;
     }
+    const yt = (p.youtube || []).filter((v) => /^[A-Za-z0-9_-]{11}$/.test(v.id || ""));
+    if (yt.length) {
+      html += `<div class="mx-block"><h4 class="mx-title">Videos en YouTube</h4><div class="mx-yt">${yt
+        .map(
+          (v) => `<figure><button type="button" class="yt-lite" data-yt="${esc(v.id)}" data-title="${esc(v.title || p.name)}" aria-label="Reproducir: ${esc(v.title || p.name)}"><img src="https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg" alt="" loading="lazy"><span class="yt-play" aria-hidden="true"></span></button><figcaption>${esc(v.label || "")}${v.label && v.title ? " — " : ""}${esc(v.title || "")}</figcaption></figure>`
+        )
+        .join("")}</div></div>`;
+    }
     const models = (p.models || []).filter((m) => /^https:\/\/sketchfab\.com\//.test(m.embed || ""));
     if (models.length) {
       html += `<div class="mx-block"><h4 class="mx-title">Modelo 3D</h4><div class="mx-models">${models
@@ -813,6 +821,17 @@
       more.textContent = open ? "Ver menos" : `Ver todos (${more.dataset.total})`;
     }
     modalExtra.addEventListener("click", onIgClick);
+    modalExtra.addEventListener("click", (e) => {
+      const t = e.target.closest(".yt-lite");
+      if (!t) return;
+      const f = document.createElement("iframe");
+      f.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(t.dataset.yt) + "?autoplay=1&rel=0";
+      f.title = t.dataset.title || "Video";
+      f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      f.allowFullscreen = true;
+      f.referrerPolicy = "strict-origin-when-cross-origin";
+      t.replaceWith(f);
+    });
 
     // Any project image (hero or strip) opens enlarged, with arrows through the project's whole gallery.
     $("modal").addEventListener("click", (e) => {
