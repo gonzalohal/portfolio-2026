@@ -2084,14 +2084,8 @@
     });
   }
 
-  async function setupTurnstile() {
-    let cfg;
-    try {
-      cfg = await api("/api/turnstile-config");
-    } catch (e) {
-      return;
-    }
-    if (!cfg.enabled) return;
+  async function setupTurnstile(cfg) {
+    if (!cfg || !cfg.enabled) return;
     tsRequired = true;
     if (!cfg.siteKey) {
       $("loginErr").textContent = "Falta configurar TURNSTILE_SITE_KEY en Vercel.";
@@ -2112,8 +2106,10 @@
 
   async function boot() {
     let authed = false;
+    let sessionInfo = {};
     try {
       const s = await API.session();
+      sessionInfo = s;
       authed = !!s.authenticated;
     } catch (e) {}
 
@@ -2127,7 +2123,7 @@
       }
     }
 
-    if (!authed) setupTurnstile();
+    if (!authed) setupTurnstile(sessionInfo.turnstile);
 
     $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
