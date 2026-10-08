@@ -238,3 +238,6 @@ label.f-label { display: block; font-size: 12px; font-weight: 600; color: var(--
   .wk-item .wk-info { flex-basis: 0; min-width: 120px; }
   .wk-item .wk-actions { flex: 1 0 100%; justify-content: flex-start; margin-top: 8px; }
 }
+
+.turnstile-box { display: flex; justify-content: center; margin: 4px 0 14px; min-height: 0; }
+.turnstile-box:empty { display: none; }

@@ -1,5 +1,6 @@
 const { checkPassword, sign } = require("../lib/auth");
 const { blockedFor, recordFailure, clearFailures } = require("../lib/ratelimit");
+const { enabled: turnstileOn, verifyTurnstile } = require("../lib/turnstile");
 
 const MAX_AGE = 60 * 60 * 12; // 12h
 
@@ -15,10 +16,17 @@ module.exports = async (req, res) => {
     }
   }
 
-  const { password } = body || {};
+  const { password, turnstileToken } = body || {};
 
   if (!process.env.ADMIN_PASSWORD || !process.env.SESSION_SECRET) {
     return res.status(500).json({ error: "El panel no está configurado (faltan variables de entorno en Vercel)." });
+  }
+
+  if (turnstileOn()) {
+    const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    if (!(await verifyTurnstile(turnstileToken, ip))) {
+      return res.status(403).json({ error: "No pudimos verificar que sos una persona. Recargá la página e intentá de nuevo." });
+    }
   }
 
   const wait = await blockedFor(req);

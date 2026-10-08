@@ -21,7 +21,7 @@
   }
 
   const API = {
-    login: (password) => api("/api/login", { method: "POST", body: { password } }),
+    login: (password, turnstileToken) => api("/api/login", { method: "POST", body: { password, turnstileToken } }),
     logout: () => api("/api/logout", { method: "POST" }),
     session: () => api("/api/session"),
     getContent: (file) => api("/api/content?file=" + encodeURIComponent(file)),
@@ -2067,6 +2067,49 @@
     $("dashView").classList.add("is-visible");
   }
 
+  // Cloudflare Turnstile on the login form (only active once the keys are set in Vercel).
+  let tsWidget = null;
+  let tsToken = "";
+  let tsRequired = false;
+
+  function loadTurnstileScript() {
+    return new Promise((resolve, reject) => {
+      if (window.turnstile) return resolve();
+      const sc = document.createElement("script");
+      sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      sc.async = true;
+      sc.onload = () => resolve();
+      sc.onerror = () => reject(new Error("No se pudo cargar la verificación de Cloudflare."));
+      document.head.appendChild(sc);
+    });
+  }
+
+  async function setupTurnstile() {
+    let cfg;
+    try {
+      cfg = await api("/api/turnstile-config");
+    } catch (e) {
+      return;
+    }
+    if (!cfg.enabled) return;
+    tsRequired = true;
+    if (!cfg.siteKey) {
+      $("loginErr").textContent = "Falta configurar TURNSTILE_SITE_KEY en Vercel.";
+      return;
+    }
+    try {
+      await loadTurnstileScript();
+      tsWidget = window.turnstile.render("#turnstileBox", {
+        sitekey: cfg.siteKey,
+        callback: (t) => { tsToken = t; },
+        "expired-callback": () => { tsToken = ""; },
+        "error-callback": () => { tsToken = ""; },
+      });
+    } catch (e) {
+      $("loginErr").textContent = e.message;
+    }
+  }
+
   async function boot() {
     let authed = false;
     try {
@@ -2084,19 +2127,26 @@
       }
     }
 
+    if (!authed) setupTurnstile();
+
     $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const pw = $("loginPassword").value;
       const errEl = $("loginErr");
       errEl.textContent = "";
+      if (tsRequired && !tsToken) {
+        errEl.textContent = "Esperá a que termine la verificación de Cloudflare.";
+        return;
+      }
       $("loginBtn").disabled = true;
       try {
-        await API.login(pw);
+        await API.login(pw, tsToken);
         await loadContent();
         showDashboard();
         renderActiveSection();
       } catch (err) {
         errEl.textContent = err.message;
+        if (tsWidget !== null && window.turnstile) { tsToken = ""; window.turnstile.reset(tsWidget); }
       } finally {
         $("loginBtn").disabled = false;
       }
