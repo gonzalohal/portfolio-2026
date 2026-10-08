@@ -351,6 +351,19 @@
     return ".jpg";
   }
 
+  const VIDEO_MAX_MB = 50;
+
+  async function uploadVideoToPath(file, targetPath) {
+    if (!/^video\/(mp4|webm|quicktime)$/.test(file.type) && !/\.(mp4|webm|mov)$/i.test(file.name)) throw new Error("El archivo tiene que ser un video MP4, WebM o MOV");
+    if (file.size > VIDEO_MAX_MB * 1024 * 1024) throw new Error("El video pesa " + Math.round(file.size / 1048576) + " MB; el máximo es " + VIDEO_MAX_MB + " MB. Comprimilo antes de subirlo.");
+    setStatus("Subiendo video…", "");
+    const { uploadUrl } = await api("/api/upload-url", { method: "POST", body: { path: targetPath } });
+    const type = file.type || (/\.webm$/i.test(file.name) ? "video/webm" : /\.mov$/i.test(file.name) ? "video/quicktime" : "video/mp4");
+    const put = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": type }, body: file });
+    if (!put.ok) throw new Error("No se pudo subir el video (" + put.status + ")");
+    setStatus("Video subido ✓", "ok");
+  }
+
   function pickFile(accept) {
     return new Promise((resolve) => {
       const input = document.createElement("input");
@@ -1948,6 +1961,75 @@
               await uploadToPath(file, targetPath);
             }
             p.images.push(name);
+            dirtyProjects = true;
+            renderActiveSection();
+          } catch (e) {
+            setStatus("Error: " + e.message, "err");
+          } finally {
+            showLoading(false);
+          }
+        })
+      );
+
+      // ---- videos (MP4/WebM/MOV, up to VIDEO_MAX_MB each) ----
+      p.videos = p.videos || [];
+      const vh = el("h3", null, "Videos");
+      vh.style.marginTop = "28px";
+      panel.appendChild(vh);
+      panel.appendChild(el("p", "hint", "Videos del trabajo (MP4, WebM o MOV, hasta " + VIDEO_MAX_MB + " MB cada uno). Se muestran en la ventana del trabajo y en el filtro Audiovisual. Después de subir, tocá \"Guardar y publicar\"."));
+      const vlist = el("div", "wk-list");
+      p.videos.forEach((v, vi) => {
+        const vrow = el("div", "wk-item");
+        const vid = document.createElement("video");
+        vid.src = assetUrl("images/work/" + p.slug + "/" + v.src) + "#t=0.5";
+        vid.preload = "metadata";
+        vid.muted = true;
+        vid.style.cssText = "width:64px;height:64px;object-fit:cover;border-radius:8px;background:#000";
+        vrow.appendChild(vid);
+
+        const vinfo = el("div", "wk-info");
+        vinfo.style.flex = "1";
+        vinfo.appendChild(textField("Título", v.title || "", (val) => { v.title = val; dirtyProjects = true; }));
+        vinfo.appendChild(textField("Etiqueta (ej: Video generado con IA)", v.label || "", (val) => { v.label = val; dirtyProjects = true; }));
+        vinfo.appendChild(el("span", null, v.src));
+        vrow.appendChild(vinfo);
+
+        const vact = el("div", "wk-actions");
+        if (vi > 0) vact.appendChild(btn("↑", "btn-sm", () => { p.videos.splice(vi - 1, 0, p.videos.splice(vi, 1)[0]); dirtyProjects = true; renderActiveSection(); }));
+        if (vi < p.videos.length - 1) vact.appendChild(btn("↓", "btn-sm", () => { p.videos.splice(vi + 1, 0, p.videos.splice(vi, 1)[0]); dirtyProjects = true; renderActiveSection(); }));
+        vact.appendChild(
+          btn("Eliminar", "btn-sm btn-danger", async () => {
+            if (!confirm('¿Eliminar el video "' + (v.title || v.src) + '"?')) return;
+            try {
+              showLoading(true);
+              await API.deleteAsset("images/work/" + p.slug + "/" + v.src);
+              p.videos.splice(vi, 1);
+              dirtyProjects = true;
+              renderActiveSection();
+            } catch (e) {
+              setStatus("Error: " + e.message, "err");
+            } finally {
+              showLoading(false);
+            }
+          })
+        );
+        vrow.appendChild(vact);
+        vlist.appendChild(vrow);
+      });
+      panel.appendChild(vlist);
+
+      panel.appendChild(
+        btn("+ Agregar video", "btn-primary btn-sm", async () => {
+          const file = await pickFile("video/mp4,video/webm,video/quicktime");
+          if (!file) return;
+          try {
+            showLoading(true, "Subiendo video…");
+            const ext = (file.name.match(/\.(mp4|webm|mov)$/i) || [, "mp4"])[1].toLowerCase();
+            const base = file.name.replace(/\.[^.]+$/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "video";
+            let name = base + "." + ext;
+            for (let n = 2; p.videos.some((x) => x.src === name); n++) name = base + "-" + n + "." + ext;
+            await uploadVideoToPath(file, "images/work/" + p.slug + "/" + name);
+            p.videos.push({ src: name, title: "", label: "Video" });
             dirtyProjects = true;
             renderActiveSection();
           } catch (e) {
