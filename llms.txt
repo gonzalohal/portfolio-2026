@@ -1,0 +1,29 @@
+# Gonzalo Hal — Diseñador Multimedial
+
+> Portfolio de Gonzalo Enrique Hal, diseñador multimedial de Mendoza, Argentina, con 6 años de trayectoria en diseño gráfico, producción audiovisual y modelado 3D. Actualmente a cargo del contenido visual de varias empresas de Gallion Holding.
+
+## Qué hace
+- Identidad de marca: registro, manual de marca y diseño de logotipo
+- Diseño gráfico: redes sociales, merchandising, brochures, señalética y campañas impresas
+- Producción audiovisual: creación y edición de video (After Effects, Premiere)
+- Video realista generado con inteligencia artificial
+- Modelado y renderizado 3D en Blender
+- Diseño de producto e impresión 3D
+- Diseño de interfaces (UX) y desarrollo web
+- Optimización para buscadores (SEO) y motores de respuesta con IA (GEO)
+
+## Trayectoria
+- Oct 2025 – actualidad: Diseñador Multimedial en Gallion Holding
+- Jul 2024 – Oct 2025: Diseñador en Triunfo Seguros
+- Sep 2022 – Oct 2023: Diseñador Gráfico en Travel Express
+- Mar 2021 – actualidad: Freelance, diseño para creadores de contenido (Twitch)
+- Oct 2020 – Mar 2021: Diseñador en Agencia Sol y ADEN International Business School
+
+## Herramientas
+Adobe Illustrator, Photoshop, After Effects y Premiere Pro (nivel avanzado); Blender, Figma, Canva; HTML5/CSS3, WordPress, Git/GitHub.
+
+## Enlaces
+- Portfolio: https://gonzalohal.com.ar/
+- LinkedIn: https://linkedin.com/in/gonzalo-hal
+- Modelos 3D: https://sketchfab.com/gonzalohal
+- Contacto: Gonzalohal@gmail.com
