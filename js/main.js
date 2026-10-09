@@ -476,7 +476,7 @@
         .map(
           (it) => `
         <div class="timeline-item">
-          <div class="timeline-date">${esc(it.date)}</div>
+          <div class="timeline-date">${esc(it.date).replace(/\s+[—–-]\s+/, " —<br>")}</div>
           <div class="timeline-role">
             <h3>${esc(it.role)}${it.company ? ` · <span class="company">${esc(it.company)}</span>` : ""}</h3>
             ${it.desc ? `<p>${esc(it.desc)}</p>` : ""}
