@@ -73,5 +73,7 @@
         }
       ]
     }
-  ]
+  ],
+  "buildCommand": "node scripts/prerender.js",
+  "outputDirectory": "."
 }

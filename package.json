@@ -21,6 +21,7 @@
     "sharp": "^0.33.5"
   },
   "devDependencies": {
+    "jsdom": "^30.1.2",
     "serve": "^14.2.6"
   }
 }
