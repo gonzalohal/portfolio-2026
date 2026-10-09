@@ -1203,3 +1203,7 @@ a.site-card { display: block; color: inherit; text-decoration: none; }
 .mx-yt figcaption { margin-top: 8px; font-size: 13px; color: var(--ink-faint); }
 .mx-yt .yt-open { color: var(--accent); font-weight: 600; white-space: nowrap; }
 .mx-yt .yt-open:hover { text-decoration: underline; }
+
+/* locked manual: the name is replaced by a blurred stand-in */
+.blur-name { filter: blur(6px); user-select: none; pointer-events: none; }
+.manual-pick.is-locked span { filter: blur(5px); user-select: none; }

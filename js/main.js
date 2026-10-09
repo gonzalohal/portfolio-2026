@@ -123,10 +123,12 @@
 
   // Manual bloqueado: sin visor ni PDF; sólo se ve la portada difuminada (la difumina el servidor) y un cartel.
   const manualIsLocked = (m) => !!m.locked && !PREVIEW.valid;
+  // Locked manuals never expose their real name: a blurred stand-in is shown instead.
+  const LOCKED_NAME_DECOY = "Marca confidencial";
   const lockedCoverUrl = (m) => `/api/reveal-image?manual=${encodeURIComponent(m.id)}${m.rev ? "&v=" + m.rev : ""}`;
 
   function lockedManualMarkup(m) {
-    return `<div class="manual-locked" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Manual bloqueado: ${esc(m.name)}. Se desbloquea en la entrevista">
+    return `<div class="manual-locked" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Manual bloqueado. Se desbloquea en la entrevista">
       <img src="${esc(lockedCoverUrl(m))}" alt="">
       ${blurBadge()}
     </div>`;
@@ -177,16 +179,25 @@
     picker.hidden = !show;
     picker.innerHTML = show
       ? MANUALS.map(
-          (m) => `<button type="button" class="manual-pick${manualIsLocked(m) ? " is-locked" : ""}" data-manual="${esc(m.id)}" aria-pressed="false" aria-label="Ver manual: ${esc(m.name)}${manualIsLocked(m) ? " (bloqueado)" : ""}">${
+          (m) => `<button type="button" class="manual-pick${manualIsLocked(m) ? " is-locked" : ""}" data-manual="${esc(m.id)}" aria-pressed="false" aria-label="${manualIsLocked(m) ? "Manual bloqueado" : "Ver manual: " + esc(m.name)}">${
             m.cover ? `<img src="${esc(manualIsLocked(m) ? lockedCoverUrl(m) : assetUrl(m.cover) + (m.rev ? "?v=" + m.rev : ""))}" alt="" loading="lazy">` : ""
-          }<span>${esc(shortManualName(m.name))}</span></button>`
+          }<span${manualIsLocked(m) ? ' aria-hidden="true"' : ""}>${esc(manualIsLocked(m) ? LOCKED_NAME_DECOY : shortManualName(m.name))}</span></button>`
         ).join("")
       : "";
   }
 
   function syncManualUI() {
     const m = MANUALS.find((x) => x.id === activeManualId);
-    if ($("manualActiveTitle")) $("manualActiveTitle").textContent = m ? m.name : "";
+    const titleEl = $("manualActiveTitle");
+    if (titleEl) {
+      if (m && manualIsLocked(m)) {
+        titleEl.innerHTML = `Manual de marca | <span class="blur-name" aria-hidden="true">${esc(LOCKED_NAME_DECOY)}</span>`;
+        titleEl.setAttribute("aria-label", "Manual bloqueado");
+      } else {
+        titleEl.removeAttribute("aria-label");
+        titleEl.textContent = m ? m.name : "";
+      }
+    }
     document.querySelectorAll("#manualPicker .manual-pick").forEach((b) => {
       const on = b.dataset.manual === activeManualId;
       b.classList.toggle("is-active", on);
