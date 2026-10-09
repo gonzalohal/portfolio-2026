@@ -68,6 +68,7 @@
     { id: "manuales", label: "Manuales de marca (PDF)" },
     { id: "experiencia", label: "Experiencia" },
     { id: "formacion", label: "Formación" },
+    { id: "cv", label: "CV (foto)" },
     { id: "contacto", label: "Contacto" },
     { id: "footer", label: "Footer" },
     { id: "compartir", label: "Compartir (link de entrevista)" },
@@ -1355,6 +1356,180 @@
     container.appendChild(panel2);
   }
 
+  /* ============================================================
+     CV (foto): reencuadrar la foto del CV y regenerar el PDF.
+     La plantilla (assets/cv-template.pdf) tiene la foto como un JPEG; acá se
+     reemplaza ese JPEG por el recorte nuevo (el texto y los links no se tocan)
+     y el resultado se publica como el CV del sitio.
+     ============================================================ */
+  const CV_TEMPLATE = "assets/cv-template.pdf";
+  const CV_PHOTO_ASPECT = "495/630";
+  let cvPdfLibPromise = null;
+
+  function loadPdfLib() {
+    if (window.PDFLib) return Promise.resolve();
+    if (!cvPdfLibPromise) {
+      cvPdfLibPromise = new Promise((resolve, reject) => {
+        const sc = document.createElement("script");
+        sc.src = "/js/vendor/pdf-lib.min.js";
+        sc.onload = () => resolve();
+        sc.onerror = () => { cvPdfLibPromise = null; reject(new Error("No se pudo cargar la librería de PDF.")); };
+        document.head.appendChild(sc);
+      });
+    }
+    return cvPdfLibPromise;
+  }
+
+  function dataUrlToBytes(dataUrl) {
+    const bin = atob(String(dataUrl).split(",")[1] || "");
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function imageSizeOf(dataUrl) {
+    return new Promise((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve({ w: im.naturalWidth, h: im.naturalHeight });
+      im.onerror = () => reject(new Error("No se pudo leer la imagen recortada."));
+      im.src = dataUrl;
+    });
+  }
+
+  // Downloads the template and swaps its (only) photo for the new crop.
+  async function buildCvPdf(cropDataUrl) {
+    await loadPdfLib();
+    const { PDFDocument, PDFName, PDFRawStream } = window.PDFLib;
+    const res = await fetch(assetUrl(CV_TEMPLATE) + "?v=" + Date.now());
+    if (!res.ok) throw new Error("No se encontró la plantilla del CV (" + CV_TEMPLATE + ").");
+    const doc = await PDFDocument.load(await res.arrayBuffer());
+    let target = null;
+    for (const [ref, obj] of doc.context.enumerateIndirectObjects()) {
+      if (!(obj instanceof PDFRawStream)) continue;
+      const sub = obj.dict.get(PDFName.of("Subtype"));
+      const filter = obj.dict.get(PDFName.of("Filter"));
+      if (sub && sub.toString() === "/Image" && filter && filter.toString() === "/DCTDecode") { target = ref; break; }
+    }
+    if (!target) throw new Error("La plantilla del CV no tiene la foto esperada.");
+    const bytes = dataUrlToBytes(cropDataUrl);
+    const { w, h } = await imageSizeOf(cropDataUrl);
+    const dict = doc.context.obj({
+      Type: "XObject",
+      Subtype: "Image",
+      Width: w,
+      Height: h,
+      ColorSpace: "DeviceRGB",
+      BitsPerComponent: 8,
+      Filter: "DCTDecode",
+      Length: bytes.length,
+    });
+    doc.context.assign(target, PDFRawStream.of(dict, bytes));
+    return await doc.save();
+  }
+
+  async function putFileToStorage(storagePath, body, contentType) {
+    const { uploadUrl } = await api("/api/upload-url", { method: "POST", body: { path: "images/" + storagePath } });
+    const put = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": contentType }, body });
+    if (!put.ok) throw new Error("No se pudo subir " + storagePath + " (" + put.status + ")");
+  }
+
+  function renderCv(container) {
+    site.cv = site.cv || {};
+    const panel = el("div", "panel");
+    panel.appendChild(el("h3", null, "Foto del CV"));
+    panel.appendChild(
+      el(
+        "p",
+        "hint",
+        "Acomodá la foto que aparece en el CV (zoom y posición). El resto del CV no cambia: texto, links y diseño quedan igual. Al aplicar, se genera el PDF nuevo y pasa a ser el que se descarga desde el portfolio."
+      )
+    );
+
+    const row = el("div", "cv-photo-row");
+    const preview = document.createElement("img");
+    preview.className = "cv-photo-preview";
+    preview.alt = "Foto actual del CV";
+    preview.src = site.cv.photo ? assetUrl(site.cv.photo) + "?v=" + (site.cv.rev || 1) : assetUrl(site.about.photo) + "?v=" + Date.now();
+    row.appendChild(preview);
+
+    const side = el("div", "cv-photo-side");
+    const msg = el("p", "hint");
+    msg.textContent = site.cv.photo ? "Esta es la foto del último CV publicado." : "Todavía no reencuadraste la foto desde el panel (se muestra la foto de Sobre mí).";
+
+    let pending = null; // JPEG data URL of the new crop
+    let sourceUrl = null; // null -> the photo from "Sobre mí"
+    const dl = el("a", "btn btn-sm");
+    dl.textContent = "Descargar PDF de prueba";
+    dl.style.display = "none";
+    let dlUrl = null;
+
+    const pick = async (src) => {
+      const url = src || assetUrl(site.about.photo) + "?v=" + Date.now();
+      const out = await openCropper(url, CV_PHOTO_ASPECT);
+      if (!out) return;
+      pending = out;
+      preview.src = out;
+      msg.textContent = "Encuadre nuevo listo. Probalo con \"Generar vista previa\" o publicalo con \"Aplicar al CV y publicar\".";
+    };
+
+    const bAdjust = btn("Reencuadrar foto", "btn-primary btn-sm", () => pick(sourceUrl));
+    const bOther = btn("Usar otra foto…", "btn-sm", async () => {
+      const file = await pickFile("image/*");
+      if (!file) return;
+      if (sourceUrl && sourceUrl.startsWith("blob:")) URL.revokeObjectURL(sourceUrl);
+      sourceUrl = URL.createObjectURL(file);
+      await pick(sourceUrl);
+    });
+    const bPrev = btn("Generar vista previa", "btn-sm", async () => {
+      if (!pending) { setStatus("Primero reencuadrá la foto.", "err"); return; }
+      try {
+        showLoading(true, "Generando PDF…");
+        const out = await buildCvPdf(pending);
+        if (dlUrl) URL.revokeObjectURL(dlUrl);
+        dlUrl = URL.createObjectURL(new Blob([out], { type: "application/pdf" }));
+        dl.href = dlUrl;
+        dl.download = "CV-prueba.pdf";
+        dl.style.display = "";
+        setStatus("Vista previa lista ✓ — descargala para revisarla", "ok");
+      } catch (e) {
+        setStatus("Error: " + e.message, "err");
+      } finally {
+        showLoading(false);
+      }
+    });
+    const bApply = btn("Aplicar al CV y publicar", "btn-primary btn-sm", async () => {
+      if (!pending) { setStatus("Primero reencuadrá la foto.", "err"); return; }
+      if (!confirm("Esto reemplaza el CV que se descarga desde el portfolio. ¿Continuar?")) return;
+      try {
+        showLoading(true, "Generando y publicando el CV…");
+        const out = await buildCvPdf(pending);
+        await putFileToStorage(site.cvFile, new Blob([out], { type: "application/pdf" }), "application/pdf");
+        await putFileToStorage("assets/cv-photo.jpg", new Blob([dataUrlToBytes(pending)], { type: "image/jpeg" }), "image/jpeg");
+        site.cv.photo = "assets/cv-photo.jpg";
+        site.cv.rev = Date.now();
+        site.cvRev = site.cv.rev;
+        await API.save("data/site.json", site, "Actualizar foto del CV desde el panel");
+        dirtySite = false;
+        pending = null;
+        msg.textContent = "CV publicado ✓ El botón \"Descargar CV\" del portfolio ya entrega la versión nueva.";
+        setStatus("CV publicado ✓", "ok");
+      } catch (e) {
+        setStatus("Error: " + e.message, "err");
+      } finally {
+        showLoading(false);
+      }
+    });
+
+    const actions = el("div", "cv-photo-actions");
+    [bAdjust, bOther, bPrev, bApply].forEach((b) => actions.appendChild(b));
+    actions.appendChild(dl);
+    side.appendChild(msg);
+    side.appendChild(actions);
+    row.appendChild(side);
+    panel.appendChild(row);
+    container.appendChild(panel);
+  }
+
   function renderContacto(container) {
     const c = site.contact;
     const panel1 = el("div", "panel");
@@ -2059,6 +2234,7 @@
     manuales: renderManuales,
     experiencia: renderExperiencia,
     formacion: renderFormacion,
+    cv: renderCv,
     contacto: renderContacto,
     footer: renderFooter,
     compartir: renderCompartir,

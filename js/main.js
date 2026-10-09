@@ -320,8 +320,9 @@
       if ($("navContactLabel") && site.nav.ctaLabel) $("navContactLabel").textContent = site.nav.ctaLabel;
     }
     if (site.cvFile) {
-      if ($("navCvLink")) $("navCvLink").href = assetUrl(site.cvFile);
-      if ($("mobileCvLink")) $("mobileCvLink").href = assetUrl(site.cvFile);
+      const cvHref = assetUrl(site.cvFile) + (site.cvRev ? "?v=" + site.cvRev : "");
+      if ($("navCvLink")) $("navCvLink").href = cvHref;
+      if ($("mobileCvLink")) $("mobileCvLink").href = cvHref;
     }
 
     // hero

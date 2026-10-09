@@ -241,3 +241,9 @@ label.f-label { display: block; font-size: 12px; font-weight: 600; color: var(--
 
 .turnstile-box { display: flex; justify-content: center; margin: 4px 0 14px; min-height: 0; }
 .turnstile-box:empty { display: none; }
+
+/* ---------- CV photo section ---------- */
+.cv-photo-row { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+.cv-photo-preview { width: 150px; aspect-ratio: 495 / 630; object-fit: cover; border-radius: 18px; border: 1px solid var(--a-line); background: var(--a-bg); flex: none; }
+.cv-photo-side { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 14px; }
+.cv-photo-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
