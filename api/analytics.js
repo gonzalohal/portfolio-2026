@@ -132,7 +132,7 @@ async function reset(req, res) {
   for (let i = 0; i < 24; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 15);
     const m = dayKey(d).slice(0, 7);
-    await deleteObject(BUCKET, pathFor(m));
+    try { await deleteObject(BUCKET, pathFor(m)); } catch {} // months without data have nothing to delete
   }
   res.status(200).json({ ok: true });
 }
