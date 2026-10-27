@@ -1653,7 +1653,7 @@
         const tiles = el("div", "stat-tiles");
         tiles.appendChild(statTile("Visitas", s.totals.views, "en " + s.range + " días"));
         tiles.appendChild(statTile("Visitantes", s.totals.visitors, "suma de únicos por día"));
-        tiles.appendChild(statTile("Hoy", s.totals.today.views, s.totals.today.visitors + " visitantes"));
+        tiles.appendChild(statTile("Hoy", s.totals.today.views, s.totals.today.visitors + (s.totals.today.visitors === 1 ? " visitante" : " visitantes")));
         tiles.appendChild(statTile("Por link de entrevista", s.totals.interview, "visitas con el link"));
         body.appendChild(tiles);
         const chartBox = el("div", "stat-box");
