@@ -20,7 +20,7 @@ const HTML_IDS = [
   "heroHeadline", "heroStats", "heroTicker",
   "aboutParagraphs", "aboutAdobe", "aboutSkills", "aboutFacts",
   "servicesGrid", "workGrid", "clientsInner", "printersGrid", "sitesGrid", "manualPicker",
-  "timelineList", "eduList",
+  "timelineList", "eduList", "navLogo",
 ];
 // elements whose textContent is filled by main.js
 const TEXT_IDS = [
@@ -68,10 +68,12 @@ async function render(htmlSource, code) {
   const text = {};
   HTML_IDS.forEach((id) => { const e = d.getElementById(id); if (e) html[id] = e.innerHTML.trim(); });
   TEXT_IDS.forEach((id) => { const e = d.getElementById(id); if (e) text[id] = (e.textContent || "").trim(); });
+  const footerEl = d.querySelector("footer");
+  const footer = footerEl ? footerEl.innerHTML.trim() : "";
   const visible = {};
   SECTION_IDS.forEach((id) => { const e = d.getElementById(id); visible[id] = !!e && !e.hidden; });
   w.close();
-  return { html, text, visible };
+  return { html, text, visible, footer };
 }
 
 function inject(source, data) {
@@ -88,6 +90,7 @@ function inject(source, data) {
     const re = openTag(id);
     if (re.test(out)) { out = out.replace(re, (m, open, tag, ws, close) => open + escAttrText(content) + close); filled++; }
   }
+  if (data.footer && /<footer>[\s\S]*?<\/footer>/.test(out)) { out = out.replace(/<footer>[\s\S]*?<\/footer>/, () => "<footer>" + data.footer + "</footer>"); filled++; }
   for (const id of SECTION_IDS) {
     if (!data.visible[id]) continue;
     out = out.replace(new RegExp(`(<section\\b[^>]*\\bid="${id}"[^>]*?)\\s+hidden(?=[\\s>])`), "$1");

@@ -75,5 +75,18 @@
     }
   ],
   "buildCommand": "node scripts/prerender.js",
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.gonzalohal.com.ar"
+        }
+      ],
+      "destination": "https://gonzalohal.com.ar/$1",
+      "permanent": true
+    }
+  ]
 }
