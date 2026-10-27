@@ -109,7 +109,9 @@ function inject(source, data) {
     const data = await render(source, code);
     const { out, filled } = inject(source, data);
     if (filled < 10) throw new Error("se pudieron completar solo " + filled + " bloques; se descarta");
-    const final = out.replace("</head>", "<!-- prerendered -->\n</head>");
+    // keep the ProfilePage dateModified (full ISO 8601 date-time, as Google requires) in step with each deploy
+    const stamped = out.replace(/"dateModified":"[^"]*"/, `"dateModified":"${new Date().toISOString()}"`);
+    const final = stamped.replace("</head>", "<!-- prerendered -->\n</head>");
     fs.writeFileSync(file, crlf ? final.replace(/\n/g, "\r\n") : final);
     console.log(`[prerender] OK: ${filled} bloques incorporados a index.html`);
   } catch (e) {
