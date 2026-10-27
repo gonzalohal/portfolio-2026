@@ -65,7 +65,7 @@
       ]
     },
     {
-      "source": "/api/(login|logout|session|save|content|preview|upload|upload-url|delete-asset|blur-image)",
+      "source": "/api/(login|logout|session|save|content|preview|upload|upload-url|delete-asset|blur-image|analytics)",
       "headers": [
         {
           "key": "Cache-Control",

@@ -1033,6 +1033,22 @@
       console.error("No se pudo cargar el contenido:", err);
     }
     bindInteractions();
+    trackVisit();
+  }
+
+  // Cookie-less visit counter (see api/analytics.js). Once per tab session; honors Do Not Track.
+  function trackVisit() {
+    try {
+      if (navigator.doNotTrack === "1" || !/(^|\.)gonzalohal\.com\.ar$/.test(location.hostname) || /[?&]nostats\b/.test(location.search)) return;
+      if (sessionStorage.getItem("gh_visit")) return;
+      sessionStorage.setItem("gh_visit", "1");
+    } catch (e) {}
+    const payload = JSON.stringify({ r: document.referrer || "", pv: PREVIEW.valid ? 1 : 0 });
+    try {
+      if (!(navigator.sendBeacon && navigator.sendBeacon("/api/analytics", new Blob([payload], { type: "application/json" })))) {
+        fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true });
+      }
+    } catch (e) {}
   }
 
   boot();

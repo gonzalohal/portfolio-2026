@@ -22,7 +22,9 @@
 
   const API = {
     login: (password, turnstileToken) => api("/api/login", { method: "POST", body: { password, turnstileToken } }),
-    logout: () => api("/api/logout", { method: "POST" }),
+    logout: () => api("/api/session", { method: "POST" }),
+    stats: (range) => api("/api/analytics?range=" + range),
+    statsReset: () => api("/api/analytics", { method: "DELETE" }),
     session: () => api("/api/session"),
     getContent: (file) => api("/api/content?file=" + encodeURIComponent(file)),
     save: (file, data, message) => api("/api/save", { method: "POST", body: { file, data, message } }),
@@ -72,6 +74,7 @@
     { id: "contacto", label: "Contacto" },
     { id: "footer", label: "Footer" },
     { id: "compartir", label: "Compartir (link de entrevista)" },
+    { id: "estadisticas", label: "Estadísticas de visitas" },
   ];
   let activeSection = "general";
 
@@ -1530,6 +1533,150 @@
     container.appendChild(panel);
   }
 
+  /* ============================================================
+     Estadísticas de visitas (datos propios, sin cookies)
+     ============================================================ */
+  const AR_PROVINCES = { A: "Salta", B: "Buenos Aires", C: "CABA", D: "San Luis", E: "Entre Ríos", F: "La Rioja", G: "Santiago del Estero", H: "Chaco", J: "San Juan", K: "Catamarca", L: "La Pampa", M: "Mendoza", N: "Misiones", P: "Formosa", Q: "Neuquén", R: "Río Negro", S: "Santa Fe", T: "Tucumán", U: "Chubut", V: "Tierra del Fuego", W: "Corrientes", X: "Córdoba", Y: "Jujuy", Z: "Santa Cruz" };
+  let statsRange = 30;
+
+  function countryName(code) {
+    if (!code || code === "??") return "Desconocido";
+    try { return new Intl.DisplayNames(["es"], { type: "region" }).of(code) || code; } catch (e) { return code; }
+  }
+  function placeLabel(key) {
+    if (key === "Otros") return "Otros lugares";
+    const [city, region, country] = key.split("|");
+    const reg = country === "AR" ? AR_PROVINCES[region] || region : region;
+    const parts = [city, reg, country ? countryName(country) : ""].filter(Boolean);
+    return parts.length ? parts.join(", ") : "Desconocido";
+  }
+
+  function statTile(label, value, sub) {
+    const tile = el("div", "stat-tile");
+    tile.appendChild(el("span", "stat-label", label));
+    tile.appendChild(el("strong", "stat-value", String(value)));
+    if (sub) tile.appendChild(el("span", "stat-sub", sub));
+    return tile;
+  }
+
+  function barList(title, rows, labelFn) {
+    const box = el("div", "stat-box");
+    box.appendChild(el("h4", null, title));
+    const total = rows.reduce((s, r) => s + r[1], 0) || 1;
+    if (!rows.length) { box.appendChild(el("p", "hint", "Sin datos todavía.")); return box; }
+    rows.forEach(([k, n]) => {
+      const row = el("div", "stat-row");
+      const top = el("div", "stat-row-top");
+      top.appendChild(el("span", null, labelFn ? labelFn(k) : k));
+      top.appendChild(el("b", null, n + " · " + Math.round((n / total) * 100) + "%"));
+      row.appendChild(top);
+      const bar = el("div", "stat-bar");
+      const fill = el("i");
+      fill.style.width = Math.max(2, Math.round((n / total) * 100)) + "%";
+      bar.appendChild(fill);
+      row.appendChild(bar);
+      box.appendChild(row);
+    });
+    return box;
+  }
+
+  function dailyChart(series) {
+    const W = 640, H = 150, padB = 20;
+    const max = Math.max(1, ...series.map((s) => s.views));
+    const bw = W / series.length;
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.setAttribute("class", "stat-chart");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Visitas por día");
+    series.forEach((s, i) => {
+      const h = Math.max(s.views ? 3 : 1, ((H - padB) * s.views) / max);
+      const r = document.createElementNS(ns, "rect");
+      r.setAttribute("x", String(i * bw + 1));
+      r.setAttribute("y", String(H - padB - h));
+      r.setAttribute("width", String(Math.max(1, bw - 2)));
+      r.setAttribute("height", String(h));
+      r.setAttribute("rx", "2");
+      r.setAttribute("class", s.views ? "stat-bar-on" : "stat-bar-off");
+      const title = document.createElementNS(ns, "title");
+      title.textContent = s.d + ": " + s.views + " visitas, " + s.visitors + " visitantes";
+      r.appendChild(title);
+      svg.appendChild(r);
+    });
+    [[0, "start"], [series.length - 1, "end"]].forEach(([i, anchor]) => {
+      const tx = document.createElementNS(ns, "text");
+      tx.setAttribute("x", anchor === "start" ? "0" : String(W));
+      tx.setAttribute("y", String(H - 4));
+      tx.setAttribute("text-anchor", anchor);
+      tx.setAttribute("class", "stat-axis");
+      tx.textContent = series[i].d;
+      svg.appendChild(tx);
+    });
+    return svg;
+  }
+
+  function renderEstadisticas(container) {
+    const panel = el("div", "panel");
+    panel.appendChild(el("h3", null, "Visitas al portfolio"));
+    panel.appendChild(
+      el(
+        "p",
+        "hint",
+        "Datos propios, sin cookies: no se guarda la IP ni datos personales, solo conteos. El lugar es aproximado (según la red desde donde se conecta la persona) y puede no coincidir con su ubicación real. Tus propias visitas con el panel abierto no se cuentan, ni las de buscadores y robots."
+      )
+    );
+
+    const bar = el("div", "stat-controls");
+    const body = el("div", "stat-body");
+    [7, 30, 90].forEach((n) => {
+      const b = btn("Últimos " + n + " días", "btn-sm" + (statsRange === n ? " btn-primary" : ""), () => { statsRange = n; renderActiveSection(); });
+      bar.appendChild(b);
+    });
+    bar.appendChild(btn("Actualizar", "btn-sm", () => load()));
+    bar.appendChild(
+      btn("Reiniciar estadísticas", "btn-sm btn-danger", async () => {
+        if (!confirm("Esto borra TODAS las estadísticas guardadas. No se puede deshacer. ¿Continuar?")) return;
+        try { showLoading(true); await API.statsReset(); setStatus("Estadísticas reiniciadas ✓", "ok"); await load(); } catch (e) { setStatus("Error: " + e.message, "err"); } finally { showLoading(false); }
+      })
+    );
+    panel.appendChild(bar);
+    panel.appendChild(body);
+    container.appendChild(panel);
+
+    async function load() {
+      body.innerHTML = "";
+      body.appendChild(el("p", "hint", "Cargando…"));
+      try {
+        const s = await API.stats(statsRange);
+        body.innerHTML = "";
+        const tiles = el("div", "stat-tiles");
+        tiles.appendChild(statTile("Visitas", s.totals.views, "en " + s.range + " días"));
+        tiles.appendChild(statTile("Visitantes", s.totals.visitors, "suma de únicos por día"));
+        tiles.appendChild(statTile("Hoy", s.totals.today.views, s.totals.today.visitors + " visitantes"));
+        tiles.appendChild(statTile("Por link de entrevista", s.totals.interview, "visitas con el link"));
+        body.appendChild(tiles);
+        const chartBox = el("div", "stat-box");
+        chartBox.appendChild(el("h4", null, "Visitas por día"));
+        chartBox.appendChild(dailyChart(s.series));
+        body.appendChild(chartBox);
+        if (!s.totals.views) body.appendChild(el("p", "hint", "Todavía no hay visitas registradas en este período. Los datos empiezan a juntarse desde que se activó el contador."));
+        const grid = el("div", "stat-grid");
+        grid.appendChild(barList("Dispositivo", s.devices));
+        grid.appendChild(barList("Sistema operativo", s.os));
+        grid.appendChild(barList("Navegador", s.browsers));
+        grid.appendChild(barList("País", s.countries, countryName));
+        grid.appendChild(barList("Lugar aproximado", s.places, placeLabel));
+        grid.appendChild(barList("De dónde llegan", s.referrers));
+        body.appendChild(grid);
+      } catch (e) {
+        body.innerHTML = "";
+        body.appendChild(el("p", "hint", "No se pudieron cargar las estadísticas: " + e.message));
+      }
+    }
+    load();
+  }
+
   function renderContacto(container) {
     const c = site.contact;
     const panel1 = el("div", "panel");
@@ -2238,6 +2385,7 @@
     contacto: renderContacto,
     footer: renderFooter,
     compartir: renderCompartir,
+    estadisticas: renderEstadisticas,
   };
 
   function currentFileForSection(id) {
@@ -2269,7 +2417,7 @@
     content.innerHTML = "";
     SECTION_RENDERERS[activeSection](content);
 
-    if (activeSection !== "compartir") {
+    if (activeSection !== "compartir" && activeSection !== "estadisticas") {
       const bar = el("div", "save-bar");
       const info = el("span", "hint", currentFileForSection(activeSection) === "site" ? "Los cambios de esta sección se guardan en data/site.json" : "Los cambios de esta sección se guardan en data/projects.json");
       bar.appendChild(info);
